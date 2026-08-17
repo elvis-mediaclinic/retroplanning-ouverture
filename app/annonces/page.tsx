@@ -42,7 +42,8 @@ export default async function AnnoncesPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {annonces.map((a) => {
-              const ville = a.villes as { nom: string; departement?: string; region?: string } | null;
+              const villeRaw = a.villes as { nom: string; departement?: string; region?: string } | { nom: string; departement?: string; region?: string }[] | null;
+              const ville = Array.isArray(villeRaw) ? villeRaw[0] ?? null : villeRaw;
               return (
                 <Link
                   key={a.id}
