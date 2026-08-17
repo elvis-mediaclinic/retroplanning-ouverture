@@ -191,6 +191,13 @@ export default async function AnnoncePage({
         [data-text-color="pink"]   { color: #ad1a72 !important; }
         [data-text-color] [data-style-type="textColor"][data-value="rgb(0, 0, 0)"] { color: inherit !important; }
         .card-heading h1, .card-heading h2, .card-heading h3 { font-size: 1.5rem; font-weight: 700; margin: 0; }
+        .col-card { background: #18181b; border: 1px solid #3f3f46; border-radius: 1rem; box-shadow: 0 0 0 1px rgba(99,179,237,0.15), 0 0 32px rgba(99,179,237,0.08); }
+        .col-card .card-heading h1,
+        .col-card .card-heading h2,
+        .col-card .card-heading h3 { color: #fff; }
+        .col-card .col-body { color: #a1a1aa; }
+        .col-card .col-body li { color: #d4d4d8; }
+        .col-card .col-body strong { color: #fff; }
       `}</style>
 
       {/* Header */}
@@ -237,15 +244,15 @@ export default async function AnnoncePage({
                       const headingHtml = headingBlock ? renderBlock(headingBlock) : null;
                       const bodyHtml = renderBlocks(bodyBlocks);
                       return (
-                        <div key={j} className={cardCls}>
+                        <div key={j} className="col-card px-8 py-8 sm:px-10 sm:py-10">
                           {headingHtml && (
                             <div
-                              className="card-heading text-zinc-900 mb-4"
+                              className="card-heading mb-4"
                               dangerouslySetInnerHTML={{ __html: headingHtml }}
                             />
                           )}
                           <div
-                            className={contentCls}
+                            className={`col-body ${contentCls}`}
                             dangerouslySetInnerHTML={{ __html: bodyHtml }}
                           />
                         </div>
