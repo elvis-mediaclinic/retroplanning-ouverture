@@ -427,14 +427,20 @@ export default async function AnnoncePage({
 
         {/* Sections concept Mediaclinic — communes à toutes les annonces */}
         {conceptSections && conceptSections.length > 0 && (
-          <>
-            <div className="flex items-center gap-3 px-1">
+          <details className="group" open>
+            <summary className="flex cursor-pointer list-none items-center gap-3 px-1 [&::-webkit-details-marker]:hidden">
               <div className="h-px flex-1 bg-zinc-200" />
-              <span className="text-xs font-semibold uppercase tracking-widest text-zinc-400">Le concept Mediaclinic</span>
+              <span className="text-sm font-semibold uppercase tracking-widest text-zinc-500 select-none group-open:text-brand transition-colors">
+                Le concept Mediaclinic
+                <span className="ml-2 text-zinc-400 group-open:hidden">▸</span>
+                <span className="ml-2 text-brand hidden group-open:inline">▾</span>
+              </span>
               <div className="h-px flex-1 bg-zinc-200" />
+            </summary>
+            <div className="mt-4 space-y-4">
+              {renderStoredSections(conceptSections, "concept")}
             </div>
-            {renderStoredSections(conceptSections, "concept")}
-          </>
+          </details>
         )}
 
         {/* Formulaire */}
