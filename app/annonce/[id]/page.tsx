@@ -191,7 +191,7 @@ export default async function AnnoncePage({
   type StatItem = { id: string; valeur: string; label: string };
   type StoredSection =
     | { id: string; type?: "texte"; titre: string; contenu_json: string; disposition?: "pleine" | "moitie" | "tiers" }
-    | { id: string; type: "stats"; titre: string; stats: StatItem[]; colonnes: 2 | 3 | 4 }
+    | { id: string; type: "stats"; titre: string; stats: StatItem[]; colonnes: 2 | 3 | 4; alignement?: "gauche" | "centre" }
     | { id: string; type: "titre"; titre: string };
   let storedSections: StoredSection[] | null = null;
   if (annonce.sections) {
@@ -273,12 +273,13 @@ export default async function AnnoncePage({
       if (row.kind === "full" && row.s.type === "stats") {
         const s = row.s as Extract<StoredSection, { type: "stats" }>;
         const cols = s.colonnes ?? 3;
+        const centré = s.alignement === "centre";
         return (
           <div key={`${keyPrefix}-${ri}`} className="px-4 sm:px-6 py-2">
-            {s.titre && <h2 className="text-2xl font-bold text-zinc-900 mb-6">{s.titre}</h2>}
+            {s.titre && <h2 className={`text-2xl font-bold text-zinc-900 mb-6 ${centré ? "text-center" : ""}`}>{s.titre}</h2>}
             <div className={STATS_GRID[cols] ?? STATS_GRID[3]}>
               {s.stats.map((stat) => (
-                <div key={stat.id} className="flex flex-col gap-1">
+                <div key={stat.id} className={`flex flex-col gap-1 ${centré ? "items-center text-center" : ""}`}>
                   <span className="text-sm text-zinc-500 leading-snug">{stat.label}</span>
                   <span className="text-4xl font-extrabold text-brand leading-none">{stat.valeur}</span>
                 </div>
