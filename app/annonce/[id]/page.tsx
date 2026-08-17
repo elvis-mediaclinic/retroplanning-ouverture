@@ -430,7 +430,7 @@ export default async function AnnoncePage({
           <details className="group">
             <summary className="flex cursor-pointer list-none items-center gap-3 px-1 [&::-webkit-details-marker]:hidden">
               <div className="h-px flex-1 bg-zinc-200" />
-              <span className="inline-flex items-center gap-2 rounded-full border border-zinc-300 px-5 py-2 text-sm font-medium text-zinc-500 hover:border-brand hover:text-brand transition-colors select-none whitespace-nowrap">
+              <span className="inline-flex items-center gap-2 rounded-full border border-zinc-300 px-5 py-2 text-base font-medium text-zinc-500 hover:border-brand hover:text-brand transition-colors select-none whitespace-nowrap">
                 <span className="group-open:hidden">Découvrir le concept Mediaclinic →</span>
                 <span className="hidden group-open:inline">Masquer le concept Mediaclinic ↑</span>
               </span>
