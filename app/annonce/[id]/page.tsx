@@ -190,7 +190,7 @@ export default async function AnnoncePage({
         [data-text-color="purple"] { color: #6940a5 !important; }
         [data-text-color="pink"]   { color: #ad1a72 !important; }
         [data-text-color] [data-style-type="textColor"][data-value="rgb(0, 0, 0)"] { color: inherit !important; }
-        .card-heading h1, .card-heading h2, .card-heading h3 { font-size: 1.25rem; font-weight: 700; margin: 0; }
+        .card-heading h1, .card-heading h2, .card-heading h3 { font-size: 1.5rem; font-weight: 700; margin: 0; }
       `}</style>
 
       {/* Header */}
