@@ -3,8 +3,9 @@
 import { useActionState, useState } from "react";
 import dynamic from "next/dynamic";
 import { upsertAnnonce } from "./annonce-actions";
+import type { Section } from "./SectionsEditor";
 
-const BlockEditor = dynamic(() => import("./BlockEditor").then((m) => m.BlockEditor), {
+const SectionsEditor = dynamic(() => import("./SectionsEditor").then((m) => m.SectionsEditor), {
   ssr: false,
   loading: () => <div className="rounded-lg border border-zinc-200 bg-zinc-50 h-40 animate-pulse" />,
 });
@@ -15,6 +16,7 @@ type Annonce = {
   accroche: string | null;
   contenu: string | null;
   contenu_json: string | null;
+  sections: string | null;
   actif: boolean;
 };
 
@@ -32,6 +34,10 @@ export function AnnonceEditor({
   const [actif, setActif] = useState(annonce?.actif ?? false);
   const [copied, setCopied] = useState(false);
   const [open, setOpen] = useState(false);
+
+  const defaultSections: Section[] | undefined = (() => {
+    try { return annonce?.sections ? JSON.parse(annonce.sections) : undefined; } catch { return undefined; }
+  })();
 
   function copy() {
     navigator.clipboard.writeText(publicUrl);
@@ -117,9 +123,10 @@ export function AnnonceEditor({
             />
           </div>
 
-          <div className="space-y-1">
-            <label className="text-sm font-medium text-zinc-700">Contenu</label>
-            <BlockEditor defaultJson={annonce?.contenu_json ?? null} />
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-zinc-700">Sections</label>
+            <p className="text-xs text-zinc-400">Chaque section devient une carte sur la page publique. Utilisez ↑↓ pour réordonner.</p>
+            <SectionsEditor defaultSections={defaultSections} />
           </div>
 
           <div className="flex items-center gap-3">

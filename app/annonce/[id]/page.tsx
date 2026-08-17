@@ -166,7 +166,7 @@ export default async function AnnoncePage({
 
   const { data: annonce } = await supabase
     .from("annonces")
-    .select("id, titre, accroche, contenu, contenu_json, actif, villes(id, nom)")
+    .select("id, titre, accroche, contenu, contenu_json, sections, actif, villes(id, nom)")
     .eq("id", id)
     .eq("actif", true)
     .single();
@@ -178,15 +178,20 @@ export default async function AnnoncePage({
     ? (villeRaw[0] as { id: string; nom: string } | undefined)
     : (villeRaw as { id: string; nom: string } | null);
 
-  // Parse JSON content into sections
-  let sections: Section[] = [];
-  if (annonce.contenu_json) {
+  // Sections structurées (nouveau format) ou fallback sur l'ancien contenu_json
+  type StoredSection = { id: string; titre: string; contenu_json: string };
+  let storedSections: StoredSection[] | null = null;
+  if (annonce.sections) {
+    try { storedSections = annonce.sections as StoredSection[]; } catch { /* ignore */ }
+  }
+
+  // Fallback : ancien format plat
+  let legacySections: Section[] = [];
+  if (!storedSections && annonce.contenu_json) {
     try {
       const blocks: Block[] = JSON.parse(annonce.contenu_json);
-      sections = groupSections(blocks);
-    } catch {
-      // fallback: render as single section
-    }
+      legacySections = groupSections(blocks);
+    } catch { /* ignore */ }
   }
 
   return (
@@ -237,88 +242,91 @@ export default async function AnnoncePage({
         </div>
 
         {/* Sections de contenu */}
-        {sections.length > 0
-          ? sections.map((section, i) => {
-              if (section.kind === "columns") {
-                return (
-                  <div key={i} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {section.cols.map((colBlocks, j) => {
-                      const [headingBlock, ...rest] = colBlocks[0]?.type === "heading"
-                        ? [colBlocks[0], ...colBlocks.slice(1)]
-                        : [null, ...colBlocks];
-                      const bodyBlocks = headingBlock ? rest : colBlocks;
-                      const headingHtml = headingBlock ? renderBlock(headingBlock) : null;
-                      const bodyHtml = renderBlocks(bodyBlocks);
-                      return (
-                        <div key={j} className="col-card px-8 py-8 sm:px-10 sm:py-10">
-                          {headingHtml && (
-                            <div
-                              className="card-heading mb-4"
-                              dangerouslySetInnerHTML={{ __html: headingHtml }}
-                            />
-                          )}
-                          <div
-                            className={contentCls}
-                            dangerouslySetInnerHTML={{ __html: bodyHtml }}
-                          />
-                        </div>
-                      );
-                    })}
-                  </div>
-                );
-              }
-
-              // Image standalone (hors carte)
-              if (section.kind === "image") {
-                const url = section.block.props?.url as string | undefined;
-                const caption = section.block.props?.caption as string | undefined;
-                const width = section.block.props?.width as number | undefined;
-                if (!url) return null;
-                return (
-                  <figure key={i} className="flex flex-col items-center gap-2">
-                    <img
-                      src={url}
-                      alt={caption ?? ""}
-                      style={{ maxWidth: width ? `${width}px` : "100%", width: "100%", borderRadius: "0.75rem" }}
-                    />
-                    {caption && (
-                      <figcaption className="text-sm text-zinc-400 text-center">{caption}</figcaption>
-                    )}
-                  </figure>
-                );
-              }
-
-              // Regular section
-              const headingHtml = section.heading ? renderBlock(section.heading) : null;
-              const bodyHtml = renderBlocks(section.blocks);
-              if (!headingHtml && !bodyHtml.trim()) return null;
+        {/* Nouveau format : sections structurées */}
+        {storedSections
+          ? storedSections.map((s) => {
+              let blocks: Block[] = [];
+              try { blocks = JSON.parse(s.contenu_json); } catch { /* ignore */ }
+              const parsed = groupSections(blocks);
+              const bodyHtml = parsed.map((sec) => {
+                if (sec.kind === "columns") {
+                  // colonnes dans une section → flex inline
+                  return `<div style="display:flex;gap:2rem;align-items:flex-start">${
+                    sec.cols.map((col) => `<div style="flex:1;min-width:0">${renderBlocks(col)}</div>`).join("")
+                  }</div>`;
+                }
+                if (sec.kind === "image") {
+                  const url = sec.block.props?.url as string | undefined;
+                  const caption = sec.block.props?.caption as string | undefined;
+                  const width = sec.block.props?.width as number | undefined;
+                  if (!url) return "";
+                  return `<figure style="text-align:center;margin:1rem 0"><img src="${url}" alt="${caption ?? ""}" style="max-width:${width ? `${width}px` : "100%"};border-radius:0.75rem" />${caption ? `<figcaption style="font-size:0.875rem;color:#71717a;margin-top:0.25rem">${esc(caption)}</figcaption>` : ""}</figure>`;
+                }
+                return renderBlocks(sec.blocks);
+              }).join("\n");
 
               return (
-                <div key={i} className={cardCls}>
-                  {headingHtml && (
-                    <div
-                      className="text-2xl font-bold text-zinc-900 mb-4 [&_h2]:text-2xl [&_h3]:text-xl [&_h2]:font-bold [&_h3]:font-semibold"
-                      dangerouslySetInnerHTML={{ __html: headingHtml }}
-                    />
+                <div key={s.id} className={cardCls}>
+                  {s.titre && (
+                    <h2 className="text-2xl font-bold text-zinc-900 mb-4">{s.titre}</h2>
                   )}
                   {bodyHtml.trim() && (
-                    <div
-                      className={contentCls}
-                      dangerouslySetInnerHTML={{ __html: bodyHtml }}
-                    />
+                    <div className={contentCls} dangerouslySetInnerHTML={{ __html: bodyHtml }} />
                   )}
                 </div>
               );
             })
-          : // Fallback: raw HTML if no JSON
-            annonce.contenu && (
-              <div className={cardCls}>
-                <div
-                  className={contentCls}
-                  dangerouslySetInnerHTML={{ __html: annonce.contenu }}
-                />
-              </div>
-            )}
+
+          : /* Fallback legacy : ancien contenu_json plat */
+            legacySections.length > 0
+            ? legacySections.map((section, i) => {
+                if (section.kind === "columns") {
+                  return (
+                    <div key={i} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {section.cols.map((colBlocks, j) => {
+                        const firstIsHeading = colBlocks[0]?.type === "heading";
+                        const headingBlock = firstIsHeading ? colBlocks[0] : null;
+                        const bodyBlocks = firstIsHeading ? colBlocks.slice(1) : colBlocks;
+                        const headingHtml = headingBlock ? renderBlock(headingBlock) : null;
+                        const bodyHtml = renderBlocks(bodyBlocks);
+                        return (
+                          <div key={j} className="col-card px-8 py-8 sm:px-10 sm:py-10">
+                            {headingHtml && <div className="card-heading mb-4" dangerouslySetInnerHTML={{ __html: headingHtml }} />}
+                            <div className={contentCls} dangerouslySetInnerHTML={{ __html: bodyHtml }} />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                }
+                if (section.kind === "image") {
+                  const url = section.block.props?.url as string | undefined;
+                  const caption = section.block.props?.caption as string | undefined;
+                  const width = section.block.props?.width as number | undefined;
+                  if (!url) return null;
+                  return (
+                    <figure key={i} className="flex flex-col items-center gap-2">
+                      <img src={url} alt={caption ?? ""} style={{ maxWidth: width ? `${width}px` : "100%", width: "100%", borderRadius: "0.75rem" }} />
+                      {caption && <figcaption className="text-sm text-zinc-400 text-center">{caption}</figcaption>}
+                    </figure>
+                  );
+                }
+                const headingHtml = section.heading ? renderBlock(section.heading) : null;
+                const bodyHtml = renderBlocks(section.blocks);
+                if (!headingHtml && !bodyHtml.trim()) return null;
+                return (
+                  <div key={i} className={cardCls}>
+                    {headingHtml && <div className="text-2xl font-bold text-zinc-900 mb-4 [&_h2]:text-2xl [&_h3]:text-xl [&_h2]:font-bold [&_h3]:font-semibold" dangerouslySetInnerHTML={{ __html: headingHtml }} />}
+                    {bodyHtml.trim() && <div className={contentCls} dangerouslySetInnerHTML={{ __html: bodyHtml }} />}
+                  </div>
+                );
+              })
+            : annonce.contenu && (
+                <div className={cardCls}>
+                  <div className={contentCls} dangerouslySetInnerHTML={{ __html: annonce.contenu }} />
+                </div>
+              )
+        }
 
         {/* Formulaire */}
         <div className={`${cardCls}`}>

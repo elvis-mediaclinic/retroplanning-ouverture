@@ -36,9 +36,16 @@ function getColumnItems(editor: any) {
   ];
 }
 
-export function BlockEditor({ defaultJson }: { defaultJson?: string | null }) {
+export function BlockEditor({
+  defaultJson,
+  onJsonChange,
+  hiddenInputName,
+}: {
+  defaultJson?: string | null;
+  onJsonChange?: (json: string) => void;
+  hiddenInputName?: string;
+}) {
   const [showMedia, setShowMedia] = useState(false);
-  const [html, setHtml] = useState("");
   const [json, setJson] = useState(defaultJson ?? "");
 
   const initialContent = (() => {
@@ -70,18 +77,17 @@ export function BlockEditor({ defaultJson }: { defaultJson?: string | null }) {
     }
   }
 
-  async function onChange() {
-    const h = await editor.blocksToHTMLLossy(editor.document);
-    setHtml(h);
-    setJson(JSON.stringify(editor.document));
+  function handleChange() {
+    const j = JSON.stringify(editor.document);
+    setJson(j);
+    onJsonChange?.(j);
   }
 
-  useEffect(() => { onChange(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { handleChange(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <>
-      <input type="hidden" name="contenu" value={html} />
-      <input type="hidden" name="contenu_json" value={json} />
+      {hiddenInputName && <input type="hidden" name={hiddenInputName} value={json} />}
 
       <div className="mb-1">
         <button
@@ -93,10 +99,10 @@ export function BlockEditor({ defaultJson }: { defaultJson?: string | null }) {
         </button>
       </div>
 
-      <div className="rounded-lg border border-zinc-200 overflow-hidden bg-white min-h-[240px]">
+      <div className="rounded-lg border border-zinc-200 overflow-hidden bg-white min-h-[200px]">
         <BlockNoteView
           editor={editor}
-          onChange={onChange}
+          onChange={handleChange}
           theme="light"
           slashMenu={false}
         >
