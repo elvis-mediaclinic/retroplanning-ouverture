@@ -36,7 +36,13 @@ export function AnnonceEditor({
   const [open, setOpen] = useState(false);
 
   const defaultSections: Section[] | undefined = (() => {
-    try { return annonce?.sections ? JSON.parse(annonce.sections) : undefined; } catch { return undefined; }
+    if (!annonce?.sections) return undefined;
+    try {
+      const s = annonce.sections;
+      if (Array.isArray(s)) return s as Section[];
+      if (typeof s === "string") return JSON.parse(s) as Section[];
+      return undefined;
+    } catch { return undefined; }
   })();
 
   function copy() {

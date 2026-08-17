@@ -182,7 +182,10 @@ export default async function AnnoncePage({
   type StoredSection = { id: string; titre: string; contenu_json: string; disposition?: "pleine" | "moitie" };
   let storedSections: StoredSection[] | null = null;
   if (annonce.sections) {
-    try { storedSections = annonce.sections as StoredSection[]; } catch { /* ignore */ }
+    try {
+      const s = annonce.sections;
+      storedSections = Array.isArray(s) ? (s as StoredSection[]) : JSON.parse(s as string) as StoredSection[];
+    } catch { /* ignore */ }
   }
 
   // Fallback : ancien format plat
