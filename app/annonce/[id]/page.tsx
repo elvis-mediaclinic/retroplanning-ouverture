@@ -191,7 +191,8 @@ export default async function AnnoncePage({
   type StatItem = { id: string; valeur: string; label: string };
   type StoredSection =
     | { id: string; type?: "texte"; titre: string; contenu_json: string; disposition?: "pleine" | "moitie" | "tiers" }
-    | { id: string; type: "stats"; titre: string; stats: StatItem[]; colonnes: 2 | 3 | 4 };
+    | { id: string; type: "stats"; titre: string; stats: StatItem[]; colonnes: 2 | 3 | 4 }
+    | { id: string; type: "titre"; titre: string };
   let storedSections: StoredSection[] | null = null;
   if (annonce.sections) {
     try {
@@ -237,14 +238,14 @@ export default async function AnnoncePage({
     let i = 0;
     while (i < list.length) {
       const s = list[i];
-      const disp = s.type !== "stats" ? s.disposition : undefined;
+      const disp = (s.type !== "stats" && s.type !== "titre") ? s.disposition : undefined;
       if (disp === "moitie" || disp === "tiers") {
         const targetDisp = disp;
         const maxCols = disp === "moitie" ? 2 : 3;
         const group: StoredSection[] = [s];
         while (group.length < maxCols) {
           const next = list[i + 1];
-          if (next && next.type !== "stats" && next.disposition === targetDisp) {
+          if (next && next.type !== "stats" && next.type !== "titre" && next.disposition === targetDisp) {
             group.push(next); i++;
           } else break;
         }
@@ -261,6 +262,14 @@ export default async function AnnoncePage({
     };
 
     return rows.map((row, ri) => {
+      if (row.kind === "full" && row.s.type === "titre") {
+        return (
+          <div key={`${keyPrefix}-${ri}`} className="text-center py-2">
+            <h2 className="text-2xl font-bold text-zinc-900">{row.s.titre}</h2>
+          </div>
+        );
+      }
+
       if (row.kind === "full" && row.s.type === "stats") {
         const s = row.s as Extract<StoredSection, { type: "stats" }>;
         const cols = s.colonnes ?? 3;

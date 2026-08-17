@@ -12,7 +12,8 @@ export type Stat = { id: string; valeur: string; label: string };
 
 export type Section =
   | { id: string; type?: "texte"; titre: string; contenu_json: string; disposition?: "pleine" | "moitie" | "tiers" }
-  | { id: string; type: "stats"; titre: string; stats: Stat[]; colonnes: 2 | 3 | 4 };
+  | { id: string; type: "stats"; titre: string; stats: Stat[]; colonnes: 2 | 3 | 4 }
+  | { id: string; type: "titre"; titre: string };
 
 function uid() { return Math.random().toString(36).slice(2); }
 
@@ -112,21 +113,26 @@ export function SectionsEditor({ defaultSections }: { defaultSections?: Section[
     }]);
   }
 
+  function addTitre() {
+    setSections((prev) => [...prev, { id: uid(), type: "titre", titre: "" }]);
+  }
+
   return (
     <div className="space-y-4">
       <input type="hidden" name="sections" id={inputId} value={JSON.stringify(sections)} />
 
       {sections.map((section, i) => {
         const isStats = section.type === "stats";
-        const disposition = !isStats ? (section as { disposition?: string }).disposition : undefined;
+        const isTitre = section.type === "titre";
+        const disposition = !isStats && !isTitre ? (section as { disposition?: string }).disposition : undefined;
 
         return (
-          <div key={section.id} className={`rounded-lg border p-4 space-y-3 ${isStats ? "border-amber-200 bg-amber-50/40" : "border-zinc-200 bg-zinc-50"}`}>
+          <div key={section.id} className={`rounded-lg border p-4 space-y-3 ${isStats ? "border-amber-200 bg-amber-50/40" : isTitre ? "border-violet-200 bg-violet-50/40" : "border-zinc-200 bg-zinc-50"}`}>
             {/* Header */}
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-1.5 shrink-0">
-                <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${isStats ? "bg-amber-100 text-amber-700" : "bg-zinc-200 text-zinc-500"}`}>
-                  {isStats ? "Stats" : "Texte"}
+                <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${isStats ? "bg-amber-100 text-amber-700" : isTitre ? "bg-violet-100 text-violet-700" : "bg-zinc-200 text-zinc-500"}`}>
+                  {isStats ? "Stats" : isTitre ? "Titre" : "Texte"}
                 </span>
               </div>
               <input
@@ -177,6 +183,8 @@ export function SectionsEditor({ defaultSections }: { defaultSections?: Section[
                 section={section as Extract<Section, { type: "stats" }>}
                 onUpdate={(patch) => update(section.id, patch as Partial<Section>)}
               />
+            ) : isTitre ? (
+              <p className="text-xs text-violet-500/70 italic">Le titre saisi ci-dessus s&apos;affichera centré sans carte.</p>
             ) : (
               <BlockEditor
                 defaultJson={(section as { contenu_json: string }).contenu_json || null}
@@ -190,11 +198,15 @@ export function SectionsEditor({ defaultSections }: { defaultSections?: Section[
       <div className="flex gap-2">
         <button type="button" onClick={addTexte}
           className="flex-1 rounded-lg border border-dashed border-zinc-300 py-2.5 text-sm text-zinc-500 hover:border-zinc-400 hover:text-zinc-700 transition-colors">
-          + Section texte
+          + Texte
         </button>
         <button type="button" onClick={addStats}
           className="flex-1 rounded-lg border border-dashed border-amber-300 py-2.5 text-sm text-amber-600 hover:border-amber-400 hover:text-amber-700 transition-colors">
           + Chiffres clés
+        </button>
+        <button type="button" onClick={addTitre}
+          className="flex-1 rounded-lg border border-dashed border-violet-300 py-2.5 text-sm text-violet-600 hover:border-violet-400 hover:text-violet-700 transition-colors">
+          + Titre
         </button>
       </div>
     </div>
