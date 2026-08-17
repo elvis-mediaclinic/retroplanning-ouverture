@@ -280,8 +280,8 @@ export default async function AnnoncePage({
             <div className={STATS_GRID[cols] ?? STATS_GRID[3]}>
               {s.stats.map((stat) => (
                 <div key={stat.id} className={`flex flex-col gap-1 ${centré ? "items-center text-center" : ""}`}>
-                  <span className="text-sm text-zinc-500 leading-snug">{stat.label}</span>
-                  <span className="text-4xl font-extrabold text-brand leading-none">{stat.valeur}</span>
+                  <span className="text-base text-zinc-600 leading-snug">{stat.label}</span>
+                  <span className="text-5xl font-extrabold text-brand leading-none">{stat.valeur}</span>
                 </div>
               ))}
             </div>
