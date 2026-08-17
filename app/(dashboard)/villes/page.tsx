@@ -22,7 +22,7 @@ export default async function VillesPage() {
         </div>
         <Link
           href="/villes/new"
-          className="rounded-md bg-zinc-900 px-3 py-2 text-sm font-medium text-white hover:bg-zinc-700"
+          className="btn-primary"
         >
           + Ajouter
         </Link>

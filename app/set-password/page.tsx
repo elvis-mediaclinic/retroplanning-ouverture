@@ -43,7 +43,7 @@ export default function SetPasswordPage() {
         <button
           type="submit"
           disabled={pending}
-          className="w-full rounded-md bg-zinc-900 px-3 py-2 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-50"
+          className="w-full btn-primary"
         >
           {pending ? "Enregistrement…" : "Valider"}
         </button>

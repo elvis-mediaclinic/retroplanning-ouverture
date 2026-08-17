@@ -30,7 +30,7 @@ export function InviteButton({
       <button
         onClick={handleClick}
         disabled={isPending}
-        className="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+        className="btn-primary"
       >
         {isPending ? "Envoi…" : "Inviter ce candidat"}
       </button>
