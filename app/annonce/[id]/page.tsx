@@ -26,6 +26,7 @@ export default async function AnnoncePage({
 
   return (
     <div className="min-h-screen bg-zinc-50">
+      <style>{`[data-node-type="column"] { flex: 1 !important; min-width: 0; }`}</style>
       {/* Header */}
       <header className="border-b border-zinc-200 bg-white">
         <div className="mx-auto w-full max-w-6xl px-4 sm:px-8 py-4 flex items-center gap-2">
@@ -65,7 +66,9 @@ export default async function AnnoncePage({
                   [&_a]:text-brand [&_a]:underline
                   [&_img]:rounded-xl [&_img]:my-6 [&_img]:max-w-full
                   [&_strong]:font-semibold
-                  [&_table]:w-full [&_table]:border-collapse [&_td]:border [&_td]:border-zinc-200 [&_td]:px-3 [&_td]:py-2 [&_th]:border [&_th]:border-zinc-200 [&_th]:px-3 [&_th]:py-2 [&_th]:bg-zinc-50 [&_th]:font-semibold"
+                  [&_table]:w-full [&_table]:border-collapse [&_td]:border [&_td]:border-zinc-200 [&_td]:px-3 [&_td]:py-2 [&_th]:border [&_th]:border-zinc-200 [&_th]:px-3 [&_th]:py-2 [&_th]:bg-zinc-50 [&_th]:font-semibold
+                  [&_[data-node-type=columnList]]:flex [&_[data-node-type=columnList]]:gap-8 [&_[data-node-type=columnList]]:my-4
+                  [&_[data-node-type=column]]:min-w-0"
                 dangerouslySetInnerHTML={{ __html: annonce.contenu }}
               />
             )}
