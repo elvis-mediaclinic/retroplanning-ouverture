@@ -229,7 +229,7 @@ export default async function AnnoncePage({
           if (!url) return "";
           return `<figure style="text-align:center;margin:1rem 0"><img src="${url}" alt="${caption ?? ""}" style="max-width:${width ? `${width}px` : "100%"};border-radius:0.75rem" />${caption ? `<figcaption style="font-size:0.875rem;color:#71717a;margin-top:0.25rem">${esc(caption)}</figcaption>` : ""}</figure>`;
         }
-        return renderBlocks(sec.blocks);
+        return [sec.heading ? renderBlock(sec.heading) : "", renderBlocks(sec.blocks)].join("\n");
       }).join("\n");
       return { titre: s.titre, bodyHtml };
     }
