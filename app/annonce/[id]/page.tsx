@@ -191,13 +191,7 @@ export default async function AnnoncePage({
         [data-text-color="pink"]   { color: #ad1a72 !important; }
         [data-text-color] [data-style-type="textColor"][data-value="rgb(0, 0, 0)"] { color: inherit !important; }
         .card-heading h1, .card-heading h2, .card-heading h3 { font-size: 1.5rem; font-weight: 700; margin: 0; }
-        .col-card { background: #18181b; border: 1px solid #3f3f46; border-radius: 1rem; box-shadow: 0 0 0 1px rgba(99,179,237,0.15), 0 0 32px rgba(99,179,237,0.08); }
-        .col-card .card-heading h1,
-        .col-card .card-heading h2,
-        .col-card .card-heading h3 { color: #fff; }
-        .col-card .col-body { color: #a1a1aa; }
-        .col-card .col-body li { color: #d4d4d8; }
-        .col-card .col-body strong { color: #fff; }
+        .col-card { background: #fff; border: 1px solid #e4e4e7; border-left: 4px solid #0ea5e9; border-radius: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
       `}</style>
 
       {/* Header */}
@@ -252,7 +246,7 @@ export default async function AnnoncePage({
                             />
                           )}
                           <div
-                            className={`col-body ${contentCls}`}
+                            className={contentCls}
                             dangerouslySetInnerHTML={{ __html: bodyHtml }}
                           />
                         </div>
