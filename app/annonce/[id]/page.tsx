@@ -141,7 +141,7 @@ function groupSections(blocks: Block[]): Section[] {
 // ── Card styles ───────────────────────────────────────────────────────────────
 
 const cardCls =
-  "rounded-2xl bg-white border border-zinc-200 shadow-sm px-8 py-8 sm:px-10 sm:py-10";
+  "rounded-2xl bg-white border border-zinc-200 shadow-sm px-4 py-4 sm:px-6 sm:py-6";
 
 const contentCls =
   "text-zinc-700 text-base leading-relaxed " +
@@ -230,7 +230,7 @@ export default async function AnnoncePage({
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-6xl px-4 sm:px-8 py-8 sm:py-12 space-y-4">
+      <main className="mx-auto w-full max-w-6xl px-4 sm:px-8 py-8 sm:py-12 space-y-6">
 
         {/* Hero — titre + accroche */}
         <div className={cardCls}>
@@ -300,7 +300,7 @@ export default async function AnnoncePage({
                   const s = row.s as Extract<StoredSection, { type: "stats" }>;
                   const cols = s.colonnes ?? 3;
                   return (
-                    <div key={ri} className="px-8 sm:px-12 py-2">
+                    <div key={ri} className="px-4 sm:px-6 py-2">
                       {s.titre && <h2 className="text-2xl font-bold text-zinc-900 mb-6">{s.titre}</h2>}
                       <div className={`grid grid-cols-2 sm:grid-cols-${cols} gap-6`}>
                         {s.stats.map((stat) => (
@@ -321,7 +321,7 @@ export default async function AnnoncePage({
                         const ts = s as Extract<StoredSection, { type?: "texte" }>;
                         const { titre, bodyHtml } = renderTextSection(ts);
                         return (
-                          <div key={s.id} className="col-card px-8 py-8 sm:px-10 sm:py-10">
+                          <div key={s.id} className="col-card px-4 py-4 sm:px-6 sm:py-6">
                             {titre && <h2 className="text-2xl font-bold text-zinc-900 mb-4">{titre}</h2>}
                             {bodyHtml.trim() && <div className={contentCls} dangerouslySetInnerHTML={{ __html: bodyHtml }} />}
                           </div>
