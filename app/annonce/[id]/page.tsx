@@ -164,12 +164,15 @@ export default async function AnnoncePage({
   const { id } = await params;
   const supabase = await createClient();
 
-  const { data: annonce } = await supabase
-    .from("annonces")
-    .select("id, titre, accroche, contenu, contenu_json, sections, actif, villes(id, nom)")
-    .eq("id", id)
-    .eq("actif", true)
-    .single();
+  const [{ data: annonce }, { data: conceptPage }] = await Promise.all([
+    supabase
+      .from("annonces")
+      .select("id, titre, accroche, contenu, contenu_json, sections, actif, villes(id, nom)")
+      .eq("id", id)
+      .eq("actif", true)
+      .single(),
+    supabase.from("pages").select("sections").eq("key", "concept").maybeSingle(),
+  ]);
 
   if (!annonce) notFound();
 
@@ -189,6 +192,98 @@ export default async function AnnoncePage({
       const s = annonce.sections;
       storedSections = Array.isArray(s) ? (s as StoredSection[]) : JSON.parse(s as string) as StoredSection[];
     } catch { /* ignore */ }
+  }
+
+  // Sections concept global
+  let conceptSections: StoredSection[] | null = null;
+  if (conceptPage?.sections) {
+    try {
+      const s = conceptPage.sections;
+      conceptSections = Array.isArray(s) ? (s as StoredSection[]) : JSON.parse(s as string) as StoredSection[];
+    } catch { /* ignore */ }
+  }
+
+  // Helper : render un tableau de StoredSection en JSX (annonce + concept)
+  function renderStoredSections(list: StoredSection[], keyPrefix: string) {
+    function renderTextSection(s: Extract<StoredSection, { type?: "texte" }>) {
+      let blocks: Block[] = [];
+      try { blocks = JSON.parse(s.contenu_json); } catch { /* ignore */ }
+      const parsed = groupSections(blocks);
+      const bodyHtml = parsed.map((sec) => {
+        if (sec.kind === "columns") {
+          return `<div style="display:flex;gap:2rem;align-items:flex-start">${
+            sec.cols.map((col) => `<div style="flex:1;min-width:0">${renderBlocks(col)}</div>`).join("")
+          }</div>`;
+        }
+        if (sec.kind === "image") {
+          const url = sec.block.props?.url as string | undefined;
+          const caption = sec.block.props?.caption as string | undefined;
+          const width = sec.block.props?.width as number | undefined;
+          if (!url) return "";
+          return `<figure style="text-align:center;margin:1rem 0"><img src="${url}" alt="${caption ?? ""}" style="max-width:${width ? `${width}px` : "100%"};border-radius:0.75rem" />${caption ? `<figcaption style="font-size:0.875rem;color:#71717a;margin-top:0.25rem">${esc(caption)}</figcaption>` : ""}</figure>`;
+        }
+        return renderBlocks(sec.blocks);
+      }).join("\n");
+      return { titre: s.titre, bodyHtml };
+    }
+
+    const rows: Array<{ kind: "full"; s: StoredSection } | { kind: "half"; pair: StoredSection[] }> = [];
+    let i = 0;
+    while (i < list.length) {
+      const s = list[i];
+      const disp = s.type !== "stats" ? s.disposition : undefined;
+      if (disp === "moitie") {
+        const pair: StoredSection[] = [s];
+        const next = list[i + 1];
+        if (next && next.type !== "stats" && next.disposition === "moitie") { pair.push(next); i++; }
+        rows.push({ kind: "half", pair });
+      } else {
+        rows.push({ kind: "full", s });
+      }
+      i++;
+    }
+
+    return rows.map((row, ri) => {
+      if (row.kind === "full" && row.s.type === "stats") {
+        const s = row.s as Extract<StoredSection, { type: "stats" }>;
+        const cols = s.colonnes ?? 3;
+        return (
+          <div key={`${keyPrefix}-${ri}`} className="px-4 sm:px-6 py-2">
+            {s.titre && <h2 className="text-2xl font-bold text-zinc-900 mb-6">{s.titre}</h2>}
+            <div className={`grid grid-cols-2 sm:grid-cols-${cols} gap-6`}>
+              {s.stats.map((stat) => (
+                <div key={stat.id} className="flex flex-col gap-1">
+                  <span className="text-sm text-zinc-500 leading-snug">{stat.label}</span>
+                  <span className="text-4xl font-extrabold text-brand leading-none">{stat.valeur}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      }
+      if (row.kind === "half") {
+        return (
+          <div key={`${keyPrefix}-${ri}`} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {row.pair.map((s) => {
+              const { titre, bodyHtml } = renderTextSection(s as Extract<StoredSection, { type?: "texte" }>);
+              return (
+                <div key={s.id} className="col-card px-4 py-4 sm:px-6 sm:py-6">
+                  {titre && <h2 className="text-2xl font-bold text-zinc-900 mb-4">{titre}</h2>}
+                  {bodyHtml.trim() && <div className={contentCls} dangerouslySetInnerHTML={{ __html: bodyHtml }} />}
+                </div>
+              );
+            })}
+          </div>
+        );
+      }
+      const { titre, bodyHtml } = renderTextSection(row.s as Extract<StoredSection, { type?: "texte" }>);
+      return (
+        <div key={`${keyPrefix}-${ri}`} className={cardCls}>
+          {titre && <h2 className="text-2xl font-bold text-zinc-900 mb-4">{titre}</h2>}
+          {bodyHtml.trim() && <div className={contentCls} dangerouslySetInnerHTML={{ __html: bodyHtml }} />}
+        </div>
+      );
+    });
   }
 
   // Fallback : ancien format plat
@@ -247,100 +342,9 @@ export default async function AnnoncePage({
           )}
         </div>
 
-        {/* Sections de contenu */}
-        {/* Nouveau format : sections structurées */}
+        {/* Sections de contenu de l'annonce */}
         {storedSections
-          ? (() => {
-
-              function renderTextSection(s: Extract<StoredSection, { type?: "texte" }>) {
-                let blocks: Block[] = [];
-                try { blocks = JSON.parse(s.contenu_json); } catch { /* ignore */ }
-                const parsed = groupSections(blocks);
-                const bodyHtml = parsed.map((sec) => {
-                  if (sec.kind === "columns") {
-                    return `<div style="display:flex;gap:2rem;align-items:flex-start">${
-                      sec.cols.map((col) => `<div style="flex:1;min-width:0">${renderBlocks(col)}</div>`).join("")
-                    }</div>`;
-                  }
-                  if (sec.kind === "image") {
-                    const url = sec.block.props?.url as string | undefined;
-                    const caption = sec.block.props?.caption as string | undefined;
-                    const width = sec.block.props?.width as number | undefined;
-                    if (!url) return "";
-                    return `<figure style="text-align:center;margin:1rem 0"><img src="${url}" alt="${caption ?? ""}" style="max-width:${width ? `${width}px` : "100%"};border-radius:0.75rem" />${caption ? `<figcaption style="font-size:0.875rem;color:#71717a;margin-top:0.25rem">${esc(caption)}</figcaption>` : ""}</figure>`;
-                  }
-                  return renderBlocks(sec.blocks);
-                }).join("\n");
-                return { titre: s.titre, bodyHtml };
-              }
-
-              // Grouper les sections consécutives en moitié (texte seulement)
-              const rows: Array<{ kind: "full"; s: StoredSection } | { kind: "half"; pair: StoredSection[] }>  = [];
-              let i = 0;
-              while (i < storedSections.length) {
-                const s = storedSections[i];
-                const disp = s.type !== "stats" ? s.disposition : undefined;
-                if (disp === "moitie") {
-                  const pair: StoredSection[] = [s];
-                  const next = storedSections[i + 1];
-                  if (next && next.type !== "stats" && next.disposition === "moitie") {
-                    pair.push(next);
-                    i++;
-                  }
-                  rows.push({ kind: "half", pair });
-                } else {
-                  rows.push({ kind: "full", s });
-                }
-                i++;
-              }
-
-              return rows.map((row, ri) => {
-                // Stats section — rendu sans carte
-                if (row.kind === "full" && row.s.type === "stats") {
-                  const s = row.s as Extract<StoredSection, { type: "stats" }>;
-                  const cols = s.colonnes ?? 3;
-                  return (
-                    <div key={ri} className="px-4 sm:px-6 py-2">
-                      {s.titre && <h2 className="text-2xl font-bold text-zinc-900 mb-6">{s.titre}</h2>}
-                      <div className={`grid grid-cols-2 sm:grid-cols-${cols} gap-6`}>
-                        {s.stats.map((stat) => (
-                          <div key={stat.id} className="flex flex-col gap-1">
-                            <span className="text-sm text-zinc-500 leading-snug">{stat.label}</span>
-                            <span className="text-4xl font-extrabold text-brand leading-none">{stat.valeur}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                }
-
-                if (row.kind === "half") {
-                  return (
-                    <div key={ri} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {row.pair.map((s) => {
-                        const ts = s as Extract<StoredSection, { type?: "texte" }>;
-                        const { titre, bodyHtml } = renderTextSection(ts);
-                        return (
-                          <div key={s.id} className="col-card px-4 py-4 sm:px-6 sm:py-6">
-                            {titre && <h2 className="text-2xl font-bold text-zinc-900 mb-4">{titre}</h2>}
-                            {bodyHtml.trim() && <div className={contentCls} dangerouslySetInnerHTML={{ __html: bodyHtml }} />}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  );
-                }
-
-                const ts = row.s as Extract<StoredSection, { type?: "texte" }>;
-                const { titre, bodyHtml } = renderTextSection(ts);
-                return (
-                  <div key={ri} className={cardCls}>
-                    {titre && <h2 className="text-2xl font-bold text-zinc-900 mb-4">{titre}</h2>}
-                    {bodyHtml.trim() && <div className={contentCls} dangerouslySetInnerHTML={{ __html: bodyHtml }} />}
-                  </div>
-                );
-              });
-            })()
+          ? renderStoredSections(storedSections, "annonce")
 
 
           : /* Fallback legacy : ancien contenu_json plat */
@@ -393,6 +397,18 @@ export default async function AnnoncePage({
                 </div>
               )
         }
+
+        {/* Sections concept Mediaclinic — communes à toutes les annonces */}
+        {conceptSections && conceptSections.length > 0 && (
+          <>
+            <div className="flex items-center gap-3 px-1">
+              <div className="h-px flex-1 bg-zinc-200" />
+              <span className="text-xs font-semibold uppercase tracking-widest text-zinc-400">Le concept Mediaclinic</span>
+              <div className="h-px flex-1 bg-zinc-200" />
+            </div>
+            {renderStoredSections(conceptSections, "concept")}
+          </>
+        )}
 
         {/* Formulaire */}
         <div className={`${cardCls}`}>

@@ -25,6 +25,10 @@ const NAV: Record<UserRole, NavGroup[]> = {
       ],
     },
     {
+      title: "Contenu",
+      items: [{ href: "/concept", label: "Concept Mediaclinic" }],
+    },
+    {
       title: "Administration",
       items: [{ href: "/admin/users", label: "Utilisateurs" }],
     },
@@ -42,6 +46,10 @@ const NAV: Record<UserRole, NavGroup[]> = {
         { href: "/villes", label: "Villes" },
         { href: "/candidats", label: "Candidats" },
       ],
+    },
+    {
+      title: "Contenu",
+      items: [{ href: "/concept", label: "Concept Mediaclinic" }],
     },
   ],
   franchise: [
