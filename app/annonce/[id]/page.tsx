@@ -62,6 +62,13 @@ function renderBlock(block: Block): string {
       return `<li${ca}>${inner}</li>`;
     case "numberedListItem":
       return `<li${ca}>${inner}</li>`;
+    case "image": {
+      const url = block.props?.url as string | undefined;
+      const caption = block.props?.caption as string | undefined;
+      if (!url) return "";
+      const img = `<img src="${url}" alt="${caption ? esc(caption) : ""}" style="max-width:100%;border-radius:0.75rem;margin:1rem 0;" />`;
+      return caption ? `<figure>${img}<figcaption style="text-align:center;font-size:0.875rem;color:#71717a;margin-top:0.25rem;">${esc(caption)}</figcaption></figure>` : img;
+    }
     case "quote":
       return `<blockquote>${inner}</blockquote>`;
     default:
