@@ -191,7 +191,7 @@ export default async function AnnoncePage({
         [data-text-color="pink"]   { color: #ad1a72 !important; }
         [data-text-color] [data-style-type="textColor"][data-value="rgb(0, 0, 0)"] { color: inherit !important; }
         .card-heading h1, .card-heading h2, .card-heading h3 { font-size: 1.5rem; font-weight: 700; margin: 0; }
-        .col-card { background: #fff; border: 1px solid #e4e4e7; border-left: 4px solid #0ea5e9; border-radius: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+        .col-card { background: #fff; border: 1px solid #e4e4e7; border-left: 4px solid #0ea5e9; border-radius: 1rem; box-shadow: -6px 0 20px rgba(14,165,233,0.35), 0 1px 3px rgba(0,0,0,0.06); }
       `}</style>
 
       {/* Header */}
