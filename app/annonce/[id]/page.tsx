@@ -279,7 +279,7 @@ export default async function AnnoncePage({
             {s.titre && <h2 className={`text-2xl font-bold text-brand mb-6 ${centré ? "text-center" : ""}`}>{s.titre}</h2>}
             <div className={STATS_GRID[cols] ?? STATS_GRID[3]}>
               {s.stats.map((stat) => (
-                <div key={stat.id} className={`flex flex-col gap-1 ${centré ? "items-center text-center" : ""}`}>
+                <div key={stat.id} className={`flex flex-col gap-1 px-4 sm:px-6 ${centré ? "items-center text-center" : ""}`}>
                   <span className="text-base text-zinc-600 leading-snug">{stat.label}</span>
                   <span className="text-5xl font-extrabold text-brand leading-none">{stat.valeur}</span>
                 </div>
