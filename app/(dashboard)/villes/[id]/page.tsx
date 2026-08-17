@@ -52,48 +52,80 @@ export default async function EditVillePage({
         <AnnonceEditor villeId={id} annonce={annonce ?? null} publicUrl={publicUrl} />
       </section>
 
-      {/* Candidatures reçues */}
-      {(candidatures ?? []).length > 0 && (
-        <section className="rounded-lg border border-zinc-200 bg-white shadow-sm">
-          <div className="border-b border-zinc-200 px-6 py-4">
-            <h2 className="text-sm font-semibold text-zinc-900">
-              Candidatures reçues{" "}
-              <span className="ml-1 rounded-full bg-brand/10 px-2 py-0.5 text-xs font-medium text-brand">
-                {candidatures?.length}
-              </span>
-            </h2>
-          </div>
-          <div className="divide-y divide-zinc-100">
-            {(candidatures ?? []).map((c) => (
-              <div key={c.id} className="px-6 py-4 space-y-1">
-                <div className="flex items-center justify-between">
-                  <p className="font-medium text-zinc-900 text-sm">
-                    {c.prenom} {c.nom}
-                  </p>
-                  <div className="flex items-center gap-3">
-                    {c.traite && (
-                      <span className="text-xs text-green-600 font-medium">✓ Traité</span>
-                    )}
-                    <span className="text-xs text-zinc-400">
-                      {new Date(c.created_at).toLocaleDateString("fr-FR")}
-                    </span>
-                  </div>
-                </div>
-                <div className="flex gap-4 text-xs text-zinc-500">
-                  <a href={`mailto:${c.email}`} className="hover:text-zinc-900">{c.email}</a>
-                  {c.telephone && <span>{c.telephone}</span>}
-                  {c.apport_personnel && (
-                    <span>Apport : {c.apport_personnel.toLocaleString("fr-FR")} €</span>
-                  )}
-                </div>
-                {c.message && (
-                  <p className="text-xs text-zinc-500 mt-1 line-clamp-2">{c.message}</p>
+      {/* Candidatures reçues — regroupées par personne */}
+      {(candidatures ?? []).length > 0 && (() => {
+        // Group by email
+        const groups = new Map<string, typeof candidatures>();
+        for (const c of candidatures ?? []) {
+          const key = c.email;
+          if (!groups.has(key)) groups.set(key, []);
+          groups.get(key)!.push(c);
+        }
+        const entries = [...groups.entries()];
+
+        return (
+          <section className="rounded-lg border border-zinc-200 bg-white shadow-sm">
+            <div className="border-b border-zinc-200 px-6 py-4">
+              <h2 className="text-sm font-semibold text-zinc-900">
+                Candidatures reçues{" "}
+                <span className="ml-1 rounded-full bg-brand/10 px-2 py-0.5 text-xs font-medium text-brand">
+                  {candidatures?.length}
+                </span>
+                {entries.length < (candidatures?.length ?? 0) && (
+                  <span className="ml-2 text-xs text-zinc-400 font-normal">
+                    ({entries.length} personne{entries.length > 1 ? "s" : ""})
+                  </span>
                 )}
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
+              </h2>
+            </div>
+            <div className="divide-y divide-zinc-100">
+              {entries.map(([email, msgs]) => {
+                const first = msgs![0];
+                const isRepeat = msgs!.length > 1;
+                return (
+                  <div key={email} className="px-6 py-4 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium text-zinc-900 text-sm">
+                          {first.prenom} {first.nom}
+                        </p>
+                        {isRepeat && (
+                          <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
+                            {msgs!.length} candidatures
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-3">
+                        {msgs!.every((m) => m.traite) && (
+                          <span className="text-xs text-green-600 font-medium">✓ Traité</span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex gap-4 text-xs text-zinc-500">
+                      <a href={`mailto:${email}`} className="hover:text-zinc-900">{email}</a>
+                      {first.telephone && <span>{first.telephone}</span>}
+                      {first.apport_personnel && (
+                        <span>Apport : {Number(first.apport_personnel).toLocaleString("fr-FR")} €</span>
+                      )}
+                    </div>
+                    {/* Messages de chaque candidature */}
+                    <div className="space-y-2">
+                      {msgs!.map((m) => (
+                        <div key={m.id} className="rounded-md bg-zinc-50 px-3 py-2 text-xs text-zinc-500">
+                          <span className="text-zinc-400 mr-2">
+                            {new Date(m.created_at).toLocaleDateString("fr-FR")}
+                          </span>
+                          {m.message ? m.message : <span className="italic">Aucun message</span>}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        );
+      })()}
     </div>
   );
 }
