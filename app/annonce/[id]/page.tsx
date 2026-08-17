@@ -190,6 +190,7 @@ export default async function AnnoncePage({
         [data-text-color="purple"] { color: #6940a5 !important; }
         [data-text-color="pink"]   { color: #ad1a72 !important; }
         [data-text-color] [data-style-type="textColor"][data-value="rgb(0, 0, 0)"] { color: inherit !important; }
+        .card-heading h1, .card-heading h2, .card-heading h3 { font-size: 1.25rem; font-weight: 700; margin: 0; }
       `}</style>
 
       {/* Header */}
@@ -239,7 +240,7 @@ export default async function AnnoncePage({
                         <div key={j} className={cardCls}>
                           {headingHtml && (
                             <div
-                              className="text-xl font-bold text-zinc-900 mb-4 [&_h2]:text-xl [&_h3]:text-xl [&_h2]:font-bold [&_h3]:font-bold"
+                              className="card-heading text-zinc-900 mb-4"
                               dangerouslySetInnerHTML={{ __html: headingHtml }}
                             />
                           )}
