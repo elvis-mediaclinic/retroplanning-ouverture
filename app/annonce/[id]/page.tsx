@@ -50,9 +50,10 @@ export default async function AnnoncePage({
             <p className="text-lg text-zinc-600">{annonce.accroche}</p>
           )}
           {annonce.contenu && (
-            <div className="mt-4 prose prose-sm max-w-none text-zinc-700 whitespace-pre-wrap">
-              {annonce.contenu}
-            </div>
+            <div
+              className="mt-4 text-zinc-700 text-sm leading-relaxed [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:text-zinc-900 [&_h2]:mt-6 [&_h2]:mb-2 [&_h3]:font-semibold [&_h3]:text-zinc-900 [&_h3]:mt-4 [&_h3]:mb-1 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1 [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:space-y-1 [&_blockquote]:border-l-4 [&_blockquote]:border-brand/40 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-zinc-500 [&_a]:text-brand [&_a]:underline [&_img]:rounded-lg [&_img]:my-4 [&_img]:max-w-full [&_strong]:font-semibold"
+              dangerouslySetInnerHTML={{ __html: annonce.contenu }}
+            />
           )}
         </div>
 

@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { upsertAnnonce } from "./annonce-actions";
+import { RichEditor } from "./RichEditor";
 
 type Annonce = {
   id: string;
@@ -105,12 +106,10 @@ export function AnnonceEditor({
 
         <div className="space-y-1">
           <label className="text-sm font-medium text-zinc-700">Contenu</label>
-          <textarea
+          <RichEditor
             name="contenu"
-            rows={8}
             defaultValue={annonce?.contenu ?? ""}
             placeholder="Décrivez l'opportunité : le concept, les chiffres clés, le profil recherché, les prochaines étapes…"
-            className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
           />
         </div>
 
