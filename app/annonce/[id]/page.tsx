@@ -427,17 +427,14 @@ export default async function AnnoncePage({
 
         {/* Sections concept Mediaclinic — communes à toutes les annonces */}
         {conceptSections && conceptSections.length > 0 && (
-          <details className="group" open>
-            <summary className="flex cursor-pointer list-none items-center gap-3 px-1 [&::-webkit-details-marker]:hidden">
-              <div className="h-px flex-1 bg-zinc-200" />
-              <span className="text-sm font-semibold uppercase tracking-widest text-zinc-500 select-none group-open:text-brand transition-colors">
-                Le concept Mediaclinic
-                <span className="ml-2 text-zinc-400 group-open:hidden">▸</span>
-                <span className="ml-2 text-brand hidden group-open:inline">▾</span>
+          <details className="group">
+            <summary className="flex cursor-pointer list-none justify-center [&::-webkit-details-marker]:hidden">
+              <span className="inline-flex items-center gap-2 rounded-full border border-brand px-6 py-2.5 text-sm font-semibold text-brand hover:bg-brand hover:text-white transition-colors select-none">
+                <span className="group-open:hidden">Découvrir le concept Mediaclinic →</span>
+                <span className="hidden group-open:inline">Masquer le concept Mediaclinic ↑</span>
               </span>
-              <div className="h-px flex-1 bg-zinc-200" />
             </summary>
-            <div className="mt-4 space-y-4">
+            <div className="mt-6 space-y-4">
               {renderStoredSections(conceptSections, "concept")}
             </div>
           </details>
