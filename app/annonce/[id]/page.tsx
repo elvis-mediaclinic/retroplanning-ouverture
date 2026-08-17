@@ -39,11 +39,9 @@ export default async function AnnoncePage({
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-6xl px-4 sm:px-8 py-8 sm:py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-8 lg:gap-12 items-start">
-
-          {/* Contenu de l'annonce */}
-          <div className="space-y-4">
+      <main className="mx-auto w-full max-w-6xl px-4 sm:px-8 py-8 sm:py-12 space-y-10">
+        {/* Contenu de l'annonce */}
+        <div className="space-y-4">
             <p className="text-xs font-semibold uppercase tracking-wide text-brand">
               Opportunité de franchise
             </p>
@@ -71,21 +69,17 @@ export default async function AnnoncePage({
                 dangerouslySetInnerHTML={{ __html: annonce.contenu }}
               />
             )}
-          </div>
+        </div>
 
-          {/* Formulaire — sticky sur desktop */}
-          <div className="lg:sticky lg:top-8">
-            <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-              <h2 className="text-base font-semibold text-zinc-900 mb-1">
-                Je candidate
-              </h2>
-              <p className="text-sm text-zinc-500 mb-5">
-                Remplissez ce formulaire et l&apos;équipe Mediaclinic vous recontactera rapidement.
-              </p>
-              <CandidatureForm annonceId={annonce.id} villeId={ville?.id ?? ""} />
-            </div>
-          </div>
-
+        {/* Formulaire */}
+        <div className="rounded-2xl border border-zinc-200 bg-white p-6 sm:p-8 shadow-sm max-w-2xl">
+          <h2 className="text-base font-semibold text-zinc-900 mb-1">
+            Je candidate
+          </h2>
+          <p className="text-sm text-zinc-500 mb-5">
+            Remplissez ce formulaire et l&apos;équipe Mediaclinic vous recontactera rapidement.
+          </p>
+          <CandidatureForm annonceId={annonce.id} villeId={ville?.id ?? ""} />
         </div>
 
         <p className="text-center text-xs text-zinc-400 mt-12">
