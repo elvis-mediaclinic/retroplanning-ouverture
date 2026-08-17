@@ -2,6 +2,148 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { CandidatureForm } from "./CandidatureForm";
 
+// ── BlockNote JSON renderer ──────────────────────────────────────────────────
+
+type TextStyle = {
+  bold?: true;
+  italic?: true;
+  underline?: true;
+  strikethrough?: true;
+  textColor?: string;
+};
+
+type InlineItem =
+  | { type: "text"; text: string; styles: TextStyle }
+  | { type: "link"; href: string; content: { type: "text"; text: string; styles: TextStyle }[] };
+
+type Block = {
+  id: string;
+  type: string;
+  props: Record<string, unknown>;
+  content: InlineItem[];
+  children: Block[];
+};
+
+function esc(s: string) {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function renderInline(items: InlineItem[]): string {
+  return (items ?? []).map((item) => {
+    if (item.type === "link") {
+      return `<a href="${item.href}" class="text-brand underline">${renderInline(item.content as InlineItem[])}</a>`;
+    }
+    let t = esc(item.text);
+    const s = item.styles ?? {};
+    if (s.bold) t = `<strong>${t}</strong>`;
+    if (s.italic) t = `<em>${t}</em>`;
+    if (s.underline) t = `<u>${t}</u>`;
+    if (s.strikethrough) t = `<s>${t}</s>`;
+    if (s.textColor && s.textColor !== "default")
+      t = `<span data-text-color="${s.textColor}">${t}</span>`;
+    return t;
+  }).join("");
+}
+
+function renderBlock(block: Block): string {
+  const inner = renderInline(block.content ?? []);
+  const color = block.props?.textColor as string | undefined;
+  const ca = color && color !== "default" ? ` data-text-color="${color}"` : "";
+
+  switch (block.type) {
+    case "paragraph":
+      return inner ? `<p${ca}>${inner}</p>` : "<br/>";
+    case "heading": {
+      const lvl = (block.props?.level as number) ?? 2;
+      const tag = lvl === 1 ? "h1" : lvl === 2 ? "h2" : "h3";
+      return `<${tag}${ca}>${inner}</${tag}>`;
+    }
+    case "bulletListItem":
+      return `<li${ca}>${inner}</li>`;
+    case "numberedListItem":
+      return `<li${ca}>${inner}</li>`;
+    case "quote":
+      return `<blockquote>${inner}</blockquote>`;
+    default:
+      return inner ? `<p>${inner}</p>` : "";
+  }
+}
+
+function renderBlocks(blocks: Block[]): string {
+  const parts: string[] = [];
+  let bullets: string[] = [];
+  let numbered: string[] = [];
+
+  const flushB = () => {
+    if (bullets.length) {
+      parts.push(`<ul>${bullets.join("")}</ul>`);
+      bullets = [];
+    }
+  };
+  const flushN = () => {
+    if (numbered.length) {
+      parts.push(`<ol>${numbered.join("")}</ol>`);
+      numbered = [];
+    }
+  };
+
+  for (const b of blocks) {
+    if (b.type === "bulletListItem") { flushN(); bullets.push(renderBlock(b)); }
+    else if (b.type === "numberedListItem") { flushB(); numbered.push(renderBlock(b)); }
+    else { flushB(); flushN(); parts.push(renderBlock(b)); }
+  }
+  flushB(); flushN();
+  return parts.join("\n");
+}
+
+// ── Section grouping ─────────────────────────────────────────────────────────
+
+type Section =
+  | { kind: "columns"; cols: Block[][] }
+  | { kind: "section"; heading: Block | null; blocks: Block[] };
+
+function groupSections(blocks: Block[]): Section[] {
+  const sections: Section[] = [];
+  let cur: { heading: Block | null; blocks: Block[] } | null = null;
+
+  const flush = () => {
+    if (cur) { sections.push({ kind: "section", ...cur }); cur = null; }
+  };
+
+  for (const b of blocks) {
+    if (b.type === "columnList") {
+      flush();
+      sections.push({ kind: "columns", cols: b.children.map((col) => col.children ?? []) });
+    } else if (b.type === "heading") {
+      flush();
+      cur = { heading: b, blocks: [] };
+    } else {
+      if (!cur) cur = { heading: null, blocks: [] };
+      cur.blocks.push(b);
+    }
+  }
+  flush();
+  return sections;
+}
+
+// ── Card styles ───────────────────────────────────────────────────────────────
+
+const cardCls =
+  "rounded-2xl bg-white border border-zinc-200 shadow-sm px-8 py-8 sm:px-10 sm:py-10";
+
+const contentCls =
+  "text-zinc-700 text-base leading-relaxed " +
+  "[&_h2]:text-xl [&_h2]:font-semibold [&_h2]:text-zinc-900 [&_h2]:mb-3 " +
+  "[&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-zinc-900 [&_h3]:mb-2 " +
+  "[&_p]:mb-3 " +
+  "[&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1.5 [&_ul]:mb-3 " +
+  "[&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:space-y-1.5 [&_ol]:mb-3 " +
+  "[&_blockquote]:border-l-4 [&_blockquote]:border-brand/40 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-zinc-500 [&_blockquote]:my-4 " +
+  "[&_a]:text-brand [&_a]:underline " +
+  "[&_strong]:font-semibold";
+
+// ── Page ─────────────────────────────────────────────────────────────────────
+
 export default async function AnnoncePage({
   params,
 }: {
@@ -12,7 +154,7 @@ export default async function AnnoncePage({
 
   const { data: annonce } = await supabase
     .from("annonces")
-    .select("id, titre, accroche, contenu, actif, villes(id, nom)")
+    .select("id, titre, accroche, contenu, contenu_json, actif, villes(id, nom)")
     .eq("id", id)
     .eq("actif", true)
     .single();
@@ -24,10 +166,20 @@ export default async function AnnoncePage({
     ? (villeRaw[0] as { id: string; nom: string } | undefined)
     : (villeRaw as { id: string; nom: string } | null);
 
+  // Parse JSON content into sections
+  let sections: Section[] = [];
+  if (annonce.contenu_json) {
+    try {
+      const blocks: Block[] = JSON.parse(annonce.contenu_json);
+      sections = groupSections(blocks);
+    } catch {
+      // fallback: render as single section
+    }
+  }
+
   return (
     <div className="min-h-screen bg-zinc-100">
       <style>{`
-        [data-node-type="column"] { flex: 1 !important; min-width: 0; }
         [data-text-color="gray"]   { color: #9b9a97 !important; }
         [data-text-color="brown"]  { color: #64473a !important; }
         [data-text-color="red"]    { color: #e03e3e !important; }
@@ -37,7 +189,6 @@ export default async function AnnoncePage({
         [data-text-color="blue"]   { color: #0b6e99 !important; }
         [data-text-color="purple"] { color: #6940a5 !important; }
         [data-text-color="pink"]   { color: #ad1a72 !important; }
-        /* Span noir parasite généré par BlockNote à l'intérieur d'un bloc coloré */
         [data-text-color] [data-style-type="textColor"][data-value="rgb(0, 0, 0)"] { color: inherit !important; }
       `}</style>
 
@@ -57,7 +208,7 @@ export default async function AnnoncePage({
       <main className="mx-auto w-full max-w-6xl px-4 sm:px-8 py-8 sm:py-12 space-y-4">
 
         {/* Hero — titre + accroche */}
-        <div className="rounded-2xl bg-white border border-zinc-200 shadow-sm px-8 py-10 sm:px-12 sm:py-12">
+        <div className={cardCls}>
           <p className="text-xs font-semibold uppercase tracking-widest text-brand mb-4">
             Opportunité de franchise
           </p>
@@ -71,30 +222,72 @@ export default async function AnnoncePage({
           )}
         </div>
 
-        {/* Corps de l'annonce */}
-        {annonce.contenu && (
-          <div className="rounded-2xl bg-white border border-zinc-200 shadow-sm px-8 py-10 sm:px-12 sm:py-12">
-            <div
-              className="text-zinc-700 text-base leading-relaxed
-                [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:text-zinc-900 [&_h2]:mt-8 [&_h2]:mb-3 [&_h2:first-child]:mt-0
-                [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-zinc-900 [&_h3]:mt-6 [&_h3]:mb-2 [&_h3:first-child]:mt-0
-                [&_p]:mb-4
-                [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:space-y-1.5 [&_ul]:mb-4
-                [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:space-y-1.5 [&_ol]:mb-4
-                [&_blockquote]:border-l-4 [&_blockquote]:border-brand/40 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-zinc-500 [&_blockquote]:my-4
-                [&_a]:text-brand [&_a]:underline
-                [&_img]:rounded-xl [&_img]:my-6 [&_img]:max-w-full
-                [&_strong]:font-semibold
-                [&_table]:w-full [&_table]:border-collapse [&_td]:border [&_td]:border-zinc-200 [&_td]:px-3 [&_td]:py-2 [&_th]:border [&_th]:border-zinc-200 [&_th]:px-3 [&_th]:py-2 [&_th]:bg-zinc-50 [&_th]:font-semibold
-                [&_[data-node-type=columnList]]:flex [&_[data-node-type=columnList]]:gap-8 [&_[data-node-type=columnList]]:my-4
-                [&_[data-node-type=column]]:min-w-0"
-              dangerouslySetInnerHTML={{ __html: annonce.contenu }}
-            />
-          </div>
-        )}
+        {/* Sections de contenu */}
+        {sections.length > 0
+          ? sections.map((section, i) => {
+              if (section.kind === "columns") {
+                return (
+                  <div key={i} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {section.cols.map((colBlocks, j) => {
+                      const [headingBlock, ...rest] = colBlocks[0]?.type === "heading"
+                        ? [colBlocks[0], ...colBlocks.slice(1)]
+                        : [null, ...colBlocks];
+                      const bodyBlocks = headingBlock ? rest : colBlocks;
+                      const headingHtml = headingBlock ? renderBlock(headingBlock) : null;
+                      const bodyHtml = renderBlocks(bodyBlocks);
+                      return (
+                        <div key={j} className={cardCls}>
+                          {headingHtml && (
+                            <div
+                              className="text-lg font-semibold text-zinc-900 mb-4 [&_h2]:text-lg [&_h3]:text-lg [&_[data-text-color]]:inherit"
+                              dangerouslySetInnerHTML={{ __html: headingHtml }}
+                            />
+                          )}
+                          <div
+                            className={contentCls}
+                            dangerouslySetInnerHTML={{ __html: bodyHtml }}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              }
+
+              // Regular section
+              const headingHtml = section.heading ? renderBlock(section.heading) : null;
+              const bodyHtml = renderBlocks(section.blocks);
+              if (!headingHtml && !bodyHtml.trim()) return null;
+
+              return (
+                <div key={i} className={cardCls}>
+                  {headingHtml && (
+                    <div
+                      className="text-xl font-semibold text-zinc-900 mb-4 [&_h2]:text-xl [&_h3]:text-lg [&_h2]:font-semibold [&_h3]:font-semibold"
+                      dangerouslySetInnerHTML={{ __html: headingHtml }}
+                    />
+                  )}
+                  {bodyHtml.trim() && (
+                    <div
+                      className={contentCls}
+                      dangerouslySetInnerHTML={{ __html: bodyHtml }}
+                    />
+                  )}
+                </div>
+              );
+            })
+          : // Fallback: raw HTML if no JSON
+            annonce.contenu && (
+              <div className={cardCls}>
+                <div
+                  className={contentCls}
+                  dangerouslySetInnerHTML={{ __html: annonce.contenu }}
+                />
+              </div>
+            )}
 
         {/* Formulaire */}
-        <div className="rounded-2xl bg-white border border-zinc-200 shadow-sm px-8 py-10 sm:px-12 sm:py-12">
+        <div className={`${cardCls}`}>
           <h2 className="text-xl font-semibold text-zinc-900 mb-1">Je candidate</h2>
           <p className="text-sm text-zinc-500 mb-6">
             Remplissez ce formulaire et l&apos;équipe Mediaclinic vous recontactera rapidement.
