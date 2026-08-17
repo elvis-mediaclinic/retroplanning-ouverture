@@ -2,6 +2,32 @@
 -- À exécuter dans le SQL editor du projet Supabase.
 
 -- ---------------------------------------------------------------------------
+-- Nettoyage préalable (idempotent — sans risque si la base est vide)
+-- ---------------------------------------------------------------------------
+
+drop table if exists public.commentaires cascade;
+drop table if exists public.etapes_projet cascade;
+drop table if exists public.etapes_template cascade;
+drop table if exists public.projets cascade;
+drop table if exists public.candidats cascade;
+drop table if exists public.villes cascade;
+drop table if exists public.profiles cascade;
+
+drop type if exists public.phase_etape cascade;
+drop type if exists public.responsable_etape cascade;
+drop type if exists public.statut_etape cascade;
+drop type if exists public.statut_projet cascade;
+drop type if exists public.statut_candidat cascade;
+drop type if exists public.statut_ville cascade;
+drop type if exists public.format_magasin cascade;
+drop type if exists public.type_magasin cascade;
+drop type if exists public.user_role cascade;
+
+drop function if exists public.get_role cascade;
+drop function if exists public.is_admin cascade;
+drop function if exists public.is_mc cascade;
+
+-- ---------------------------------------------------------------------------
 -- Enums
 -- ---------------------------------------------------------------------------
 
