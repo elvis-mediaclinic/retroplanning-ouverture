@@ -37,6 +37,8 @@ export default async function AnnoncePage({
         [data-text-color="blue"]   { color: #0b6e99 !important; }
         [data-text-color="purple"] { color: #6940a5 !important; }
         [data-text-color="pink"]   { color: #ad1a72 !important; }
+        /* Span noir parasite généré par BlockNote à l'intérieur d'un bloc coloré */
+        [data-text-color] [data-style-type="textColor"][data-value="rgb(0, 0, 0)"] { color: inherit !important; }
       `}</style>
       {/* Header */}
       <header className="border-b border-zinc-200 bg-white">
