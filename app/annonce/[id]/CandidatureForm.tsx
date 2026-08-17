@@ -74,33 +74,18 @@ export function CandidatureForm({
         </div>
       </div>
 
-      {/* Ligne 2 : Apport · Message */}
-      <div className="grid grid-cols-1 sm:grid-cols-[200px_1fr] gap-4">
-        <div className="space-y-1">
-          <label className="text-sm font-medium text-zinc-700">
-            Apport personnel (€)
-            <span className="ml-1 text-xs text-zinc-400">optionnel</span>
-          </label>
-          <input
-            name="apport_personnel"
-            type="number"
-            min="0"
-            placeholder="ex : 50 000"
-            className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
-          />
-        </div>
-        <div className="space-y-1">
-          <label className="text-sm font-medium text-zinc-700">
-            Message
-            <span className="ml-1 text-xs text-zinc-400">optionnel</span>
-          </label>
-          <textarea
-            name="message"
-            rows={3}
-            placeholder="Parlez-nous de votre parcours, vos motivations…"
-            className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
-          />
-        </div>
+      {/* Ligne 2 : Message */}
+      <div className="space-y-1">
+        <label className="text-sm font-medium text-zinc-700">
+          Message
+          <span className="ml-1 text-xs text-zinc-400">optionnel</span>
+        </label>
+        <textarea
+          name="message"
+          rows={3}
+          placeholder="Parlez-nous de votre parcours, vos motivations…"
+          className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
+        />
       </div>
 
       {state?.error && (
