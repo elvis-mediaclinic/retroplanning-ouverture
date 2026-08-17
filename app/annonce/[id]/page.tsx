@@ -239,7 +239,7 @@ export default async function AnnoncePage({
                         <div key={j} className={cardCls}>
                           {headingHtml && (
                             <div
-                              className="text-lg font-semibold text-zinc-900 mb-4 [&_h2]:text-lg [&_h3]:text-lg [&_[data-text-color]]:inherit"
+                              className="text-xl font-bold text-zinc-900 mb-4 [&_h2]:text-xl [&_h3]:text-xl [&_h2]:font-bold [&_h3]:font-bold"
                               dangerouslySetInnerHTML={{ __html: headingHtml }}
                             />
                           )}
@@ -263,7 +263,7 @@ export default async function AnnoncePage({
                 <div key={i} className={cardCls}>
                   {headingHtml && (
                     <div
-                      className="text-xl font-semibold text-zinc-900 mb-4 [&_h2]:text-xl [&_h3]:text-lg [&_h2]:font-semibold [&_h3]:font-semibold"
+                      className="text-2xl font-bold text-zinc-900 mb-4 [&_h2]:text-2xl [&_h3]:text-xl [&_h2]:font-bold [&_h3]:font-semibold"
                       dangerouslySetInnerHTML={{ __html: headingHtml }}
                     />
                   )}
