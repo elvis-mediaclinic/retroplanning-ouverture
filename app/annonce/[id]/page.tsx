@@ -28,15 +28,15 @@ export default async function AnnoncePage({
     <div className="min-h-screen bg-zinc-50">
       <style>{`
         [data-node-type="column"] { flex: 1 !important; min-width: 0; }
-        [data-text-color="gray"]   { color: #9b9a97; }
-        [data-text-color="brown"]  { color: #64473a; }
-        [data-text-color="red"]    { color: #e03e3e; }
-        [data-text-color="orange"] { color: #d9730d; }
-        [data-text-color="yellow"] { color: #dfab01; }
-        [data-text-color="green"]  { color: #4d6461; }
-        [data-text-color="blue"]   { color: #0b6e99; }
-        [data-text-color="purple"] { color: #6940a5; }
-        [data-text-color="pink"]   { color: #ad1a72; }
+        [data-text-color="gray"]   { color: #9b9a97 !important; }
+        [data-text-color="brown"]  { color: #64473a !important; }
+        [data-text-color="red"]    { color: #e03e3e !important; }
+        [data-text-color="orange"] { color: #d9730d !important; }
+        [data-text-color="yellow"] { color: #dfab01 !important; }
+        [data-text-color="green"]  { color: #4d6461 !important; }
+        [data-text-color="blue"]   { color: #0b6e99 !important; }
+        [data-text-color="purple"] { color: #6940a5 !important; }
+        [data-text-color="pink"]   { color: #ad1a72 !important; }
       `}</style>
       {/* Header */}
       <header className="border-b border-zinc-200 bg-white">
