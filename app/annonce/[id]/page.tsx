@@ -107,7 +107,9 @@ function renderBlocks(blocks: Block[]): string {
 
 type Section =
   | { kind: "columns"; cols: Block[][] }
+  | { kind: "image"; block: Block }
   | { kind: "section"; heading: Block | null; blocks: Block[] };
+
 
 function groupSections(blocks: Block[]): Section[] {
   const sections: Section[] = [];
@@ -121,6 +123,9 @@ function groupSections(blocks: Block[]): Section[] {
     if (b.type === "columnList") {
       flush();
       sections.push({ kind: "columns", cols: b.children.map((col) => col.children ?? []) });
+    } else if (b.type === "image") {
+      flush();
+      sections.push({ kind: "image", block: b });
     } else if (b.type === "heading") {
       flush();
       cur = { heading: b, blocks: [] };
@@ -260,6 +265,26 @@ export default async function AnnoncePage({
                       );
                     })}
                   </div>
+                );
+              }
+
+              // Image standalone (hors carte)
+              if (section.kind === "image") {
+                const url = section.block.props?.url as string | undefined;
+                const caption = section.block.props?.caption as string | undefined;
+                const width = section.block.props?.width as number | undefined;
+                if (!url) return null;
+                return (
+                  <figure key={i} className="flex flex-col items-center gap-2">
+                    <img
+                      src={url}
+                      alt={caption ?? ""}
+                      style={{ maxWidth: width ? `${width}px` : "100%", width: "100%", borderRadius: "0.75rem" }}
+                    />
+                    {caption && (
+                      <figcaption className="text-sm text-zinc-400 text-center">{caption}</figcaption>
+                    )}
+                  </figure>
                 );
               }
 
