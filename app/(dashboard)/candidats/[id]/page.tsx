@@ -15,11 +15,10 @@ export default async function EditCandidatPage({
   const { id } = await params;
   const supabase = await createClient();
 
-  const { data: candidat } = await supabase
-    .from("candidats")
-    .select("*")
-    .eq("id", id)
-    .single();
+  const [{ data: candidat }, { data: villes }] = await Promise.all([
+    supabase.from("candidats").select("*").eq("id", id).single(),
+    supabase.from("villes").select("id, nom").order("nom"),
+  ]);
 
   if (!candidat) notFound();
 
@@ -47,7 +46,7 @@ export default async function EditCandidatPage({
         </div>
       </div>
       <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
-        <CandidatForm action={action} defaultValues={candidat} />
+        <CandidatForm action={action} defaultValues={candidat} villes={villes ?? []} />
       </div>
     </div>
   );

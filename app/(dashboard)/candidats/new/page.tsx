@@ -1,10 +1,17 @@
 import Link from "next/link";
 import { requireMC } from "@/lib/dal";
+import { createClient } from "@/lib/supabase/server";
 import { createCandidat } from "../actions";
 import { CandidatForm } from "../CandidatForm";
 
 export default async function NewCandidatPage() {
   await requireMC();
+  const supabase = await createClient();
+  const { data: villes } = await supabase
+    .from("villes")
+    .select("id, nom")
+    .order("nom");
+
   return (
     <div className="space-y-6">
       <div>
@@ -14,7 +21,7 @@ export default async function NewCandidatPage() {
         <h1 className="mt-2 text-lg font-semibold text-zinc-900">Nouveau candidat</h1>
       </div>
       <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
-        <CandidatForm action={createCandidat} submitLabel="Créer" />
+        <CandidatForm action={createCandidat} villes={villes ?? []} submitLabel="Créer" />
       </div>
     </div>
   );

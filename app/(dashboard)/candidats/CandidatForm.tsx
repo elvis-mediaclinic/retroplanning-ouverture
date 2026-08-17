@@ -3,13 +3,16 @@
 import { useActionState } from "react";
 import type { Candidat } from "@/lib/types";
 
+type Ville = { id: string; nom: string };
+
 type Props = {
   action: (state: { error?: string } | undefined, formData: FormData) => Promise<{ error?: string } | undefined>;
-  defaultValues?: Partial<Candidat>;
+  defaultValues?: Partial<Candidat & { ville_id?: string | null }>;
+  villes?: Ville[];
   submitLabel?: string;
 };
 
-export function CandidatForm({ action, defaultValues, submitLabel = "Enregistrer" }: Props) {
+export function CandidatForm({ action, defaultValues, villes = [], submitLabel = "Enregistrer" }: Props) {
   const [state, formAction, pending] = useActionState(action, undefined);
 
   return (
@@ -71,16 +74,6 @@ export function CandidatForm({ action, defaultValues, submitLabel = "Enregistrer
           />
         </div>
         <div className="space-y-1">
-          <label className="text-sm font-medium text-zinc-700">Zone souhaitée</label>
-          <input
-            name="zone_souhaitee"
-            defaultValue={defaultValues?.zone_souhaitee ?? ""}
-            placeholder="ex : Sud-Ouest, Bretagne…"
-            className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
-          />
-        </div>
-
-        <div className="space-y-1">
           <label className="text-sm font-medium text-zinc-700">Statut</label>
           <select
             name="statut"
@@ -93,6 +86,29 @@ export function CandidatForm({ action, defaultValues, submitLabel = "Enregistrer
             <option value="signe">Signé</option>
             <option value="refuse">Refusé</option>
           </select>
+        </div>
+
+        <div className="space-y-1">
+          <label className="text-sm font-medium text-zinc-700">Ville souhaitée</label>
+          <select
+            name="ville_id"
+            defaultValue={defaultValues?.ville_id ?? ""}
+            className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
+          >
+            <option value="">— Aucune ville spécifique —</option>
+            {villes.map((v) => (
+              <option key={v.id} value={v.id}>{v.nom}</option>
+            ))}
+          </select>
+        </div>
+        <div className="space-y-1">
+          <label className="text-sm font-medium text-zinc-700">Zone souhaitée (libre)</label>
+          <input
+            name="zone_souhaitee"
+            defaultValue={defaultValues?.zone_souhaitee ?? ""}
+            placeholder="ex : Sud-Ouest, Bretagne…"
+            className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
+          />
         </div>
 
         <div className="col-span-2 space-y-1">
@@ -110,11 +126,7 @@ export function CandidatForm({ action, defaultValues, submitLabel = "Enregistrer
         <p className="text-sm text-red-600" role="alert">{state.error}</p>
       )}
 
-      <button
-        type="submit"
-        disabled={pending}
-        className="btn-primary"
-      >
+      <button type="submit" disabled={pending} className="btn-primary">
         {pending ? "Enregistrement…" : submitLabel}
       </button>
     </form>
