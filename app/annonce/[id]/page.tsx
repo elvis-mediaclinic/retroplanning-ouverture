@@ -190,7 +190,7 @@ export default async function AnnoncePage({
   // Sections structurées (nouveau format) ou fallback sur l'ancien contenu_json
   type StatItem = { id: string; valeur: string; label: string };
   type StoredSection =
-    | { id: string; type?: "texte"; titre: string; contenu_json: string; disposition?: "pleine" | "moitie" }
+    | { id: string; type?: "texte"; titre: string; contenu_json: string; disposition?: "pleine" | "moitie" | "tiers" }
     | { id: string; type: "stats"; titre: string; stats: StatItem[]; colonnes: 2 | 3 | 4 };
   let storedSections: StoredSection[] | null = null;
   if (annonce.sections) {
@@ -233,21 +233,32 @@ export default async function AnnoncePage({
       return { titre: s.titre, bodyHtml };
     }
 
-    const rows: Array<{ kind: "full"; s: StoredSection } | { kind: "half"; pair: StoredSection[] }> = [];
+    const rows: Array<{ kind: "full"; s: StoredSection } | { kind: "group"; cols: 2 | 3; pair: StoredSection[] }> = [];
     let i = 0;
     while (i < list.length) {
       const s = list[i];
       const disp = s.type !== "stats" ? s.disposition : undefined;
-      if (disp === "moitie") {
-        const pair: StoredSection[] = [s];
-        const next = list[i + 1];
-        if (next && next.type !== "stats" && next.disposition === "moitie") { pair.push(next); i++; }
-        rows.push({ kind: "half", pair });
+      if (disp === "moitie" || disp === "tiers") {
+        const targetDisp = disp;
+        const maxCols = disp === "moitie" ? 2 : 3;
+        const group: StoredSection[] = [s];
+        while (group.length < maxCols) {
+          const next = list[i + 1];
+          if (next && next.type !== "stats" && next.disposition === targetDisp) {
+            group.push(next); i++;
+          } else break;
+        }
+        rows.push({ kind: "group", cols: maxCols as 2 | 3, pair: group });
       } else {
         rows.push({ kind: "full", s });
       }
       i++;
     }
+
+    const GROUP_GRID: Record<number, string> = {
+      2: "grid grid-cols-1 sm:grid-cols-2 gap-4",
+      3: "grid grid-cols-1 sm:grid-cols-3 gap-4",
+    };
 
     return rows.map((row, ri) => {
       if (row.kind === "full" && row.s.type === "stats") {
@@ -267,9 +278,9 @@ export default async function AnnoncePage({
           </div>
         );
       }
-      if (row.kind === "half") {
+      if (row.kind === "group") {
         return (
-          <div key={`${keyPrefix}-${ri}`} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div key={`${keyPrefix}-${ri}`} className={GROUP_GRID[row.cols]}>
             {row.pair.map((s) => {
               const { titre, bodyHtml } = renderTextSection(s as Extract<StoredSection, { type?: "texte" }>);
               return (

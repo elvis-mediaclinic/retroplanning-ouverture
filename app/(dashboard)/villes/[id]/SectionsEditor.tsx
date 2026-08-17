@@ -11,7 +11,7 @@ const BlockEditor = dynamic(() => import("./BlockEditor").then((m) => m.BlockEdi
 export type Stat = { id: string; valeur: string; label: string };
 
 export type Section =
-  | { id: string; type?: "texte"; titre: string; contenu_json: string; disposition?: "pleine" | "moitie" }
+  | { id: string; type?: "texte"; titre: string; contenu_json: string; disposition?: "pleine" | "moitie" | "tiers" }
   | { id: string; type: "stats"; titre: string; stats: Stat[]; colonnes: 2 | 3 | 4 };
 
 function uid() { return Math.random().toString(36).slice(2); }
@@ -138,16 +138,21 @@ export function SectionsEditor({ defaultSections }: { defaultSections?: Section[
               />
               <div className="flex items-center gap-1 shrink-0">
                 {!isStats && (
-                  <button
-                    type="button"
-                    title={disposition === "moitie" ? "Passer en pleine largeur" : "Passer en demi-largeur"}
-                    onClick={() => update(section.id, { disposition: disposition === "moitie" ? "pleine" : "moitie" } as Partial<Section>)}
-                    className={`rounded border px-2 py-1 text-xs font-medium transition-colors ${
-                      disposition === "moitie" ? "border-brand bg-brand/10 text-brand" : "border-zinc-300 bg-white text-zinc-400 hover:text-zinc-600"
-                    }`}
-                  >
-                    {disposition === "moitie" ? "½" : "▬"}
-                  </button>
+                  <>
+                    {(["pleine", "moitie", "tiers"] as const).map((d) => (
+                      <button
+                        key={d}
+                        type="button"
+                        title={{ pleine: "Pleine largeur", moitie: "½ largeur (2 colonnes)", tiers: "⅓ largeur (3 colonnes)" }[d]}
+                        onClick={() => update(section.id, { disposition: d } as Partial<Section>)}
+                        className={`rounded border px-2 py-1 text-xs font-medium transition-colors ${
+                          (disposition ?? "pleine") === d ? "border-brand bg-brand/10 text-brand" : "border-zinc-300 bg-white text-zinc-400 hover:text-zinc-600"
+                        }`}
+                      >
+                        {{ pleine: "▬", moitie: "½", tiers: "⅓" }[d]}
+                      </button>
+                    ))}
+                  </>
                 )}
                 <button type="button" onClick={() => move(i, -1)} disabled={i === 0} title="Monter"
                   className="rounded border border-zinc-300 bg-white px-2 py-1 text-xs text-zinc-500 hover:bg-zinc-50 disabled:opacity-30">↑</button>
@@ -160,7 +165,10 @@ export function SectionsEditor({ defaultSections }: { defaultSections?: Section[
               </div>
             </div>
             {!isStats && disposition === "moitie" && (
-              <p className="text-xs text-brand/70">½ largeur — se positionne côte à côte avec la section adjacente en demi-largeur</p>
+              <p className="text-xs text-brand/70">½ largeur — se positionne côte à côte avec la section adjacente en ½</p>
+            )}
+            {!isStats && disposition === "tiers" && (
+              <p className="text-xs text-brand/70">⅓ largeur — se regroupe avec les sections adjacentes en ⅓ (max 3)</p>
             )}
 
             {/* Contenu */}
