@@ -27,7 +27,8 @@ export function CandidatureForm({
 
   return (
     <form action={formAction} className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
+      {/* Ligne 1 : Prénom · Nom · Email · Téléphone */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="space-y-1">
           <label className="text-sm font-medium text-zinc-700">
             Prénom <span className="text-red-500">*</span>
@@ -71,7 +72,11 @@ export function CandidatureForm({
             className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
           />
         </div>
-        <div className="col-span-2 space-y-1">
+      </div>
+
+      {/* Ligne 2 : Apport · Message */}
+      <div className="grid grid-cols-1 sm:grid-cols-[200px_1fr] gap-4">
+        <div className="space-y-1">
           <label className="text-sm font-medium text-zinc-700">
             Apport personnel (€)
             <span className="ml-1 text-xs text-zinc-400">optionnel</span>
@@ -80,18 +85,18 @@ export function CandidatureForm({
             name="apport_personnel"
             type="number"
             min="0"
-            placeholder="ex : 50000"
+            placeholder="ex : 50 000"
             className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
           />
         </div>
-        <div className="col-span-2 space-y-1">
+        <div className="space-y-1">
           <label className="text-sm font-medium text-zinc-700">
             Message
             <span className="ml-1 text-xs text-zinc-400">optionnel</span>
           </label>
           <textarea
             name="message"
-            rows={4}
+            rows={3}
             placeholder="Parlez-nous de votre parcours, vos motivations…"
             className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
           />
@@ -102,7 +107,7 @@ export function CandidatureForm({
         <p className="text-sm text-red-600" role="alert">{state.error}</p>
       )}
 
-      <button type="submit" disabled={pending} className="btn-primary w-full">
+      <button type="submit" disabled={pending} className="btn-primary">
         {pending ? "Envoi…" : "Envoyer ma candidature"}
       </button>
     </form>
