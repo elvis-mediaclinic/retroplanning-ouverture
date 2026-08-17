@@ -275,7 +275,7 @@ export default async function AnnoncePage({
         const cols = s.colonnes ?? 3;
         const centré = s.alignement === "centre";
         return (
-          <div key={`${keyPrefix}-${ri}`} className="px-4 sm:px-6 py-2">
+          <div key={`${keyPrefix}-${ri}`} className="py-2">
             {s.titre && <h2 className={`text-2xl font-bold text-brand mb-6 ${centré ? "text-center" : ""}`}>{s.titre}</h2>}
             <div className={STATS_GRID[cols] ?? STATS_GRID[3]}>
               {s.stats.map((stat) => (
