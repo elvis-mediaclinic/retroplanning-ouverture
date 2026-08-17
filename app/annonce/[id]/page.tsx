@@ -300,13 +300,13 @@ export default async function AnnoncePage({
                   const s = row.s as Extract<StoredSection, { type: "stats" }>;
                   const cols = s.colonnes ?? 3;
                   return (
-                    <div key={ri} className="py-2">
-                      {s.titre && <h2 className="text-2xl font-bold text-zinc-900 mb-6 text-center">{s.titre}</h2>}
+                    <div key={ri} className="px-8 sm:px-12 py-2">
+                      {s.titre && <h2 className="text-2xl font-bold text-zinc-900 mb-6">{s.titre}</h2>}
                       <div className={`grid grid-cols-2 sm:grid-cols-${cols} gap-6`}>
                         {s.stats.map((stat) => (
-                          <div key={stat.id} className="flex flex-col items-center text-center gap-1">
-                            <span className="text-4xl font-extrabold text-brand leading-none">{stat.valeur}</span>
+                          <div key={stat.id} className="flex flex-col gap-1">
                             <span className="text-sm text-zinc-500 leading-snug">{stat.label}</span>
+                            <span className="text-4xl font-extrabold text-brand leading-none">{stat.valeur}</span>
                           </div>
                         ))}
                       </div>
