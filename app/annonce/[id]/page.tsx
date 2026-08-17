@@ -141,9 +141,9 @@ function groupSections(blocks: Block[]): Section[] {
 // ── Card styles ───────────────────────────────────────────────────────────────
 
 const STATS_GRID: Record<number, string> = {
-  2: "grid grid-cols-2 gap-6",
-  3: "grid grid-cols-2 sm:grid-cols-3 gap-6",
-  4: "grid grid-cols-2 sm:grid-cols-4 gap-6",
+  2: "grid grid-cols-2 gap-4",
+  3: "grid grid-cols-2 sm:grid-cols-3 gap-4",
+  4: "grid grid-cols-2 sm:grid-cols-4 gap-4",
 };
 
 const cardCls =
