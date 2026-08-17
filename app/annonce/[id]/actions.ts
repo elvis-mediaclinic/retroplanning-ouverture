@@ -49,51 +49,57 @@ export async function submitCandidature(
 
   if (error) return { error: "Une erreur est survenue. Veuillez réessayer." };
 
-  // Create candidat if not already in the system (deduplicated by email)
-  const service = createServiceClient();
-  const { data: existingCandidat } = await service
-    .from("candidats")
-    .select("id")
-    .eq("email", parsed.data.email)
-    .maybeSingle();
+  // Secondary operations: create candidat + send email.
+  // These run after the candidature is saved — a failure here doesn't block
+  // the user but is logged server-side for investigation.
+  try {
+    const service = createServiceClient();
 
-  if (!existingCandidat) {
-    await service.from("candidats").insert({
-      prenom: parsed.data.prenom,
-      nom: parsed.data.nom,
-      email: parsed.data.email,
-      telephone: parsed.data.telephone ?? null,
-      ville_id: villeId || null,
-    });
-  }
+    // Upsert candidat (deduplicated by email)
+    const { data: existingCandidat } = await service
+      .from("candidats")
+      .select("id")
+      .eq("email", parsed.data.email)
+      .maybeSingle();
 
-  // Fetch annonce + ville name for the email
-  const { data: annonce } = await service
-    .from("annonces")
-    .select("titre, villes(nom)")
-    .eq("id", annonceId)
-    .single();
+    if (!existingCandidat) {
+      const { error: candidatError } = await service.from("candidats").insert({
+        prenom: parsed.data.prenom,
+        nom: parsed.data.nom,
+        email: parsed.data.email,
+        telephone: parsed.data.telephone ?? null,
+        ville_id: villeId || null,
+      });
+      if (candidatError) console.error("[candidature] candidat insert:", candidatError.message);
+    }
 
-  const villeRaw = annonce?.villes as unknown;
-  const villeNom = Array.isArray(villeRaw)
-    ? (villeRaw[0] as { nom: string } | undefined)?.nom
-    : (villeRaw as { nom: string } | null)?.nom;
+    // Fetch annonce + ville name for the email
+    const { data: annonce } = await service
+      .from("annonces")
+      .select("titre, villes(nom)")
+      .eq("id", annonceId)
+      .single();
 
-  // Fetch admin emails
-  const { data: admins } = await service
-    .from("profiles")
-    .select("email, prenom, nom")
-    .eq("role", "admin");
+    const villeRaw = annonce?.villes as unknown;
+    const villeNom = Array.isArray(villeRaw)
+      ? (villeRaw[0] as { nom: string } | undefined)?.nom
+      : (villeRaw as { nom: string } | null)?.nom;
 
-  const adminEmails = (admins ?? [])
-    .map((a) => a.email)
-    .filter(Boolean) as string[];
+    // Fetch admin emails
+    const { data: admins } = await service
+      .from("profiles")
+      .select("email, prenom, nom")
+      .eq("role", "admin");
 
-  // Send notification email
-  if (adminEmails.length > 0) {
-    const d = parsed.data;
+    const adminEmails = (admins ?? [])
+      .map((a) => a.email)
+      .filter(Boolean) as string[];
 
-    await transporter.sendMail({
+    // Send notification email
+    if (adminEmails.length > 0) {
+      const d = parsed.data;
+
+      await transporter.sendMail({
       from: process.env.SMTP_FROM,
       to: adminEmails.join(", "),
       subject: `Nouvelle candidature franchise — ${villeNom ?? ""}`,
@@ -142,7 +148,10 @@ export async function submitCandidature(
           <p style="text-align:center;color:#a1a1aa;font-size:12px;margin-top:16px">Mediaclinic · Réseau de franchise</p>
         </div>
       `,
-    });
+      });
+    }
+  } catch (err) {
+    console.error("[candidature] secondary operations failed:", err);
   }
 
   return { success: true };
