@@ -1,10 +1,18 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { login } from "./actions";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [state, action, pending] = useActionState(login, undefined);
+
+  useEffect(() => {
+    if (state?.success) {
+      router.push("/");
+    }
+  }, [state, router]);
 
   return (
     <div className="flex flex-1 items-center justify-center p-6">

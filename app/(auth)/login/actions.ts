@@ -1,6 +1,5 @@
 "use server";
 
-import { redirect } from "next/navigation";
 import * as z from "zod";
 import { createClient } from "@/lib/supabase/server";
 
@@ -9,7 +8,7 @@ const LoginSchema = z.object({
   password: z.string().min(1, { error: "Mot de passe requis." }),
 });
 
-export type LoginState = { error?: string } | undefined;
+export type LoginState = { error?: string; success?: boolean } | undefined;
 
 export async function login(
   _state: LoginState,
@@ -31,7 +30,7 @@ export async function login(
     return { error: "Identifiants incorrects." };
   }
 
-  redirect("/");
+  return { success: true };
 }
 
 export async function logout() {
