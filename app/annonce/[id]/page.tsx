@@ -151,7 +151,7 @@ const cardCls =
 
 const contentCls =
   "text-zinc-700 text-base leading-relaxed " +
-  "[&_h2]:text-xl [&_h2]:font-semibold [&_h2]:text-zinc-900 [&_h2]:mb-3 " +
+  "[&_h2]:text-xl [&_h2]:font-semibold [&_h2]:text-brand [&_h2]:mb-3 " +
   "[&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-zinc-900 [&_h3]:mb-2 " +
   "[&_p]:mb-3 " +
   "[&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1.5 [&_ul]:mb-3 " +
@@ -265,7 +265,7 @@ export default async function AnnoncePage({
       if (row.kind === "full" && row.s.type === "titre") {
         return (
           <div key={`${keyPrefix}-${ri}`} className="text-center py-2">
-            <h2 className="text-2xl font-bold text-zinc-900">{row.s.titre}</h2>
+            <h2 className="text-2xl font-bold text-brand">{row.s.titre}</h2>
           </div>
         );
       }
@@ -276,7 +276,7 @@ export default async function AnnoncePage({
         const centré = s.alignement === "centre";
         return (
           <div key={`${keyPrefix}-${ri}`} className="px-4 sm:px-6 py-2">
-            {s.titre && <h2 className={`text-2xl font-bold text-zinc-900 mb-6 ${centré ? "text-center" : ""}`}>{s.titre}</h2>}
+            {s.titre && <h2 className={`text-2xl font-bold text-brand mb-6 ${centré ? "text-center" : ""}`}>{s.titre}</h2>}
             <div className={STATS_GRID[cols] ?? STATS_GRID[3]}>
               {s.stats.map((stat) => (
                 <div key={stat.id} className={`flex flex-col gap-1 ${centré ? "items-center text-center" : ""}`}>
@@ -295,7 +295,7 @@ export default async function AnnoncePage({
               const { titre, bodyHtml } = renderTextSection(s as Extract<StoredSection, { type?: "texte" }>);
               return (
                 <div key={s.id} className="col-card px-4 py-4 sm:px-6 sm:py-6">
-                  {titre && <h2 className="text-2xl font-bold text-zinc-900 mb-4">{titre}</h2>}
+                  {titre && <h2 className="text-2xl font-bold text-brand mb-4">{titre}</h2>}
                   {bodyHtml.trim() && <div className={contentCls} dangerouslySetInnerHTML={{ __html: bodyHtml }} />}
                 </div>
               );
@@ -306,7 +306,7 @@ export default async function AnnoncePage({
       const { titre, bodyHtml } = renderTextSection(row.s as Extract<StoredSection, { type?: "texte" }>);
       return (
         <div key={`${keyPrefix}-${ri}`} className={cardCls}>
-          {titre && <h2 className="text-2xl font-bold text-zinc-900 mb-4">{titre}</h2>}
+          {titre && <h2 className="text-2xl font-bold text-brand mb-4">{titre}</h2>}
           {bodyHtml.trim() && <div className={contentCls} dangerouslySetInnerHTML={{ __html: bodyHtml }} />}
         </div>
       );
@@ -413,7 +413,7 @@ export default async function AnnoncePage({
                 if (!headingHtml && !bodyHtml.trim()) return null;
                 return (
                   <div key={i} className={cardCls}>
-                    {headingHtml && <div className="text-2xl font-bold text-zinc-900 mb-4 [&_h2]:text-2xl [&_h3]:text-xl [&_h2]:font-bold [&_h3]:font-semibold" dangerouslySetInnerHTML={{ __html: headingHtml }} />}
+                    {headingHtml && <div className="text-2xl font-bold text-brand mb-4 [&_h2]:text-2xl [&_h3]:text-xl [&_h2]:font-bold [&_h3]:font-semibold" dangerouslySetInnerHTML={{ __html: headingHtml }} />}
                     {bodyHtml.trim() && <div className={contentCls} dangerouslySetInnerHTML={{ __html: bodyHtml }} />}
                   </div>
                 );
