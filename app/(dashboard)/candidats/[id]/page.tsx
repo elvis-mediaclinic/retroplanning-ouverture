@@ -15,12 +15,15 @@ export default async function EditCandidatPage({
   const { id } = await params;
   const supabase = await createClient();
 
-  const [{ data: candidat }, { data: villes }] = await Promise.all([
+  const [{ data: candidat }, { data: villes }, { data: candidatVilles }] = await Promise.all([
     supabase.from("candidats").select("*").eq("id", id).single(),
     supabase.from("villes").select("id, nom").order("nom"),
+    supabase.from("candidat_villes").select("ville_id").eq("candidat_id", id),
   ]);
 
   if (!candidat) notFound();
+
+  const selectedVilleIds = (candidatVilles ?? []).map((cv) => cv.ville_id);
 
   const action = updateCandidat.bind(null, id);
   const invite = inviteCandidat.bind(null, id);
@@ -46,7 +49,7 @@ export default async function EditCandidatPage({
         </div>
       </div>
       <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
-        <CandidatForm action={action} defaultValues={candidat} villes={villes ?? []} />
+        <CandidatForm action={action} defaultValues={candidat} villes={villes ?? []} selectedVilleIds={selectedVilleIds} />
       </div>
     </div>
   );

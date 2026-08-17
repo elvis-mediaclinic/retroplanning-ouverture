@@ -7,12 +7,13 @@ type Ville = { id: string; nom: string };
 
 type Props = {
   action: (state: { error?: string } | undefined, formData: FormData) => Promise<{ error?: string } | undefined>;
-  defaultValues?: Partial<Candidat & { ville_id?: string | null }>;
+  defaultValues?: Partial<Candidat>;
   villes?: Ville[];
+  selectedVilleIds?: string[];
   submitLabel?: string;
 };
 
-export function CandidatForm({ action, defaultValues, villes = [], submitLabel = "Enregistrer" }: Props) {
+export function CandidatForm({ action, defaultValues, villes = [], selectedVilleIds = [], submitLabel = "Enregistrer" }: Props) {
   const [state, formAction, pending] = useActionState(action, undefined);
 
   return (
@@ -88,20 +89,27 @@ export function CandidatForm({ action, defaultValues, villes = [], submitLabel =
           </select>
         </div>
 
-        <div className="space-y-1">
-          <label className="text-sm font-medium text-zinc-700">Ville souhaitée</label>
-          <select
-            name="ville_id"
-            defaultValue={defaultValues?.ville_id ?? ""}
-            className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
-          >
-            <option value="">— Aucune ville spécifique —</option>
-            {villes.map((v) => (
-              <option key={v.id} value={v.id}>{v.nom}</option>
-            ))}
-          </select>
-        </div>
-        <div className="space-y-1">
+        {villes.length > 0 && (
+          <div className="col-span-2 space-y-2">
+            <label className="text-sm font-medium text-zinc-700">Villes souhaitées</label>
+            <div className="max-h-40 overflow-y-auto rounded-md border border-zinc-200 bg-zinc-50 p-3 grid grid-cols-2 gap-y-1.5 gap-x-4">
+              {villes.map((v) => (
+                <label key={v.id} className="flex items-center gap-2 text-sm text-zinc-700 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    name="ville_ids"
+                    value={v.id}
+                    defaultChecked={selectedVilleIds.includes(v.id)}
+                    className="rounded border-zinc-300 text-brand accent-brand"
+                  />
+                  {v.nom}
+                </label>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="col-span-2 space-y-1">
           <label className="text-sm font-medium text-zinc-700">Zone souhaitée (libre)</label>
           <input
             name="zone_souhaitee"

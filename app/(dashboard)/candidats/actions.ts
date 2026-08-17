@@ -13,7 +13,6 @@ const CandidatSchema = z.object({
   email: z.email({ error: "Email invalide." }),
   telephone: z.string().optional(),
   apport_personnel: z.coerce.number().positive().optional(),
-  ville_id: z.string().uuid().optional(),
   zone_souhaitee: z.string().optional(),
   statut: z.enum(["prospect", "en_evaluation", "valide", "signe", "refuse"]),
   notes: z.string().optional(),
@@ -34,7 +33,7 @@ export async function createCandidat(
     apport_personnel: formData.get("apport_personnel") || undefined,
     ville_id: formData.get("ville_id") || undefined,
     zone_souhaitee: formData.get("zone_souhaitee") || undefined,
-    statut: formData.get("statut"),
+    statut: formData.get("statut") || "prospect",
     notes: formData.get("notes") || undefined,
   });
 
@@ -42,18 +41,28 @@ export async function createCandidat(
     return { error: parsed.error.issues[0]?.message ?? "Formulaire invalide." };
   }
 
+  const villeIds = formData.getAll("ville_ids") as string[];
+
   const supabase = await createClient();
-  const { error } = await supabase.from("candidats").insert({
-    ...parsed.data,
+  const { data: newCandidat, error } = await supabase.from("candidats").insert({
+    nom: parsed.data.nom,
+    prenom: parsed.data.prenom,
+    email: parsed.data.email,
     telephone: parsed.data.telephone ?? null,
     apport_personnel: parsed.data.apport_personnel ?? null,
-    ville_id: parsed.data.ville_id ?? null,
     zone_souhaitee: parsed.data.zone_souhaitee ?? null,
+    statut: parsed.data.statut,
     notes: parsed.data.notes ?? null,
     created_by: session.id,
-  });
+  }).select("id").single();
 
   if (error) return { error: error.message };
+
+  if (newCandidat && villeIds.length > 0) {
+    await supabase.from("candidat_villes").insert(
+      villeIds.map((ville_id) => ({ candidat_id: newCandidat.id, ville_id }))
+    );
+  }
 
   redirect("/candidats");
 }
@@ -72,7 +81,7 @@ export async function updateCandidat(
     apport_personnel: formData.get("apport_personnel") || undefined,
     ville_id: formData.get("ville_id") || undefined,
     zone_souhaitee: formData.get("zone_souhaitee") || undefined,
-    statut: formData.get("statut"),
+    statut: formData.get("statut") || "prospect",
     notes: formData.get("notes") || undefined,
   });
 
@@ -80,20 +89,32 @@ export async function updateCandidat(
     return { error: parsed.error.issues[0]?.message ?? "Formulaire invalide." };
   }
 
+  const villeIds = formData.getAll("ville_ids") as string[];
+
   const supabase = await createClient();
   const { error } = await supabase
     .from("candidats")
     .update({
-      ...parsed.data,
+      nom: parsed.data.nom,
+      prenom: parsed.data.prenom,
+      email: parsed.data.email,
       telephone: parsed.data.telephone ?? null,
       apport_personnel: parsed.data.apport_personnel ?? null,
-      ville_id: parsed.data.ville_id ?? null,
       zone_souhaitee: parsed.data.zone_souhaitee ?? null,
+      statut: parsed.data.statut,
       notes: parsed.data.notes ?? null,
     })
     .eq("id", id);
 
   if (error) return { error: error.message };
+
+  // Remplace les villes liées
+  await supabase.from("candidat_villes").delete().eq("candidat_id", id);
+  if (villeIds.length > 0) {
+    await supabase.from("candidat_villes").insert(
+      villeIds.map((ville_id) => ({ candidat_id: id, ville_id }))
+    );
+  }
 
   revalidatePath("/candidats");
   redirect("/candidats");

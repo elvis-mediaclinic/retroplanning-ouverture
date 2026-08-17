@@ -10,7 +10,7 @@ export default async function CandidatsPage() {
 
   const { data: candidats } = await supabase
     .from("candidats")
-    .select("id, nom, prenom, email, telephone, zone_souhaitee, statut, apport_personnel, profil_id, villes(nom)")
+    .select("id, nom, prenom, email, telephone, zone_souhaitee, statut, apport_personnel, profil_id, candidat_villes(villes(nom))")
     .order("created_at", { ascending: false });
 
   return (
@@ -54,9 +54,12 @@ export default async function CandidatsPage() {
                 <td className="py-2 px-4 text-zinc-500">{c.email}</td>
                 <td className="py-2 px-4 text-zinc-500">
                   {(() => {
-                    const v = c.villes as unknown;
-                    const villeNom = Array.isArray(v) ? (v[0] as { nom: string } | undefined)?.nom : (v as { nom: string } | null)?.nom;
-                    return villeNom ?? c.zone_souhaitee ?? "—";
+                    const cvs = c.candidat_villes as unknown as Array<{ villes: { nom: string } | { nom: string }[] | null }> | null;
+                    const noms = (cvs ?? []).map((cv) => {
+                      const v = cv.villes;
+                      return Array.isArray(v) ? v[0]?.nom : v?.nom;
+                    }).filter(Boolean);
+                    return noms.length > 0 ? noms.join(", ") : (c.zone_souhaitee ?? "—");
                   })()}
                 </td>
                 <td className="py-2 px-4 text-zinc-500">
