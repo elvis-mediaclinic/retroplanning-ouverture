@@ -341,14 +341,19 @@ export default async function AnnoncePage({
 
       {/* Header */}
       <header className="border-b border-zinc-200 bg-white">
-        <div className="mx-auto w-full max-w-6xl px-4 sm:px-8 py-4 flex items-center gap-2">
-          <span className="font-bold text-zinc-900 text-sm">Mediaclinic</span>
-          {ville && (
-            <>
-              <span className="text-zinc-300">·</span>
-              <span className="text-sm text-zinc-500">{ville.nom}</span>
-            </>
-          )}
+        <div className="mx-auto w-full max-w-6xl px-4 sm:px-8 py-4 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-zinc-900 text-sm">Mediaclinic</span>
+            {ville && (
+              <>
+                <span className="text-zinc-300">·</span>
+                <span className="text-sm text-zinc-500">{ville.nom}</span>
+              </>
+            )}
+          </div>
+          <a href="/annonces" className="text-sm text-zinc-500 hover:text-brand transition-colors">
+            ← Toutes les opportunités
+          </a>
         </div>
       </header>
 
