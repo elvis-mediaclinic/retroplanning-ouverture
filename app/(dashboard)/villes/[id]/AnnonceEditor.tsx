@@ -1,14 +1,20 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import dynamic from "next/dynamic";
 import { upsertAnnonce } from "./annonce-actions";
-import { RichEditor } from "./RichEditor";
+
+const BlockEditor = dynamic(() => import("./BlockEditor").then((m) => m.BlockEditor), {
+  ssr: false,
+  loading: () => <div className="rounded-lg border border-zinc-200 bg-zinc-50 h-40 animate-pulse" />,
+});
 
 type Annonce = {
   id: string;
   titre: string;
   accroche: string | null;
   contenu: string | null;
+  contenu_json: string | null;
   actif: boolean;
 };
 
@@ -43,9 +49,7 @@ export function AnnonceEditor({
           <div className="flex items-center gap-2">
             <span
               className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
-                annonce.actif
-                  ? "bg-green-100 text-green-700"
-                  : "bg-zinc-100 text-zinc-500"
+                annonce.actif ? "bg-green-100 text-green-700" : "bg-zinc-100 text-zinc-500"
               }`}
             >
               {annonce.actif ? "Publiée" : "Non publiée"}
@@ -106,11 +110,7 @@ export function AnnonceEditor({
 
         <div className="space-y-1">
           <label className="text-sm font-medium text-zinc-700">Contenu</label>
-          <RichEditor
-            name="contenu"
-            defaultValue={annonce?.contenu ?? ""}
-            placeholder="Décrivez l'opportunité : le concept, les chiffres clés, le profil recherché, les prochaines étapes…"
-          />
+          <BlockEditor defaultJson={annonce?.contenu_json ?? null} />
         </div>
 
         <div className="flex items-center gap-3">

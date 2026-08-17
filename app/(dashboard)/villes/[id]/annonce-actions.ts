@@ -19,7 +19,8 @@ export async function upsertAnnonce(
     ville_id: villeId,
     titre: (formData.get("titre") as string).trim(),
     accroche: (formData.get("accroche") as string | null)?.trim() || null,
-    contenu: (formData.get("contenu") as string | null)?.trim() || null,
+    contenu: (formData.get("contenu") as string | null) || null,
+    contenu_json: (formData.get("contenu_json") as string | null) || null,
     actif: formData.get("actif") === "true",
     updated_at: new Date().toISOString(),
   };
