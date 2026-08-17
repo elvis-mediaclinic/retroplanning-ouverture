@@ -12,7 +12,7 @@ export type Stat = { id: string; valeur: string; label: string };
 
 export type Section =
   | { id: string; type?: "texte"; titre: string; contenu_json: string; disposition?: "pleine" | "moitie" | "tiers" }
-  | { id: string; type: "stats"; titre: string; stats: Stat[]; colonnes: 2 | 3 | 4 }
+  | { id: string; type: "stats"; titre: string; stats: Stat[]; colonnes: 2 | 3 | 4; alignement?: "gauche" | "centre" }
   | { id: string; type: "titre"; titre: string };
 
 function uid() { return Math.random().toString(36).slice(2); }
@@ -20,18 +20,33 @@ function uid() { return Math.random().toString(36).slice(2); }
 function StatsEditor({ section, onUpdate }: { section: Extract<Section, { type: "stats" }>; onUpdate: (patch: Partial<Extract<Section, { type: "stats" }>>) => void }) {
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-2">
-        <label className="text-xs text-zinc-500">Colonnes :</label>
-        {([2, 3, 4] as const).map((n) => (
-          <button
-            key={n}
-            type="button"
-            onClick={() => onUpdate({ colonnes: n })}
-            className={`rounded border px-2 py-0.5 text-xs font-medium ${section.colonnes === n ? "border-brand bg-brand/10 text-brand" : "border-zinc-300 bg-white text-zinc-500"}`}
-          >
-            {n}
-          </button>
-        ))}
+      <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          <label className="text-xs text-zinc-500">Colonnes :</label>
+          {([2, 3, 4] as const).map((n) => (
+            <button
+              key={n}
+              type="button"
+              onClick={() => onUpdate({ colonnes: n })}
+              className={`rounded border px-2 py-0.5 text-xs font-medium ${section.colonnes === n ? "border-brand bg-brand/10 text-brand" : "border-zinc-300 bg-white text-zinc-500"}`}
+            >
+              {n}
+            </button>
+          ))}
+        </div>
+        <div className="flex items-center gap-2">
+          <label className="text-xs text-zinc-500">Alignement :</label>
+          {(["gauche", "centre"] as const).map((a) => (
+            <button
+              key={a}
+              type="button"
+              onClick={() => onUpdate({ alignement: a })}
+              className={`rounded border px-2 py-0.5 text-xs font-medium ${(section.alignement ?? "gauche") === a ? "border-brand bg-brand/10 text-brand" : "border-zinc-300 bg-white text-zinc-500"}`}
+            >
+              {a === "gauche" ? "⬤ Gauche" : "◉ Centré"}
+            </button>
+          ))}
+        </div>
       </div>
       <div className="space-y-2">
         {section.stats.map((stat, i) => (
