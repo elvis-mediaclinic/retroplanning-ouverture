@@ -179,7 +179,7 @@ export default async function AnnoncePage({
     : (villeRaw as { id: string; nom: string } | null);
 
   // Sections structurées (nouveau format) ou fallback sur l'ancien contenu_json
-  type StoredSection = { id: string; titre: string; contenu_json: string };
+  type StoredSection = { id: string; titre: string; contenu_json: string; disposition?: "pleine" | "moitie" };
   let storedSections: StoredSection[] | null = null;
   if (annonce.sections) {
     try { storedSections = annonce.sections as StoredSection[]; } catch { /* ignore */ }
@@ -244,38 +244,75 @@ export default async function AnnoncePage({
         {/* Sections de contenu */}
         {/* Nouveau format : sections structurées */}
         {storedSections
-          ? storedSections.map((s) => {
-              let blocks: Block[] = [];
-              try { blocks = JSON.parse(s.contenu_json); } catch { /* ignore */ }
-              const parsed = groupSections(blocks);
-              const bodyHtml = parsed.map((sec) => {
-                if (sec.kind === "columns") {
-                  // colonnes dans une section → flex inline
-                  return `<div style="display:flex;gap:2rem;align-items:flex-start">${
-                    sec.cols.map((col) => `<div style="flex:1;min-width:0">${renderBlocks(col)}</div>`).join("")
-                  }</div>`;
-                }
-                if (sec.kind === "image") {
-                  const url = sec.block.props?.url as string | undefined;
-                  const caption = sec.block.props?.caption as string | undefined;
-                  const width = sec.block.props?.width as number | undefined;
-                  if (!url) return "";
-                  return `<figure style="text-align:center;margin:1rem 0"><img src="${url}" alt="${caption ?? ""}" style="max-width:${width ? `${width}px` : "100%"};border-radius:0.75rem" />${caption ? `<figcaption style="font-size:0.875rem;color:#71717a;margin-top:0.25rem">${esc(caption)}</figcaption>` : ""}</figure>`;
-                }
-                return renderBlocks(sec.blocks);
-              }).join("\n");
+          ? (() => {
 
-              return (
-                <div key={s.id} className={cardCls}>
-                  {s.titre && (
-                    <h2 className="text-2xl font-bold text-zinc-900 mb-4">{s.titre}</h2>
-                  )}
-                  {bodyHtml.trim() && (
-                    <div className={contentCls} dangerouslySetInnerHTML={{ __html: bodyHtml }} />
-                  )}
-                </div>
-              );
-            })
+              function renderStoredSection(s: StoredSection) {
+                let blocks: Block[] = [];
+                try { blocks = JSON.parse(s.contenu_json); } catch { /* ignore */ }
+                const parsed = groupSections(blocks);
+                const bodyHtml = parsed.map((sec) => {
+                  if (sec.kind === "columns") {
+                    return `<div style="display:flex;gap:2rem;align-items:flex-start">${
+                      sec.cols.map((col) => `<div style="flex:1;min-width:0">${renderBlocks(col)}</div>`).join("")
+                    }</div>`;
+                  }
+                  if (sec.kind === "image") {
+                    const url = sec.block.props?.url as string | undefined;
+                    const caption = sec.block.props?.caption as string | undefined;
+                    const width = sec.block.props?.width as number | undefined;
+                    if (!url) return "";
+                    return `<figure style="text-align:center;margin:1rem 0"><img src="${url}" alt="${caption ?? ""}" style="max-width:${width ? `${width}px` : "100%"};border-radius:0.75rem" />${caption ? `<figcaption style="font-size:0.875rem;color:#71717a;margin-top:0.25rem">${esc(caption)}</figcaption>` : ""}</figure>`;
+                  }
+                  return renderBlocks(sec.blocks);
+                }).join("\n");
+
+                return { titre: s.titre, bodyHtml };
+              }
+
+              // Grouper les sections consécutives en moitié
+              const rows: Array<{ kind: "full"; s: StoredSection } | { kind: "half"; pair: StoredSection[] }> = [];
+              let i = 0;
+              while (i < storedSections.length) {
+                const s = storedSections[i];
+                if (s.disposition === "moitie") {
+                  const pair: StoredSection[] = [s];
+                  if (storedSections[i + 1]?.disposition === "moitie") {
+                    pair.push(storedSections[i + 1]);
+                    i++;
+                  }
+                  rows.push({ kind: "half", pair });
+                } else {
+                  rows.push({ kind: "full", s });
+                }
+                i++;
+              }
+
+              return rows.map((row, ri) => {
+                if (row.kind === "half") {
+                  return (
+                    <div key={ri} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {row.pair.map((s) => {
+                        const { titre, bodyHtml } = renderStoredSection(s);
+                        return (
+                          <div key={s.id} className={`col-card px-8 py-8 sm:px-10 sm:py-10`}>
+                            {titre && <h2 className="text-2xl font-bold text-zinc-900 mb-4">{titre}</h2>}
+                            {bodyHtml.trim() && <div className={contentCls} dangerouslySetInnerHTML={{ __html: bodyHtml }} />}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                }
+                const { titre, bodyHtml } = renderStoredSection(row.s);
+                return (
+                  <div key={ri} className={cardCls}>
+                    {titre && <h2 className="text-2xl font-bold text-zinc-900 mb-4">{titre}</h2>}
+                    {bodyHtml.trim() && <div className={contentCls} dangerouslySetInnerHTML={{ __html: bodyHtml }} />}
+                  </div>
+                );
+              });
+            })()
+
 
           : /* Fallback legacy : ancien contenu_json plat */
             legacySections.length > 0

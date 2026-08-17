@@ -12,6 +12,7 @@ export type Section = {
   id: string;
   titre: string;
   contenu_json: string;
+  disposition?: "pleine" | "moitie";
 };
 
 function uid() {
@@ -74,6 +75,19 @@ export function SectionsEditor({
               className="flex-1 rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm font-medium"
             />
             <div className="flex items-center gap-1 shrink-0">
+              {/* Disposition */}
+              <button
+                type="button"
+                title={section.disposition === "moitie" ? "Passer en pleine largeur" : "Passer en demi-largeur (côte à côte)"}
+                onClick={() => update(section.id, { disposition: section.disposition === "moitie" ? "pleine" : "moitie" })}
+                className={`rounded border px-2 py-1 text-xs font-medium transition-colors ${
+                  section.disposition === "moitie"
+                    ? "border-brand bg-brand/10 text-brand"
+                    : "border-zinc-300 bg-white text-zinc-400 hover:text-zinc-600"
+                }`}
+              >
+                {section.disposition === "moitie" ? "½" : "▬"}
+              </button>
               <button
                 type="button"
                 onClick={() => move(i, -1)}
@@ -104,6 +118,9 @@ export function SectionsEditor({
               )}
             </div>
           </div>
+          {section.disposition === "moitie" && (
+            <p className="text-xs text-brand/70">½ largeur — se positionne côte à côte avec la section adjacente en demi-largeur</p>
+          )}
 
           {/* Éditeur de contenu */}
           <BlockEditor
