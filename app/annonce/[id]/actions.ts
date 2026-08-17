@@ -53,6 +53,7 @@ export async function submitCandidature(
   // These run after the candidature is saved — a failure here doesn't block
   // the user but is logged server-side for investigation.
   try {
+    console.log("[candidature] secret key present:", !!process.env.SUPABASE_SECRET_KEY);
     const service = createServiceClient();
 
     // Upsert candidat (deduplicated by email)
