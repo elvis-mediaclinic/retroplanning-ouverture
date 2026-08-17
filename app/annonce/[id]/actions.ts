@@ -53,8 +53,20 @@ export async function submitCandidature(
   // These run after the candidature is saved — a failure here doesn't block
   // the user but is logged server-side for investigation.
   try {
-    console.log("[candidature] secret key present:", !!process.env.SUPABASE_SECRET_KEY);
     const service = createServiceClient();
+
+    // Fetch annonce title for notes before inserting candidat
+    const { data: annonceForNotes } = await service
+      .from("annonces")
+      .select("titre")
+      .eq("id", annonceId)
+      .single();
+
+    const dateStr = new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" });
+    const notes = [
+      `Candidature sur l'annonce "${annonceForNotes?.titre ?? annonceId}" le ${dateStr}`,
+      parsed.data.message ? parsed.data.message : null,
+    ].filter(Boolean).join("\n");
 
     // Upsert candidat (deduplicated by email)
     const { data: existingCandidat } = await service
@@ -69,9 +81,20 @@ export async function submitCandidature(
         nom: parsed.data.nom,
         email: parsed.data.email,
         telephone: parsed.data.telephone ?? null,
+        apport_personnel: parsed.data.apport_personnel ?? null,
         ville_id: villeId || null,
+        notes,
       });
       if (candidatError) console.error("[candidature] candidat insert:", candidatError.message);
+    } else {
+      // Candidat existant : ajouter la note à la suite
+      const { data: existing } = await service
+        .from("candidats")
+        .select("notes")
+        .eq("id", existingCandidat.id)
+        .single();
+      const updatedNotes = [existing?.notes, notes].filter(Boolean).join("\n\n---\n\n");
+      await service.from("candidats").update({ notes: updatedNotes }).eq("id", existingCandidat.id);
     }
 
     // Fetch annonce + ville name for the email
@@ -80,6 +103,8 @@ export async function submitCandidature(
       .select("titre, villes(nom)")
       .eq("id", annonceId)
       .single();
+
+    const annonceTitle = annonceForNotes?.titre ?? annonce?.titre ?? "";
 
     const villeRaw = annonce?.villes as unknown;
     const villeNom = Array.isArray(villeRaw)
