@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useCreateBlockNote, SuggestionMenuController, getDefaultReactSlashMenuItems } from "@blocknote/react";
+import { useCreateBlockNote, SuggestionMenuController, getDefaultReactSlashMenuItems, FormattingToolbar, FormattingToolbarController, BasicTextStyleButton, TextAlignButton, ColorStyleButton, NestBlockButton, UnnestBlockButton, BlockTypeSelect } from "@blocknote/react";
 import { BlockNoteView as _BlockNoteView } from "@blocknote/mantine";
 import { BlockNoteSchema } from "@blocknote/core";
 import { withMultiColumn, insertColumnList } from "@blocknote/xl-multi-column";
@@ -105,7 +105,25 @@ export function BlockEditor({
           onChange={handleChange}
           theme="light"
           slashMenu={false}
+          formattingToolbar={false}
         >
+          <FormattingToolbarController
+            formattingToolbar={() => (
+              <FormattingToolbar>
+                <BlockTypeSelect key="blockTypeSelect" />
+                <BasicTextStyleButton basicTextStyle="bold" key="boldStyleButton" />
+                <BasicTextStyleButton basicTextStyle="italic" key="italicStyleButton" />
+                <BasicTextStyleButton basicTextStyle="underline" key="underlineStyleButton" />
+                <BasicTextStyleButton basicTextStyle="strike" key="strikeStyleButton" />
+                <TextAlignButton textAlignment="left" key="textAlignLeftButton" />
+                <TextAlignButton textAlignment="center" key="textAlignCenterButton" />
+                <TextAlignButton textAlignment="right" key="textAlignRightButton" />
+                <ColorStyleButton key="colorStyleButton" />
+                <NestBlockButton key="nestBlockButton" />
+                <UnnestBlockButton key="unnestBlockButton" />
+              </FormattingToolbar>
+            )}
+          />
           <SuggestionMenuController
             triggerCharacter="/"
             getItems={async (query: string) => [

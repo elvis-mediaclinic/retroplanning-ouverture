@@ -179,7 +179,10 @@ export default async function AnnoncePage({
     : (villeRaw as { id: string; nom: string } | null);
 
   // Sections structurées (nouveau format) ou fallback sur l'ancien contenu_json
-  type StoredSection = { id: string; titre: string; contenu_json: string; disposition?: "pleine" | "moitie" };
+  type StatItem = { id: string; valeur: string; label: string };
+  type StoredSection =
+    | { id: string; type?: "texte"; titre: string; contenu_json: string; disposition?: "pleine" | "moitie" }
+    | { id: string; type: "stats"; titre: string; stats: StatItem[]; colonnes: 2 | 3 | 4 };
   let storedSections: StoredSection[] | null = null;
   if (annonce.sections) {
     try {
@@ -249,7 +252,7 @@ export default async function AnnoncePage({
         {storedSections
           ? (() => {
 
-              function renderStoredSection(s: StoredSection) {
+              function renderTextSection(s: Extract<StoredSection, { type?: "texte" }>) {
                 let blocks: Block[] = [];
                 try { blocks = JSON.parse(s.contenu_json); } catch { /* ignore */ }
                 const parsed = groupSections(blocks);
@@ -268,19 +271,20 @@ export default async function AnnoncePage({
                   }
                   return renderBlocks(sec.blocks);
                 }).join("\n");
-
                 return { titre: s.titre, bodyHtml };
               }
 
-              // Grouper les sections consécutives en moitié
-              const rows: Array<{ kind: "full"; s: StoredSection } | { kind: "half"; pair: StoredSection[] }> = [];
+              // Grouper les sections consécutives en moitié (texte seulement)
+              const rows: Array<{ kind: "full"; s: StoredSection } | { kind: "half"; pair: StoredSection[] }>  = [];
               let i = 0;
               while (i < storedSections.length) {
                 const s = storedSections[i];
-                if (s.disposition === "moitie") {
+                const disp = s.type !== "stats" ? s.disposition : undefined;
+                if (disp === "moitie") {
                   const pair: StoredSection[] = [s];
-                  if (storedSections[i + 1]?.disposition === "moitie") {
-                    pair.push(storedSections[i + 1]);
+                  const next = storedSections[i + 1];
+                  if (next && next.type !== "stats" && next.disposition === "moitie") {
+                    pair.push(next);
                     i++;
                   }
                   rows.push({ kind: "half", pair });
@@ -291,13 +295,33 @@ export default async function AnnoncePage({
               }
 
               return rows.map((row, ri) => {
+                // Stats section — rendu sans carte
+                if (row.kind === "full" && row.s.type === "stats") {
+                  const s = row.s as Extract<StoredSection, { type: "stats" }>;
+                  const cols = s.colonnes ?? 3;
+                  return (
+                    <div key={ri} className="py-2">
+                      {s.titre && <h2 className="text-2xl font-bold text-zinc-900 mb-6 text-center">{s.titre}</h2>}
+                      <div className={`grid grid-cols-2 sm:grid-cols-${cols} gap-6`}>
+                        {s.stats.map((stat) => (
+                          <div key={stat.id} className="flex flex-col items-center text-center gap-1">
+                            <span className="text-4xl font-extrabold text-brand leading-none">{stat.valeur}</span>
+                            <span className="text-sm text-zinc-500 leading-snug">{stat.label}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                }
+
                 if (row.kind === "half") {
                   return (
                     <div key={ri} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {row.pair.map((s) => {
-                        const { titre, bodyHtml } = renderStoredSection(s);
+                        const ts = s as Extract<StoredSection, { type?: "texte" }>;
+                        const { titre, bodyHtml } = renderTextSection(ts);
                         return (
-                          <div key={s.id} className={`col-card px-8 py-8 sm:px-10 sm:py-10`}>
+                          <div key={s.id} className="col-card px-8 py-8 sm:px-10 sm:py-10">
                             {titre && <h2 className="text-2xl font-bold text-zinc-900 mb-4">{titre}</h2>}
                             {bodyHtml.trim() && <div className={contentCls} dangerouslySetInnerHTML={{ __html: bodyHtml }} />}
                           </div>
@@ -306,7 +330,9 @@ export default async function AnnoncePage({
                     </div>
                   );
                 }
-                const { titre, bodyHtml } = renderStoredSection(row.s);
+
+                const ts = row.s as Extract<StoredSection, { type?: "texte" }>;
+                const { titre, bodyHtml } = renderTextSection(ts);
                 return (
                   <div key={ri} className={cardCls}>
                     {titre && <h2 className="text-2xl font-bold text-zinc-900 mb-4">{titre}</h2>}

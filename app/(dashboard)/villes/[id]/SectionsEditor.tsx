@@ -8,29 +8,80 @@ const BlockEditor = dynamic(() => import("./BlockEditor").then((m) => m.BlockEdi
   loading: () => <div className="rounded-lg border border-zinc-200 bg-zinc-50 h-32 animate-pulse" />,
 });
 
-export type Section = {
-  id: string;
-  titre: string;
-  contenu_json: string;
-  disposition?: "pleine" | "moitie";
-};
+export type Stat = { id: string; valeur: string; label: string };
 
-function uid() {
-  return Math.random().toString(36).slice(2);
+export type Section =
+  | { id: string; type?: "texte"; titre: string; contenu_json: string; disposition?: "pleine" | "moitie" }
+  | { id: string; type: "stats"; titre: string; stats: Stat[]; colonnes: 2 | 3 | 4 };
+
+function uid() { return Math.random().toString(36).slice(2); }
+
+function StatsEditor({ section, onUpdate }: { section: Extract<Section, { type: "stats" }>; onUpdate: (patch: Partial<Extract<Section, { type: "stats" }>>) => void }) {
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <label className="text-xs text-zinc-500">Colonnes :</label>
+        {([2, 3, 4] as const).map((n) => (
+          <button
+            key={n}
+            type="button"
+            onClick={() => onUpdate({ colonnes: n })}
+            className={`rounded border px-2 py-0.5 text-xs font-medium ${section.colonnes === n ? "border-brand bg-brand/10 text-brand" : "border-zinc-300 bg-white text-zinc-500"}`}
+          >
+            {n}
+          </button>
+        ))}
+      </div>
+      <div className="space-y-2">
+        {section.stats.map((stat, i) => (
+          <div key={stat.id} className="flex items-center gap-2">
+            <input
+              value={stat.valeur}
+              onChange={(e) => {
+                const next = [...section.stats];
+                next[i] = { ...stat, valeur: e.target.value };
+                onUpdate({ stats: next });
+              }}
+              placeholder="70 000"
+              className="w-32 rounded-md border border-zinc-300 bg-white px-2 py-1 text-sm font-bold text-center"
+            />
+            <input
+              value={stat.label}
+              onChange={(e) => {
+                const next = [...section.stats];
+                next[i] = { ...stat, label: e.target.value };
+                onUpdate({ stats: next });
+              }}
+              placeholder="habitants dans la zone"
+              className="flex-1 rounded-md border border-zinc-300 bg-white px-2 py-1 text-sm"
+            />
+            <button
+              type="button"
+              onClick={() => onUpdate({ stats: section.stats.filter((_, j) => j !== i) })}
+              className="text-xs text-red-400 hover:text-red-600"
+            >✕</button>
+          </div>
+        ))}
+      </div>
+      <button
+        type="button"
+        onClick={() => onUpdate({ stats: [...section.stats, { id: uid(), valeur: "", label: "" }] })}
+        className="text-xs text-brand hover:text-brand-dark"
+      >
+        + Ajouter un chiffre
+      </button>
+    </div>
+  );
 }
 
-export function SectionsEditor({
-  defaultSections,
-}: {
-  defaultSections?: Section[];
-}) {
+export function SectionsEditor({ defaultSections }: { defaultSections?: Section[] }) {
   const inputId = useId();
   const [sections, setSections] = useState<Section[]>(
-    defaultSections ?? [{ id: uid(), titre: "", contenu_json: "" }]
+    defaultSections ?? [{ id: uid(), type: "texte", titre: "", contenu_json: "" }]
   );
 
   function update(id: string, patch: Partial<Section>) {
-    setSections((prev) => prev.map((s) => (s.id === id ? { ...s, ...patch } : s)));
+    setSections((prev) => prev.map((s) => (s.id === id ? { ...s, ...patch } as Section : s)));
   }
 
   function move(index: number, dir: -1 | 1) {
@@ -47,96 +98,97 @@ export function SectionsEditor({
     setSections((prev) => prev.filter((s) => s.id !== id));
   }
 
-  function add() {
-    setSections((prev) => [...prev, { id: uid(), titre: "", contenu_json: "" }]);
+  function addTexte() {
+    setSections((prev) => [...prev, { id: uid(), type: "texte", titre: "", contenu_json: "" }]);
+  }
+
+  function addStats() {
+    setSections((prev) => [...prev, {
+      id: uid(),
+      type: "stats",
+      titre: "",
+      stats: [{ id: uid(), valeur: "", label: "" }],
+      colonnes: 3,
+    }]);
   }
 
   return (
     <div className="space-y-4">
-      <input
-        type="hidden"
-        name="sections"
-        id={inputId}
-        value={JSON.stringify(sections)}
-      />
+      <input type="hidden" name="sections" id={inputId} value={JSON.stringify(sections)} />
 
-      {sections.map((section, i) => (
-        <div
-          key={section.id}
-          className="rounded-lg border border-zinc-200 bg-zinc-50 p-4 space-y-3"
-        >
-          {/* Header section */}
-          <div className="flex items-center gap-2">
-            <input
-              type="text"
-              value={section.titre}
-              onChange={(e) => update(section.id, { titre: e.target.value })}
-              placeholder="Titre de la section (optionnel)"
-              className="flex-1 rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm font-medium"
-            />
-            <div className="flex items-center gap-1 shrink-0">
-              {/* Disposition */}
-              <button
-                type="button"
-                title={section.disposition === "moitie" ? "Passer en pleine largeur" : "Passer en demi-largeur (côte à côte)"}
-                onClick={() => update(section.id, { disposition: section.disposition === "moitie" ? "pleine" : "moitie" })}
-                className={`rounded border px-2 py-1 text-xs font-medium transition-colors ${
-                  section.disposition === "moitie"
-                    ? "border-brand bg-brand/10 text-brand"
-                    : "border-zinc-300 bg-white text-zinc-400 hover:text-zinc-600"
-                }`}
-              >
-                {section.disposition === "moitie" ? "½" : "▬"}
-              </button>
-              <button
-                type="button"
-                onClick={() => move(i, -1)}
-                disabled={i === 0}
-                title="Monter"
-                className="rounded border border-zinc-300 bg-white px-2 py-1 text-xs text-zinc-500 hover:bg-zinc-50 disabled:opacity-30"
-              >
-                ↑
-              </button>
-              <button
-                type="button"
-                onClick={() => move(i, 1)}
-                disabled={i === sections.length - 1}
-                title="Descendre"
-                className="rounded border border-zinc-300 bg-white px-2 py-1 text-xs text-zinc-500 hover:bg-zinc-50 disabled:opacity-30"
-              >
-                ↓
-              </button>
-              {sections.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() => remove(section.id)}
-                  title="Supprimer"
-                  className="rounded border border-red-200 bg-white px-2 py-1 text-xs text-red-500 hover:bg-red-50"
-                >
-                  ✕
-                </button>
-              )}
+      {sections.map((section, i) => {
+        const isStats = section.type === "stats";
+        const disposition = !isStats ? (section as { disposition?: string }).disposition : undefined;
+
+        return (
+          <div key={section.id} className={`rounded-lg border p-4 space-y-3 ${isStats ? "border-amber-200 bg-amber-50/40" : "border-zinc-200 bg-zinc-50"}`}>
+            {/* Header */}
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 shrink-0">
+                <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${isStats ? "bg-amber-100 text-amber-700" : "bg-zinc-200 text-zinc-500"}`}>
+                  {isStats ? "Stats" : "Texte"}
+                </span>
+              </div>
+              <input
+                type="text"
+                value={section.titre}
+                onChange={(e) => update(section.id, { titre: e.target.value })}
+                placeholder="Titre de la section (optionnel)"
+                className="flex-1 rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm font-medium"
+              />
+              <div className="flex items-center gap-1 shrink-0">
+                {!isStats && (
+                  <button
+                    type="button"
+                    title={disposition === "moitie" ? "Passer en pleine largeur" : "Passer en demi-largeur"}
+                    onClick={() => update(section.id, { disposition: disposition === "moitie" ? "pleine" : "moitie" } as Partial<Section>)}
+                    className={`rounded border px-2 py-1 text-xs font-medium transition-colors ${
+                      disposition === "moitie" ? "border-brand bg-brand/10 text-brand" : "border-zinc-300 bg-white text-zinc-400 hover:text-zinc-600"
+                    }`}
+                  >
+                    {disposition === "moitie" ? "½" : "▬"}
+                  </button>
+                )}
+                <button type="button" onClick={() => move(i, -1)} disabled={i === 0} title="Monter"
+                  className="rounded border border-zinc-300 bg-white px-2 py-1 text-xs text-zinc-500 hover:bg-zinc-50 disabled:opacity-30">↑</button>
+                <button type="button" onClick={() => move(i, 1)} disabled={i === sections.length - 1} title="Descendre"
+                  className="rounded border border-zinc-300 bg-white px-2 py-1 text-xs text-zinc-500 hover:bg-zinc-50 disabled:opacity-30">↓</button>
+                {sections.length > 1 && (
+                  <button type="button" onClick={() => remove(section.id)} title="Supprimer"
+                    className="rounded border border-red-200 bg-white px-2 py-1 text-xs text-red-500 hover:bg-red-50">✕</button>
+                )}
+              </div>
             </div>
+            {!isStats && disposition === "moitie" && (
+              <p className="text-xs text-brand/70">½ largeur — se positionne côte à côte avec la section adjacente en demi-largeur</p>
+            )}
+
+            {/* Contenu */}
+            {isStats ? (
+              <StatsEditor
+                section={section as Extract<Section, { type: "stats" }>}
+                onUpdate={(patch) => update(section.id, patch as Partial<Section>)}
+              />
+            ) : (
+              <BlockEditor
+                defaultJson={(section as { contenu_json: string }).contenu_json || null}
+                onJsonChange={(json) => update(section.id, { contenu_json: json } as Partial<Section>)}
+              />
+            )}
           </div>
-          {section.disposition === "moitie" && (
-            <p className="text-xs text-brand/70">½ largeur — se positionne côte à côte avec la section adjacente en demi-largeur</p>
-          )}
+        );
+      })}
 
-          {/* Éditeur de contenu */}
-          <BlockEditor
-            defaultJson={section.contenu_json || null}
-            onJsonChange={(json) => update(section.id, { contenu_json: json })}
-          />
-        </div>
-      ))}
-
-      <button
-        type="button"
-        onClick={add}
-        className="w-full rounded-lg border border-dashed border-zinc-300 py-2.5 text-sm text-zinc-500 hover:border-zinc-400 hover:text-zinc-700 transition-colors"
-      >
-        + Ajouter une section
-      </button>
+      <div className="flex gap-2">
+        <button type="button" onClick={addTexte}
+          className="flex-1 rounded-lg border border-dashed border-zinc-300 py-2.5 text-sm text-zinc-500 hover:border-zinc-400 hover:text-zinc-700 transition-colors">
+          + Section texte
+        </button>
+        <button type="button" onClick={addStats}
+          className="flex-1 rounded-lg border border-dashed border-amber-300 py-2.5 text-sm text-amber-600 hover:border-amber-400 hover:text-amber-700 transition-colors">
+          + Chiffres clés
+        </button>
+      </div>
     </div>
   );
 }
