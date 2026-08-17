@@ -140,6 +140,12 @@ function groupSections(blocks: Block[]): Section[] {
 
 // ── Card styles ───────────────────────────────────────────────────────────────
 
+const STATS_GRID: Record<number, string> = {
+  2: "grid grid-cols-2 gap-6",
+  3: "grid grid-cols-2 sm:grid-cols-3 gap-6",
+  4: "grid grid-cols-2 sm:grid-cols-4 gap-6",
+};
+
 const cardCls =
   "rounded-2xl bg-white border border-zinc-200 shadow-sm px-4 py-4 sm:px-6 sm:py-6";
 
@@ -250,7 +256,7 @@ export default async function AnnoncePage({
         return (
           <div key={`${keyPrefix}-${ri}`} className="px-4 sm:px-6 py-2">
             {s.titre && <h2 className="text-2xl font-bold text-zinc-900 mb-6">{s.titre}</h2>}
-            <div className={`grid grid-cols-2 sm:grid-cols-${cols} gap-6`}>
+            <div className={STATS_GRID[cols] ?? STATS_GRID[3]}>
               {s.stats.map((stat) => (
                 <div key={stat.id} className="flex flex-col gap-1">
                   <span className="text-sm text-zinc-500 leading-snug">{stat.label}</span>
