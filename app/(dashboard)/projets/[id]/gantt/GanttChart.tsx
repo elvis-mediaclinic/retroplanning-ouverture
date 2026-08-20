@@ -52,6 +52,7 @@ function StatusPopover({
   onUpdate: (statut: StatutEtape) => void;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const [above, setAbove] = useState(true);
 
   useEffect(() => {
     function handle(e: MouseEvent) {
@@ -61,10 +62,20 @@ function StatusPopover({
     return () => document.removeEventListener("mousedown", handle);
   }, [onClose]);
 
+  // Bascule en dessous si le popover dépasse le haut du viewport
+  useEffect(() => {
+    if (ref.current) {
+      const rect = ref.current.getBoundingClientRect();
+      if (rect.top < 8) setAbove(false);
+    }
+  }, []);
+
   return (
     <div
       ref={ref}
-      className="absolute z-30 bottom-full mb-2 left-1/2 -translate-x-1/2 bg-white border border-zinc-200 rounded-lg shadow-lg py-1 min-w-[140px]"
+      className={`absolute z-30 left-1/2 -translate-x-1/2 bg-white border border-zinc-200 rounded-lg shadow-lg py-1 min-w-[140px] ${
+        above ? "bottom-full mb-2" : "top-full mt-2"
+      }`}
     >
       <p className="px-3 py-1 text-[10px] font-semibold text-zinc-400 uppercase tracking-wide border-b border-zinc-100 mb-1 truncate max-w-[200px]">
         {etape.nom}
