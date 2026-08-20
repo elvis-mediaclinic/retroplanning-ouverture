@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   DndContext,
   closestCenter,
@@ -61,6 +61,7 @@ export function SortableEtapeList({
   canEdit: boolean;
 }) {
   const [items, setItems] = useState(etapes);
+  useEffect(() => { setItems(etapes); }, [etapes]);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
