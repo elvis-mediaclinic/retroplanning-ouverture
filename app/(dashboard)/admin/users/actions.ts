@@ -4,6 +4,7 @@ import * as z from "zod";
 import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/dal";
 import { createServiceClient } from "@/lib/supabase/service";
+import { sendInvitationEmail } from "@/lib/mailer";
 
 const CreateUserSchema = z.object({
   email: z.email({ error: "Adresse email invalide." }),
@@ -62,17 +63,19 @@ export async function createUser(
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
-  // Tente d'abord l'envoi par email avec redirectTo explicite (lien pointe vers l'app, pas supabase.co)
-  const { data: invited, error: inviteError } = await service.auth.admin.inviteUserByEmail(email, {
-    redirectTo: `${siteUrl}/auth/callback`,
+  // Crée le compte et récupère le lien d'activation
+  const { data: linkData, error: linkError } = await service.auth.admin.generateLink({
+    type: "invite",
+    email,
+    options: { redirectTo: `${siteUrl}/auth/callback` },
   });
 
-  if (inviteError || !invited.user) {
-    return { error: `Impossible de créer le compte : ${inviteError?.message ?? "erreur inconnue"}.` };
+  if (linkError || !linkData.user) {
+    return { error: `Impossible de créer le compte : ${linkError?.message ?? "erreur inconnue"}.` };
   }
 
   const { error: profileError } = await service.from("profiles").insert({
-    id: invited.user.id,
+    id: linkData.user.id,
     role,
     nom,
     prenom,
@@ -82,20 +85,28 @@ export async function createUser(
   });
 
   if (profileError) {
-    return { error: `Invitation envoyée mais profil non enregistré : ${profileError.message}.` };
+    return { error: `Compte créé mais profil non enregistré : ${profileError.message}.` };
   }
 
-  // Génère aussi le lien en fallback, au cas où l'email n'arrive pas
-  const { data: linkData } = await service.auth.admin.generateLink({
-    type: "invite",
-    email,
-    options: { redirectTo: `${siteUrl}/auth/callback` },
-  });
+  const inviteLink = linkData.properties?.action_link;
+
+  // Envoie l'email via notre propre SMTP (pas celui de Supabase)
+  let emailSent = false;
+  if (inviteLink) {
+    try {
+      await sendInvitationEmail({ to: email, prenom, inviteLink });
+      emailSent = true;
+    } catch (e) {
+      console.error("Erreur envoi email invitation :", e);
+    }
+  }
 
   revalidatePath("/admin/users");
   return {
-    inviteLink: linkData?.properties?.action_link,
+    inviteLink,
     personName: `${prenom} ${nom}`,
-    success: `Invitation envoyée à ${email}.`,
+    success: emailSent
+      ? `Invitation envoyée par email à ${email}.`
+      : `Compte créé — l'email n'a pas pu être envoyé, utilisez le lien ci-dessous.`,
   };
 }

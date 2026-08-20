@@ -22,9 +22,7 @@ export function CreateUserForm() {
         <p className="text-sm font-medium text-green-800">
           ✓ Invitation envoyée à <strong>{state.personName}</strong>
         </p>
-        <p className="text-xs text-green-700">
-          Un email d&apos;invitation a été envoyé. Si la personne ne le reçoit pas, utilisez ce lien de secours :
-        </p>
+        <p className="text-xs text-green-700">{state.success}</p>
         {state.inviteLink && <div className="space-y-1">
           <p className="text-xs font-medium text-zinc-700">
             Lien d&apos;activation (secours)
