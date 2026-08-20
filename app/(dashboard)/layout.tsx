@@ -13,6 +13,7 @@ export default async function DashboardLayout({
       <Sidebar
         role={profile.role}
         userName={`${profile.prenom} ${profile.nom}`}
+        fonction={profile.fonction}
       />
       <main className="flex-1 overflow-y-auto">
         <div className="mx-auto max-w-5xl px-6 py-8">{children}</div>

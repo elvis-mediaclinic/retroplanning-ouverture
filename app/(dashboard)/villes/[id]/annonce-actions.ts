@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireMC } from "@/lib/dal";
+import { requireMarketing } from "@/lib/dal";
 import { createClient } from "@/lib/supabase/server";
 
 export type AnnonceState = { error?: string; ok?: boolean } | undefined;
@@ -12,7 +12,7 @@ export async function upsertAnnonce(
   _state: AnnonceState,
   formData: FormData
 ): Promise<AnnonceState> {
-  const session = await requireMC();
+  const session = await requireMarketing();
   const supabase = await createClient();
 
   const sectionsRaw = (formData.get("sections") as string | null) || null;
@@ -41,7 +41,7 @@ export async function upsertAnnonce(
 }
 
 export async function toggleAnnonce(annonceId: string, actif: boolean, villeId: string) {
-  await requireMC();
+  await requireMarketing();
   const supabase = await createClient();
   await supabase.from("annonces").update({ actif, updated_at: new Date().toISOString() }).eq("id", annonceId);
   revalidatePath(`/villes/${villeId}`);

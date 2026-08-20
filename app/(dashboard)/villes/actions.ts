@@ -3,7 +3,7 @@
 import * as z from "zod";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireMC } from "@/lib/dal";
+import { requireMarketing } from "@/lib/dal";
 import { createClient } from "@/lib/supabase/server";
 
 const VilleSchema = z.object({
@@ -21,7 +21,7 @@ export async function createVille(
   _state: VilleState,
   formData: FormData
 ): Promise<VilleState> {
-  const session = await requireMC();
+  const session = await requireMarketing();
   const parsed = VilleSchema.safeParse({
     nom: formData.get("nom"),
     departement: formData.get("departement") || undefined,
@@ -57,7 +57,7 @@ export async function updateVille(
   _state: VilleState,
   formData: FormData
 ): Promise<VilleState> {
-  await requireMC();
+  await requireMarketing();
   const parsed = VilleSchema.safeParse({
     nom: formData.get("nom"),
     departement: formData.get("departement") || undefined,

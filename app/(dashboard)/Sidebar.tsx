@@ -140,13 +140,38 @@ function NavContent({
 export function Sidebar({
   role,
   userName,
+  fonction,
 }: {
   role: UserRole;
   userName: string;
+  fonction?: string | null;
 }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const groups = NAV[role];
+
+  const isMarketing =
+    role === "responsable_mc" &&
+    !!fonction?.toLowerCase().includes("marketing");
+
+  const groups =
+    role === "responsable_mc" && isMarketing
+      ? [
+          {
+            items: [
+              { href: "/", label: "Tableau de bord" },
+              { href: "/projets", label: "Ouvertures" },
+            ],
+          },
+          {
+            title: "Prospection",
+            items: [{ href: "/villes", label: "Villes" }],
+          },
+          {
+            title: "Contenu",
+            items: [{ href: "/concept", label: "Concept Mediaclinic" }],
+          },
+        ]
+      : NAV[role];
 
   return (
     <>

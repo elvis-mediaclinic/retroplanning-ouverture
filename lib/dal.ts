@@ -47,3 +47,14 @@ export async function requireRole(...roles: Profile["role"][]) {
 export async function requireMC() {
   return requireRole("admin", "consultant", "responsable_mc");
 }
+
+// Admin ou responsable_mc avec fonction contenant "marketing" (insensible à la casse).
+export async function requireMarketing() {
+  const profile = await getProfile();
+  const isMarketing =
+    profile.role === "admin" ||
+    (profile.role === "responsable_mc" &&
+      profile.fonction?.toLowerCase().includes("marketing"));
+  if (!isMarketing) redirect("/");
+  return profile;
+}

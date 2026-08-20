@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireMC } from "@/lib/dal";
+import { requireMarketing } from "@/lib/dal";
 import { createClient } from "@/lib/supabase/server";
 
 export type ConceptState = { error?: string; ok?: boolean } | undefined;
@@ -10,7 +10,7 @@ export async function saveConcept(
   _state: ConceptState,
   formData: FormData
 ): Promise<ConceptState> {
-  await requireMC();
+  await requireMarketing();
   const supabase = await createClient();
 
   const sectionsRaw = formData.get("sections") as string | null;

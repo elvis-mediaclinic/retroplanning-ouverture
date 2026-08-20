@@ -23,16 +23,22 @@ import type { EtapeProjet, MCUser } from "@/lib/types";
 function SortableItem({
   etape,
   projetId,
-  canEdit,
+  canEditAll,
+  isResponsableMC,
   mcUsers,
   currentUserId,
 }: {
   etape: EtapeProjet;
   projetId: string;
-  canEdit: boolean;
+  canEditAll: boolean;
+  isResponsableMC: boolean;
   mcUsers: MCUser[];
   currentUserId?: string;
 }) {
+  const canEdit =
+    canEditAll ||
+    (isResponsableMC && !!currentUserId && (etape.resp_mc ?? []).includes(currentUserId));
+
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: etape.id });
 
   const style = {
@@ -44,7 +50,7 @@ function SortableItem({
 
   return (
     <div ref={setNodeRef} style={style} className="flex items-stretch">
-      {canEdit && (
+      {canEditAll && (
         <button
           type="button"
           {...attributes}
@@ -72,13 +78,15 @@ function SortableItem({
 export function SortableEtapeList({
   etapes,
   projetId,
-  canEdit,
+  canEditAll,
+  isResponsableMC,
   mcUsers,
   currentUserId,
 }: {
   etapes: EtapeProjet[];
   projetId: string;
-  canEdit: boolean;
+  canEditAll: boolean;
+  isResponsableMC: boolean;
   mcUsers: MCUser[];
   currentUserId?: string;
 }) {
@@ -109,7 +117,8 @@ export function SortableEtapeList({
               key={etape.id}
               etape={etape}
               projetId={projetId}
-              canEdit={canEdit}
+              canEditAll={canEditAll}
+              isResponsableMC={isResponsableMC}
               mcUsers={mcUsers}
               currentUserId={currentUserId}
             />

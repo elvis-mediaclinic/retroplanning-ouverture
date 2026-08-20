@@ -70,8 +70,11 @@ export default async function ProjetPage({
     notFound();
   }
 
-  const isMC = profile.role === "admin" || profile.role === "consultant";
-  const canEdit = profile.role === "admin" || profile.role === "franchise";
+  const isMC = profile.role === "admin" || profile.role === "consultant" || profile.role === "responsable_mc";
+  // admin/franchise : peuvent tout modifier
+  // responsable_mc : peuvent modifier uniquement les étapes où ils sont assignés (géré dans EtapeRow)
+  const canEditAll = profile.role === "admin" || profile.role === "franchise";
+  const isResponsableMC = profile.role === "responsable_mc";
 
   const etapesParPhase = PHASES_ORDER.reduce<Record<PhaseEtape, EtapeProjet[]>>(
     (acc, phase) => {
@@ -231,12 +234,13 @@ export default async function ProjetPage({
               <SortableEtapeList
                 etapes={phaseEtapes}
                 projetId={id}
-                canEdit={canEdit}
+                canEditAll={canEditAll}
+                isResponsableMC={isResponsableMC}
                 mcUsers={mcUsers}
                 currentUserId={profile.id}
               />
 
-              {canEdit && (
+              {canEditAll && (
                 <AddEtapeForm projetId={id} phase={phase} mcUsers={mcUsers} />
               )}
             </div>
