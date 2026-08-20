@@ -31,7 +31,7 @@ export default async function DashboardPage() {
 
   const stats = [
     {
-      label: "Projets actifs",
+      label: "Ouvertures actives",
       value: (projets ?? []).filter((p) =>
         ["prospection", "en_cours"].includes(p.statut)
       ).length,
@@ -76,7 +76,7 @@ export default async function DashboardPage() {
       <div>
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-sm font-semibold text-zinc-900">
-            Projets en cours
+            Ouvertures en cours
           </h2>
           <Link
             href="/projets"

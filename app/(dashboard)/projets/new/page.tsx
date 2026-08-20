@@ -19,7 +19,7 @@ export default async function NewProjetPage() {
     <div className="space-y-6">
       <div>
         <Link href="/projets" className="text-sm text-zinc-500 hover:text-zinc-900">
-          ← Projets
+          ← Ouvertures
         </Link>
         <h1 className="mt-2 text-lg font-semibold text-zinc-900">Nouveau projet</h1>
         <p className="mt-1 text-sm text-zinc-500">

@@ -18,6 +18,7 @@ import {
   formatDate,
 } from "@/lib/utils";
 import { EtapeRow } from "./EtapeRow";
+import { AddEtapeForm } from "./AddEtapeForm";
 
 const PHASES_ORDER: PhaseEtape[] = [
   "administratif_financement",
@@ -89,7 +90,7 @@ export default async function ProjetPage({
             href={isMC ? "/projets" : "/mon-projet"}
             className="text-sm text-zinc-500 hover:text-zinc-900"
           >
-            ← {isMC ? "Projets" : "Mon projet"}
+            ← {isMC ? "Ouvertures" : "Mon projet"}
           </Link>
           <div className="mt-2 flex items-center gap-3">
             <h1 className="text-xl font-semibold text-zinc-900">{projet.nom}</h1>
@@ -218,6 +219,10 @@ export default async function ProjetPage({
                   />
                 ))}
               </div>
+
+              {canEdit && (
+                <AddEtapeForm projetId={id} phase={phase} />
+              )}
             </div>
           );
         })}

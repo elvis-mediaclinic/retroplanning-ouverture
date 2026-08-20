@@ -63,6 +63,15 @@ export function EtapeRow({
       <div className="mx-3 mb-2 rounded-md border border-zinc-100 bg-zinc-50 p-4">
         {canEdit ? (
           <form action={formAction} className="space-y-3">
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-zinc-600">Nom</label>
+              <input
+                name="nom"
+                defaultValue={etape.nom}
+                className="w-full rounded border border-zinc-300 px-2 py-1.5 text-xs"
+              />
+            </div>
+
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               <div className="space-y-1">
                 <label className="text-xs font-medium text-zinc-600">Statut</label>
@@ -80,6 +89,20 @@ export function EtapeRow({
               </div>
 
               <div className="space-y-1">
+                <label className="text-xs font-medium text-zinc-600">Responsable</label>
+                <select
+                  name="responsable"
+                  defaultValue={etape.responsable}
+                  className="w-full rounded border border-zinc-300 px-2 py-1.5 text-xs"
+                >
+                  <option value="mc">Nous</option>
+                  <option value="franchise">Franchisé</option>
+                  <option value="les_deux">Les deux</option>
+                  <option value="externe">Externe</option>
+                </select>
+              </div>
+
+              <div className="space-y-1">
                 <label className="text-xs font-medium text-zinc-600">
                   Date de réalisation
                 </label>
@@ -91,7 +114,7 @@ export function EtapeRow({
                 />
               </div>
 
-              <div className="col-span-2 space-y-1">
+              <div className="space-y-1">
                 <label className="text-xs font-medium text-zinc-600">
                   Lien document (SharePoint)
                 </label>

@@ -49,10 +49,12 @@ export const RESP_COLORS: Record<ResponsableEtape, string> = {
   franchise: "bg-orange-100 text-orange-700",
   mc: "bg-indigo-100 text-indigo-700",
   externe: "bg-zinc-100 text-zinc-600",
+  les_deux: "bg-purple-100 text-purple-700",
 };
 
 export const RESP_LABELS: Record<ResponsableEtape, string> = {
   franchise: "Franchisé",
-  mc: "Équipe MC",
+  mc: "Nous",
   externe: "Externe",
+  les_deux: "Les deux",
 };

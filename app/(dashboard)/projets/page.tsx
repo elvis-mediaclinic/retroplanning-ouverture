@@ -24,9 +24,9 @@ export default async function ProjetsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-lg font-semibold text-zinc-900">Projets</h1>
+          <h1 className="text-lg font-semibold text-zinc-900">Ouvertures</h1>
           <p className="text-sm text-zinc-500">
-            Tous les projets d&apos;ouverture
+            Tous les dossiers d&apos;ouverture
           </p>
         </div>
         <Link

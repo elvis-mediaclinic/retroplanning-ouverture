@@ -37,7 +37,7 @@ export type StatutProjet =
 
 export type StatutEtape = "a_faire" | "en_cours" | "fait" | "en_retard" | "na";
 
-export type ResponsableEtape = "franchise" | "mc" | "externe";
+export type ResponsableEtape = "franchise" | "mc" | "externe" | "les_deux";
 
 export type PhaseEtape =
   | "administratif_financement"
