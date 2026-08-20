@@ -16,15 +16,18 @@ export function CreateUserForm() {
   }
 
   // Après création réussie : afficher le lien à copier
-  if (state?.inviteLink) {
+  if (state?.personName) {
     return (
       <div className="rounded-lg border border-green-200 bg-green-50 p-6 shadow-sm space-y-3">
         <p className="text-sm font-medium text-green-800">
-          ✓ Compte créé pour <strong>{state.personName}</strong>
+          ✓ Invitation envoyée à <strong>{state.personName}</strong>
         </p>
-        <div className="space-y-1">
+        <p className="text-xs text-green-700">
+          Un email d&apos;invitation a été envoyé. Si la personne ne le reçoit pas, utilisez ce lien de secours :
+        </p>
+        {state.inviteLink && <div className="space-y-1">
           <p className="text-xs font-medium text-zinc-700">
-            Lien d&apos;activation — à envoyer à la personne (Slack, email…)
+            Lien d&apos;activation (secours)
           </p>
           <div className="flex gap-2">
             <input
@@ -43,7 +46,7 @@ export function CreateUserForm() {
           <p className="text-xs text-zinc-400">
             Usage unique · expire après le clic · la personne choisira son mot de passe
           </p>
-        </div>
+        </div>}
       </div>
     );
   }

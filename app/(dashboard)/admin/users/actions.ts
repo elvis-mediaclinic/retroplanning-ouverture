@@ -60,18 +60,19 @@ export async function createUser(
   const { email, nom, prenom, role, telephone, fonction } = parsed.data;
   const service = createServiceClient();
 
-  // generateLink crée le compte et retourne le lien directement — pas de dépendance SMTP
-  const { data: linkData, error: linkError } = await service.auth.admin.generateLink({
-    type: "invite",
-    email,
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+
+  // Tente d'abord l'envoi par email avec redirectTo explicite (lien pointe vers l'app, pas supabase.co)
+  const { data: invited, error: inviteError } = await service.auth.admin.inviteUserByEmail(email, {
+    redirectTo: `${siteUrl}/auth/callback`,
   });
 
-  if (linkError || !linkData.user) {
-    return { error: `Impossible de créer le compte : ${linkError?.message ?? "erreur inconnue"}.` };
+  if (inviteError || !invited.user) {
+    return { error: `Impossible de créer le compte : ${inviteError?.message ?? "erreur inconnue"}.` };
   }
 
   const { error: profileError } = await service.from("profiles").insert({
-    id: linkData.user.id,
+    id: invited.user.id,
     role,
     nom,
     prenom,
@@ -81,12 +82,20 @@ export async function createUser(
   });
 
   if (profileError) {
-    return { error: `Compte créé mais profil non enregistré : ${profileError.message}.` };
+    return { error: `Invitation envoyée mais profil non enregistré : ${profileError.message}.` };
   }
+
+  // Génère aussi le lien en fallback, au cas où l'email n'arrive pas
+  const { data: linkData } = await service.auth.admin.generateLink({
+    type: "invite",
+    email,
+    options: { redirectTo: `${siteUrl}/auth/callback` },
+  });
 
   revalidatePath("/admin/users");
   return {
-    inviteLink: linkData.properties.action_link,
+    inviteLink: linkData?.properties.action_link,
     personName: `${prenom} ${nom}`,
+    success: `Invitation envoyée à ${email}.`,
   };
 }
