@@ -1,7 +1,7 @@
 "use client";
 
 import { utils, writeFile } from "xlsx";
-import type { EtapeProjet } from "@/lib/types";
+import type { EtapeProjet, MCUser } from "@/lib/types";
 import { PHASE_LABELS, STATUT_ETAPE_LABELS } from "@/lib/types";
 
 const RESPONSABLE_LABELS: Record<string, string> = {
@@ -14,16 +14,31 @@ const RESPONSABLE_LABELS: Record<string, string> = {
 export function ExportButtons({
   etapes,
   projetNom,
+  mcUsers = [],
 }: {
   etapes: EtapeProjet[];
   projetNom: string;
+  mcUsers?: MCUser[];
 }) {
+  function mcNames(ids: string[] | null) {
+    if (!ids?.length) return "";
+    return ids
+      .map((id) => {
+        const u = mcUsers.find((m) => m.id === id);
+        return u ? `${u.prenom} ${u.nom}` : id;
+      })
+      .join(", ");
+  }
+
   function exportExcel() {
     const rows = etapes.map((e) => ({
       Phase: PHASE_LABELS[e.phase] ?? e.phase,
       "Nom de l'étape": e.nom,
       Ordre: e.ordre,
-      Responsable: RESPONSABLE_LABELS[e.responsable] ?? e.responsable,
+      "Responsable (type)": RESPONSABLE_LABELS[e.responsable] ?? e.responsable,
+      "Responsable MC": mcNames(e.resp_mc),
+      "Responsable franchisé": e.resp_franchise ?? "",
+      "Responsable externe": e.resp_externe ?? "",
       Statut: STATUT_ETAPE_LABELS[e.statut] ?? e.statut,
       "Date cible": e.date_cible ?? "",
       "Date réalisation": e.date_realisation ?? "",
@@ -39,7 +54,10 @@ export function ExportButtons({
       { wch: 28 }, // Phase
       { wch: 42 }, // Nom
       { wch: 7 },  // Ordre
-      { wch: 16 }, // Responsable
+      { wch: 16 }, // Responsable type
+      { wch: 24 }, // Resp MC
+      { wch: 24 }, // Resp franchisé
+      { wch: 24 }, // Resp externe
       { wch: 12 }, // Statut
       { wch: 14 }, // Date cible
       { wch: 18 }, // Date réalisation
