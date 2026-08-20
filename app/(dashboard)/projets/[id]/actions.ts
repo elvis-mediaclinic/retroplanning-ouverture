@@ -136,6 +136,21 @@ export async function reorderEtapes(
   revalidatePath(`/mon-projet`);
 }
 
+export async function updateDateCible(
+  etapeId: string,
+  projetId: string,
+  dateCible: string
+): Promise<void> {
+  await verifySession();
+  const supabase = await createClient();
+  await supabase
+    .from("etapes_projet")
+    .update({ date_cible: dateCible, updated_at: new Date().toISOString() })
+    .eq("id", etapeId);
+  revalidatePath(`/projets/${projetId}`);
+  revalidatePath(`/projets/${projetId}/gantt`);
+}
+
 export async function addCommentaire(
   projetId: string,
   etapeId: string | null,

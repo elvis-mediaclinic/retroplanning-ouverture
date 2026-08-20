@@ -40,7 +40,7 @@ export default async function GanttPage({ params }: { params: Promise<{ id: stri
       </div>
 
       <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
-        <GanttChart etapes={etapes ?? []} dateOuverture={projet.date_cible_ouverture} dateCreation={projet.created_at} />
+        <GanttChart etapes={etapes ?? []} dateOuverture={projet.date_cible_ouverture} dateCreation={projet.created_at} projetId={id} />
       </div>
     </div>
   );
