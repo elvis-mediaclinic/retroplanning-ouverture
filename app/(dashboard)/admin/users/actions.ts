@@ -11,6 +11,7 @@ const CreateUserSchema = z.object({
   prenom: z.string().min(1, { error: "Prénom requis." }),
   role: z.enum(["admin", "consultant", "franchise", "responsable_mc"], { error: "Rôle invalide." }),
   telephone: z.string().optional(),
+  fonction: z.string().optional(),
 });
 
 export type CreateUserState = { error?: string; success?: string } | undefined;
@@ -52,13 +53,14 @@ export async function createUser(
     prenom: formData.get("prenom"),
     role: formData.get("role"),
     telephone: formData.get("telephone") || undefined,
+    fonction: formData.get("fonction") || undefined,
   });
 
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Formulaire invalide." };
   }
 
-  const { email, nom, prenom, role, telephone } = parsed.data;
+  const { email, nom, prenom, role, telephone, fonction } = parsed.data;
   const service = createServiceClient();
 
   const { data: invited, error: inviteError } =
@@ -77,6 +79,7 @@ export async function createUser(
     prenom,
     email,
     telephone: telephone || null,
+    fonction: fonction || null,
   });
 
   if (profileError) {

@@ -1,10 +1,11 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { createUser } from "./actions";
 
 export function CreateUserForm() {
   const [state, action, pending] = useActionState(createUser, undefined);
+  const [role, setRole] = useState("franchise");
 
   return (
     <form
@@ -66,21 +67,40 @@ export function CreateUserForm() {
         </div>
       </div>
 
-      <div className="space-y-1">
-        <label htmlFor="role" className="text-sm font-medium text-zinc-700">
-          Rôle
-        </label>
-        <select
-          id="role"
-          name="role"
-          required
-          className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900"
-        >
-          <option value="franchise">Franchisé</option>
-          <option value="responsable_mc">Responsable MC</option>
-          <option value="consultant">Consultant</option>
-          <option value="admin">Admin</option>
-        </select>
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-1">
+          <label htmlFor="role" className="text-sm font-medium text-zinc-700">
+            Rôle
+          </label>
+          <select
+            id="role"
+            name="role"
+            required
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+            className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900"
+          >
+            <option value="franchise">Franchisé</option>
+            <option value="responsable_mc">Responsable MC</option>
+            <option value="consultant">Consultant</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+
+        {(role === "admin" || role === "responsable_mc") && (
+          <div className="space-y-1">
+            <label htmlFor="fonction" className="text-sm font-medium text-zinc-700">
+              Fonction
+            </label>
+            <input
+              id="fonction"
+              name="fonction"
+              type="text"
+              placeholder="ex : Développeur franchise, DAF…"
+              className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900"
+            />
+          </div>
+        )}
       </div>
 
       {state?.error && (
