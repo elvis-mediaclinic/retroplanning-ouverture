@@ -14,7 +14,12 @@ const CreateUserSchema = z.object({
   fonction: z.string().optional(),
 });
 
-export type CreateUserState = { error?: string; success?: string } | undefined;
+export type CreateUserState = {
+  error?: string;
+  inviteLink?: string;
+  nom?: string;
+  email?: string;
+} | undefined;
 
 export async function updateUser(
   userId: string,
@@ -41,10 +46,7 @@ export async function createUser(
   await requireRole("admin");
 
   if (!process.env.SUPABASE_SECRET_KEY) {
-    return {
-      error:
-        "Configuration serveur incomplète : la clé secrète Supabase (SUPABASE_SECRET_KEY) n'est pas définie.",
-    };
+    return { error: "Configuration serveur incomplète : SUPABASE_SECRET_KEY manquante." };
   }
 
   const parsed = CreateUserSchema.safeParse({
@@ -63,17 +65,18 @@ export async function createUser(
   const { email, nom, prenom, role, telephone, fonction } = parsed.data;
   const service = createServiceClient();
 
-  const { data: invited, error: inviteError } =
-    await service.auth.admin.inviteUserByEmail(email);
+  // Génère le lien d'invitation sans envoyer d'email — l'admin le partagera lui-même
+  const { data: linkData, error: linkError } = await service.auth.admin.generateLink({
+    type: "invite",
+    email,
+  });
 
-  if (inviteError || !invited.user) {
-    return {
-      error: `Impossible d'inviter ce compte : ${inviteError?.message ?? "erreur inconnue"}.`,
-    };
+  if (linkError || !linkData.user) {
+    return { error: `Impossible de créer l'invitation : ${linkError?.message ?? "erreur inconnue"}.` };
   }
 
   const { error: profileError } = await service.from("profiles").insert({
-    id: invited.user.id,
+    id: linkData.user.id,
     role,
     nom,
     prenom,
@@ -83,13 +86,13 @@ export async function createUser(
   });
 
   if (profileError) {
-    return {
-      error: `Compte invité mais profil non enregistré : ${profileError.message}.`,
-    };
+    return { error: `Compte créé mais profil non enregistré : ${profileError.message}.` };
   }
 
   revalidatePath("/admin/users");
   return {
-    success: `Invitation envoyée à ${email}. Le compte sera actif dès qu'il aura défini son mot de passe.`,
+    inviteLink: linkData.properties.action_link,
+    nom: `${prenom} ${nom}`,
+    email,
   };
 }
