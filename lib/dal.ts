@@ -43,7 +43,7 @@ export async function requireRole(...roles: Profile["role"][]) {
   return profile;
 }
 
-// Alias sémantique : admin ou consultant = équipe MC interne.
+// Équipe MC interne : admin, consultant, responsable_mc.
 export async function requireMC() {
-  return requireRole("admin", "consultant");
+  return requireRole("admin", "consultant", "responsable_mc");
 }

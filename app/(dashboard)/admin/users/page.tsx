@@ -5,6 +5,7 @@ import { CreateUserForm } from "./CreateUserForm";
 const ROLE_LABELS: Record<string, string> = {
   admin: "Admin",
   consultant: "Consultant",
+  responsable_mc: "Responsable MC",
   franchise: "Franchisé",
 };
 

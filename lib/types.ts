@@ -1,4 +1,4 @@
-export type UserRole = "admin" | "consultant" | "franchise";
+export type UserRole = "admin" | "consultant" | "franchise" | "responsable_mc";
 
 export type Profile = {
   id: string;
@@ -101,14 +101,12 @@ export type EtapeTemplate = {
   responsable: ResponsableEtape;
 };
 
-export const RESP_MC_OPTIONS = [
-  "Développeur franchise",
-  "Marketing",
-  "Informatique",
-  "Technique / Formation",
-  "Direction",
-] as const;
-export type RespMC = typeof RESP_MC_OPTIONS[number];
+export type MCUser = {
+  id: string;
+  nom: string;
+  prenom: string;
+  role: UserRole;
+};
 
 export type EtapeProjet = {
   id: string;
@@ -117,7 +115,7 @@ export type EtapeProjet = {
   phase: PhaseEtape;
   nom: string;
   responsable: ResponsableEtape;
-  resp_mc: string[] | null;
+  resp_mc: string[] | null; // uuid[] en base
   resp_franchise: string | null;
   resp_externe: string | null;
   ordre: number;

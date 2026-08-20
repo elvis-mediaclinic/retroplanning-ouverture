@@ -2,8 +2,9 @@
 
 import * as z from "zod";
 import { revalidatePath } from "next/cache";
-import { verifySession } from "@/lib/dal";
+import { verifySession, requireRole } from "@/lib/dal";
 import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/service";
 
 const RESPONSABLE = ["franchise", "mc", "externe", "les_deux"] as const;
 
@@ -149,6 +150,58 @@ export async function updateDateCible(
     .eq("id", etapeId);
   revalidatePath(`/projets/${projetId}`);
   revalidatePath(`/projets/${projetId}/gantt`);
+}
+
+export async function inviterFranchise(
+  projetId: string
+): Promise<{ error?: string; success?: string }> {
+  await requireRole("admin");
+
+  const supabase = await createClient();
+  const { data: projet } = await supabase
+    .from("projets")
+    .select("nom, candidats(nom, prenom, email)")
+    .eq("id", projetId)
+    .single();
+
+  if (!projet) return { error: "Projet introuvable." };
+
+  const candidatRaw = Array.isArray(projet.candidats)
+    ? (projet.candidats[0] as { nom: string; prenom: string; email: string } | undefined) ?? null
+    : (projet.candidats as { nom: string; prenom: string; email: string } | null);
+  if (!candidatRaw?.email) return { error: "Ce projet n'a pas de candidat avec un email." };
+
+  const service = createServiceClient();
+  const { data: invited, error: inviteError } = await service.auth.admin.inviteUserByEmail(
+    candidatRaw.email,
+    { data: { nom: candidatRaw.nom, prenom: candidatRaw.prenom } }
+  );
+
+  if (inviteError || !invited.user) {
+    return { error: `Impossible d'inviter : ${inviteError?.message ?? "erreur inconnue"}.` };
+  }
+
+  // Crée le profil si absent (cas premier invite)
+  const { error: profileError } = await service.from("profiles").upsert({
+    id: invited.user.id,
+    role: "franchise",
+    nom: candidatRaw.nom,
+    prenom: candidatRaw.prenom,
+    email: candidatRaw.email,
+  }, { onConflict: "id", ignoreDuplicates: true });
+
+  if (profileError) {
+    return { error: `Invitation envoyée mais profil non créé : ${profileError.message}.` };
+  }
+
+  // Lie le profil franchisé au projet
+  await supabase
+    .from("projets")
+    .update({ franchisee_id: invited.user.id })
+    .eq("id", projetId);
+
+  revalidatePath(`/projets/${projetId}`);
+  return { success: `Invitation envoyée à ${candidatRaw.email}.` };
 }
 
 export async function addCommentaire(

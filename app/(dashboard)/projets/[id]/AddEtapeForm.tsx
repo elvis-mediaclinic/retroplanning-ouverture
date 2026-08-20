@@ -2,13 +2,26 @@
 
 import { useActionState, useRef } from "react";
 import { addEtape } from "./actions";
-import { RESP_MC_OPTIONS, type PhaseEtape } from "@/lib/types";
-import { MultiSelect } from "./MultiSelect";
+import type { MCUser, PhaseEtape } from "@/lib/types";
+import { MultiSelect, type SelectOption } from "./MultiSelect";
 
-export function AddEtapeForm({ projetId, phase }: { projetId: string; phase: PhaseEtape }) {
+export function AddEtapeForm({
+  projetId,
+  phase,
+  mcUsers,
+}: {
+  projetId: string;
+  phase: PhaseEtape;
+  mcUsers: MCUser[];
+}) {
   const action = addEtape.bind(null, projetId);
   const [state, formAction, pending] = useActionState(action, undefined);
   const formRef = useRef<HTMLFormElement>(null);
+
+  const mcOptions: SelectOption[] = mcUsers.map((u) => ({
+    value: u.id,
+    label: `${u.prenom} ${u.nom}`,
+  }));
 
   return (
     <form
@@ -27,7 +40,7 @@ export function AddEtapeForm({ projetId, phase }: { projetId: string; phase: Pha
         className="flex-1 min-w-40 rounded border border-zinc-200 bg-white px-2 py-1.5 text-xs placeholder:text-zinc-400"
       />
       <div className="w-48">
-        <MultiSelect name="resp_mc" options={RESP_MC_OPTIONS} placeholder="Resp. MC…" />
+        <MultiSelect name="resp_mc" options={mcOptions} placeholder="Resp. MC…" />
       </div>
       <input
         name="resp_franchise"

@@ -18,9 +18,21 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { reorderEtapes } from "./actions";
 import { EtapeRow } from "./EtapeRow";
-import type { EtapeProjet } from "@/lib/types";
+import type { EtapeProjet, MCUser } from "@/lib/types";
 
-function SortableItem({ etape, projetId, canEdit }: { etape: EtapeProjet; projetId: string; canEdit: boolean }) {
+function SortableItem({
+  etape,
+  projetId,
+  canEdit,
+  mcUsers,
+  currentUserId,
+}: {
+  etape: EtapeProjet;
+  projetId: string;
+  canEdit: boolean;
+  mcUsers: MCUser[];
+  currentUserId?: string;
+}) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: etape.id });
 
   const style = {
@@ -45,7 +57,13 @@ function SortableItem({ etape, projetId, canEdit }: { etape: EtapeProjet; projet
         </button>
       )}
       <div className="flex-1 min-w-0">
-        <EtapeRow etape={etape} projetId={projetId} canEdit={canEdit} />
+        <EtapeRow
+          etape={etape}
+          projetId={projetId}
+          canEdit={canEdit}
+          mcUsers={mcUsers}
+          currentUserId={currentUserId}
+        />
       </div>
     </div>
   );
@@ -55,10 +73,14 @@ export function SortableEtapeList({
   etapes,
   projetId,
   canEdit,
+  mcUsers,
+  currentUserId,
 }: {
   etapes: EtapeProjet[];
   projetId: string;
   canEdit: boolean;
+  mcUsers: MCUser[];
+  currentUserId?: string;
 }) {
   const [items, setItems] = useState(etapes);
   useEffect(() => { setItems(etapes); }, [etapes]);
@@ -83,7 +105,14 @@ export function SortableEtapeList({
       <SortableContext items={items.map((e) => e.id)} strategy={verticalListSortingStrategy}>
         <div className="divide-y divide-zinc-100">
           {items.map((etape) => (
-            <SortableItem key={etape.id} etape={etape} projetId={projetId} canEdit={canEdit} />
+            <SortableItem
+              key={etape.id}
+              etape={etape}
+              projetId={projetId}
+              canEdit={canEdit}
+              mcUsers={mcUsers}
+              currentUserId={currentUserId}
+            />
           ))}
         </div>
       </SortableContext>

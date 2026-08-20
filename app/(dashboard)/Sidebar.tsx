@@ -57,6 +57,14 @@ const NAV: Record<UserRole, NavGroup[]> = {
       items: [{ href: "/mon-projet", label: "Mon projet" }],
     },
   ],
+  responsable_mc: [
+    {
+      items: [
+        { href: "/", label: "Tableau de bord" },
+        { href: "/projets", label: "Ouvertures" },
+      ],
+    },
+  ],
 };
 
 function isActive(pathname: string, href: string) {

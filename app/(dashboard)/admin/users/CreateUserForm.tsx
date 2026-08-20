@@ -77,7 +77,8 @@ export function CreateUserForm() {
           className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900"
         >
           <option value="franchise">Franchisé</option>
-          <option value="consultant">Consultant (direction)</option>
+          <option value="responsable_mc">Responsable MC</option>
+          <option value="consultant">Consultant</option>
           <option value="admin">Admin</option>
         </select>
       </div>

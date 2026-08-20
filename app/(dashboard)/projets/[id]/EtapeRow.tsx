@@ -2,23 +2,40 @@
 
 import { useActionState } from "react";
 import { updateEtape } from "./actions";
-import type { EtapeProjet, StatutEtape } from "@/lib/types";
-import { STATUT_ETAPE_LABELS, RESP_MC_OPTIONS } from "@/lib/types";
+import type { EtapeProjet, MCUser, StatutEtape } from "@/lib/types";
+import { STATUT_ETAPE_LABELS } from "@/lib/types";
 import { STATUT_ETAPE_COLORS, formatDate } from "@/lib/utils";
-import { MultiSelect } from "./MultiSelect";
+import { MultiSelect, type SelectOption } from "./MultiSelect";
 import { DateInput } from "./DateInput";
 
 export function EtapeRow({
   etape,
   projetId,
   canEdit,
+  mcUsers,
+  currentUserId,
 }: {
   etape: EtapeProjet;
   projetId: string;
   canEdit: boolean;
+  mcUsers: MCUser[];
+  currentUserId?: string;
 }) {
   const action = updateEtape.bind(null, etape.id, projetId);
   const [state, formAction, pending] = useActionState(action, undefined);
+
+  const mcOptions: SelectOption[] = mcUsers.map((u) => ({
+    value: u.id,
+    label: `${u.prenom} ${u.nom}`,
+  }));
+
+  function mcNames(ids: string[] | null) {
+    if (!ids || ids.length === 0) return null;
+    return ids.map((id) => {
+      const u = mcUsers.find((u) => u.id === id);
+      return u ? `${u.prenom} ${u.nom}` : id.slice(0, 8);
+    });
+  }
 
   const dateAlert = (() => {
     if (!etape.date_cible || etape.statut === "fait" || etape.statut === "na") return null;
@@ -31,21 +48,29 @@ export function EtapeRow({
     return null;
   })();
 
+  const isMyEtape = currentUserId && etape.resp_mc?.includes(currentUserId);
+
   return (
     <details className="group" key={etape.updated_at}>
-      <summary className="flex cursor-pointer list-none items-center gap-3 px-3 py-2.5 hover:bg-zinc-50 [&::-webkit-details-marker]:hidden">
+      <summary className={`flex cursor-pointer list-none items-center gap-3 px-3 py-2.5 hover:bg-zinc-50 [&::-webkit-details-marker]:hidden ${isMyEtape ? "bg-indigo-50/60" : ""}`}>
         <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${STATUT_ETAPE_COLORS[etape.statut as StatutEtape]}`}>
           {STATUT_ETAPE_LABELS[etape.statut as StatutEtape]}
         </span>
 
-        <span className="flex-1 text-sm text-zinc-800">{etape.nom}</span>
+        <span className="flex-1 text-sm text-zinc-800">
+          {etape.nom}
+          {isMyEtape && <span className="ml-2 text-indigo-500 text-xs">← vous</span>}
+        </span>
 
         <span className="flex items-center gap-1 shrink-0">
-          {etape.resp_mc && etape.resp_mc.length > 0 && (
-            <span className="rounded-full bg-indigo-100 text-indigo-700 px-2 py-0.5 text-xs font-medium">
-              MC · {etape.resp_mc.join(", ")}
-            </span>
-          )}
+          {(() => {
+            const names = mcNames(etape.resp_mc);
+            return names ? (
+              <span className="rounded-full bg-indigo-100 text-indigo-700 px-2 py-0.5 text-xs font-medium">
+                MC · {names.join(", ")}
+              </span>
+            ) : null;
+          })()}
           {etape.resp_franchise && (
             <span className="rounded-full bg-orange-100 text-orange-700 px-2 py-0.5 text-xs font-medium">
               F · {etape.resp_franchise}
@@ -57,9 +82,7 @@ export function EtapeRow({
             </span>
           )}
           {!etape.resp_mc?.length && !etape.resp_franchise && !etape.resp_externe && (
-            <span className="rounded-full bg-zinc-100 text-zinc-400 px-2 py-0.5 text-xs font-medium">
-              —
-            </span>
+            <span className="rounded-full bg-zinc-100 text-zinc-400 px-2 py-0.5 text-xs font-medium">—</span>
           )}
         </span>
 
@@ -108,7 +131,12 @@ export function EtapeRow({
 
               <div className="space-y-1">
                 <label className="text-xs font-medium text-zinc-600">Resp. MC</label>
-                <MultiSelect name="resp_mc" options={RESP_MC_OPTIONS} defaultValue={etape.resp_mc ?? []} placeholder="—" />
+                <MultiSelect
+                  name="resp_mc"
+                  options={mcOptions}
+                  defaultValue={etape.resp_mc ?? []}
+                  placeholder="—"
+                />
               </div>
 
               <div className="space-y-1">
@@ -160,7 +188,10 @@ export function EtapeRow({
           </form>
         ) : (
           <div className="space-y-1 text-xs text-zinc-600">
-            {etape.resp_mc && etape.resp_mc.length > 0 && <p>MC : <strong>{etape.resp_mc.join(", ")}</strong></p>}
+            {(() => {
+              const names = mcNames(etape.resp_mc);
+              return names ? <p>MC : <strong>{names.join(", ")}</strong></p> : null;
+            })()}
             {etape.resp_franchise && <p>Franchisé : <strong>{etape.resp_franchise}</strong></p>}
             {etape.resp_externe && <p>Externe : <strong>{etape.resp_externe}</strong></p>}
             {etape.date_realisation && <p>Réalisé le : <strong>{formatDate(etape.date_realisation)}</strong></p>}
@@ -168,7 +199,7 @@ export function EtapeRow({
               <p>Document : <a href={etape.lien_document} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Ouvrir</a></p>
             )}
             {etape.commentaire && <p>Note : {etape.commentaire}</p>}
-            {!etape.resp_mc && !etape.resp_franchise && !etape.date_realisation && !etape.lien_document && !etape.commentaire && (
+            {!etape.resp_mc?.length && !etape.resp_franchise && !etape.date_realisation && !etape.lien_document && !etape.commentaire && (
               <p className="text-zinc-400">Aucune information supplémentaire.</p>
             )}
           </div>

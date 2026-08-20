@@ -11,7 +11,9 @@ import {
   type PhaseEtape,
   type StatutEtape,
   type EtapeProjet,
+  type MCUser,
 } from "@/lib/types";
+import { InviteButton } from "./InviteButton";
 import {
   STATUT_PROJET_COLORS,
   STATUT_ETAPE_COLORS,
@@ -39,7 +41,7 @@ export default async function ProjetPage({
   const { id } = await params;
   const supabase = await createClient();
 
-  const [{ data: projet }, { data: etapes }] = await Promise.all([
+  const [{ data: projet }, { data: etapes }, { data: mcUsersData }] = await Promise.all([
     supabase
       .from("projets")
       .select(
@@ -53,7 +55,13 @@ export default async function ProjetPage({
       .select("*")
       .eq("projet_id", id)
       .order("ordre"),
+    supabase
+      .from("profiles")
+      .select("id, nom, prenom, role")
+      .in("role", ["admin", "responsable_mc"]),
   ]);
+
+  const mcUsers: MCUser[] = mcUsersData ?? [];
 
   if (!projet) notFound();
 
@@ -115,6 +123,9 @@ export default async function ProjetPage({
           >
             Vue Gantt
           </Link>
+          {profile.role === "admin" && !projet.franchisee_id && (
+            <InviteButton projetId={id} />
+          )}
           {profile.role === "admin" && (
             <Link
               href={`/projets/${id}/edit`}
@@ -217,10 +228,16 @@ export default async function ProjetPage({
               </div>
 
               {/* Étapes */}
-              <SortableEtapeList etapes={phaseEtapes} projetId={id} canEdit={canEdit} />
+              <SortableEtapeList
+                etapes={phaseEtapes}
+                projetId={id}
+                canEdit={canEdit}
+                mcUsers={mcUsers}
+                currentUserId={profile.id}
+              />
 
               {canEdit && (
-                <AddEtapeForm projetId={id} phase={phase} />
+                <AddEtapeForm projetId={id} phase={phase} mcUsers={mcUsers} />
               )}
             </div>
           );

@@ -9,7 +9,7 @@ const CreateUserSchema = z.object({
   email: z.email({ error: "Adresse email invalide." }),
   nom: z.string().min(1, { error: "Nom requis." }),
   prenom: z.string().min(1, { error: "Prénom requis." }),
-  role: z.enum(["admin", "consultant", "franchise"], { error: "Rôle invalide." }),
+  role: z.enum(["admin", "consultant", "franchise", "responsable_mc"], { error: "Rôle invalide." }),
   telephone: z.string().optional(),
 });
 
