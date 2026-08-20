@@ -10,7 +10,7 @@ export default async function GanttPage({ params }: { params: Promise<{ id: stri
   const supabase = await createClient();
 
   const [{ data: projet }, { data: etapes }] = await Promise.all([
-    supabase.from("projets").select("id, nom, date_cible_ouverture, franchisee_id").eq("id", id).single(),
+    supabase.from("projets").select("id, nom, date_cible_ouverture, franchisee_id, created_at").eq("id", id).single(),
     supabase.from("etapes_projet").select("*").eq("projet_id", id).order("ordre"),
   ]);
 
@@ -40,7 +40,7 @@ export default async function GanttPage({ params }: { params: Promise<{ id: stri
       </div>
 
       <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
-        <GanttChart etapes={etapes ?? []} dateOuverture={projet.date_cible_ouverture} />
+        <GanttChart etapes={etapes ?? []} dateOuverture={projet.date_cible_ouverture} dateCreation={projet.created_at} />
       </div>
     </div>
   );

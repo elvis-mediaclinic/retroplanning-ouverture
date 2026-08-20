@@ -29,9 +29,11 @@ function toDay(iso: string) {
 export function GanttChart({
   etapes,
   dateOuverture,
+  dateCreation,
 }: {
   etapes: EtapeProjet[];
   dateOuverture: string | null;
+  dateCreation: string;
 }) {
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const todayMs = today.getTime();
@@ -42,7 +44,8 @@ export function GanttChart({
   }
 
   const dates = withDate.map((e) => toDay(e.date_cible!));
-  const minMs = Math.min(...dates, todayMs);
+  const creationMs = new Date(dateCreation).setHours(0, 0, 0, 0);
+  const minMs = Math.min(...dates, creationMs);
   const maxMs = dateOuverture
     ? Math.max(...dates, toDay(dateOuverture), todayMs)
     : Math.max(...dates, todayMs);
