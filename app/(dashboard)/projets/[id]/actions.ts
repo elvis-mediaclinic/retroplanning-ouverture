@@ -121,6 +121,21 @@ export async function addEtape(
   return {};
 }
 
+export async function reorderEtapes(
+  projetId: string,
+  orderedIds: string[]
+): Promise<void> {
+  await verifySession();
+  const supabase = await createClient();
+  await Promise.all(
+    orderedIds.map((id, index) =>
+      supabase.from("etapes_projet").update({ ordre: index + 1 }).eq("id", id)
+    )
+  );
+  revalidatePath(`/projets/${projetId}`);
+  revalidatePath(`/mon-projet`);
+}
+
 export async function addCommentaire(
   projetId: string,
   etapeId: string | null,

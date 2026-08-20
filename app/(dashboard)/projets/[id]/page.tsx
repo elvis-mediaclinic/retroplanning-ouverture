@@ -17,8 +17,8 @@ import {
   STATUT_ETAPE_COLORS,
   formatDate,
 } from "@/lib/utils";
-import { EtapeRow } from "./EtapeRow";
 import { AddEtapeForm } from "./AddEtapeForm";
+import { SortableEtapeList } from "./SortableEtapeList";
 
 const PHASES_ORDER: PhaseEtape[] = [
   "administratif_financement",
@@ -209,16 +209,7 @@ export default async function ProjetPage({
               </div>
 
               {/* Étapes */}
-              <div className="divide-y divide-zinc-100">
-                {phaseEtapes.map((etape) => (
-                  <EtapeRow
-                    key={etape.id}
-                    etape={etape}
-                    projetId={id}
-                    canEdit={canEdit}
-                  />
-                ))}
-              </div>
+              <SortableEtapeList etapes={phaseEtapes} projetId={id} canEdit={canEdit} />
 
               {canEdit && (
                 <AddEtapeForm projetId={id} phase={phase} />
