@@ -43,6 +43,7 @@ export function ExportButtons({
     const rows = sorted.map((e) => ({
       Phase: PHASE_LABELS[e.phase] ?? e.phase,
       "Nom de l'étape": e.nom,
+      Ordre: e.ordre,
       "Responsable MC": mcNames(e.resp_mc),
       "Responsable franchisé": e.resp_franchise ?? "",
       "Responsable externe": e.resp_externe ?? "",
@@ -58,6 +59,7 @@ export function ExportButtons({
     ws["!cols"] = [
       { wch: 28 }, // Phase
       { wch: 42 }, // Nom
+      { wch: 7 },  // Ordre
       { wch: 24 }, // Resp MC
       { wch: 24 }, // Resp franchisé
       { wch: 24 }, // Resp externe
