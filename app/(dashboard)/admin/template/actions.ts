@@ -18,6 +18,39 @@ const PHASE_MAP: Record<string, string> = {
 };
 
 
+export async function updateEtapeTemplate(id: string, nom: string) {
+  await requireRole("admin");
+  const supabase = await createClient();
+  const { error } = await supabase.from("etapes_template").update({ nom: nom.trim() }).eq("id", id);
+  if (error) return { error: error.message };
+  revalidatePath("/admin/template");
+}
+
+export async function addEtapeTemplate(phase: string, nom: string) {
+  await requireRole("admin");
+  if (!nom.trim()) return { error: "Nom requis." };
+  const supabase = await createClient();
+  // Ordre = max de la phase + 1
+  const { data } = await supabase
+    .from("etapes_template")
+    .select("ordre")
+    .eq("phase", phase)
+    .order("ordre", { ascending: false })
+    .limit(1)
+    .single();
+  const ordre = (data?.ordre ?? 0) + 1;
+  const { error } = await supabase.from("etapes_template").insert({ phase, nom: nom.trim(), ordre });
+  if (error) return { error: error.message };
+  revalidatePath("/admin/template");
+}
+
+export async function deleteEtapeTemplate(id: string) {
+  await requireRole("admin");
+  const supabase = await createClient();
+  await supabase.from("etapes_template").delete().eq("id", id);
+  revalidatePath("/admin/template");
+}
+
 export async function importTemplate(
   _state: ImportTemplateState,
   formData: FormData
