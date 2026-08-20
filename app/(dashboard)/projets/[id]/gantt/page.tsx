@@ -17,7 +17,8 @@ export default async function GanttPage({ params }: { params: Promise<{ id: stri
   if (!projet) notFound();
   if (profile.role === "franchise" && projet.franchisee_id !== profile.id) notFound();
 
-  const isMC = profile.role === "admin" || profile.role === "consultant";
+  const isMC = profile.role === "admin" || profile.role === "consultant" || profile.role === "responsable_mc";
+  const canEdit = profile.role === "admin" || profile.role === "franchise";
 
   return (
     <div className="space-y-6">
@@ -40,7 +41,7 @@ export default async function GanttPage({ params }: { params: Promise<{ id: stri
       </div>
 
       <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
-        <GanttChart etapes={etapes ?? []} dateOuverture={projet.date_cible_ouverture} dateCreation={projet.created_at} projetId={id} />
+        <GanttChart etapes={etapes ?? []} dateOuverture={projet.date_cible_ouverture} dateCreation={projet.created_at} projetId={id} canEdit={canEdit} />
       </div>
     </div>
   );

@@ -1,10 +1,10 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
-import type { EtapeProjet, PhaseEtape } from "@/lib/types";
+import { useCallback, useRef, useState, useEffect } from "react";
+import type { EtapeProjet, PhaseEtape, StatutEtape } from "@/lib/types";
 import { PHASE_LABELS, STATUT_ETAPE_LABELS } from "@/lib/types";
 import { formatDate } from "@/lib/utils";
-import { updateDateCible } from "../actions";
+import { updateDateCible, updateStatutEtape } from "../actions";
 
 const STATUT_COLORS: Record<string, string> = {
   fait: "#22c55e",
@@ -13,6 +13,14 @@ const STATUT_COLORS: Record<string, string> = {
   en_retard: "#ef4444",
   na: "#d4d4d8",
 };
+
+const STATUTS: { value: StatutEtape; label: string; color: string }[] = [
+  { value: "a_faire", label: "À faire", color: "#a1a1aa" },
+  { value: "en_cours", label: "En cours", color: "#3b82f6" },
+  { value: "fait", label: "Fait", color: "#22c55e" },
+  { value: "en_retard", label: "En retard", color: "#ef4444" },
+  { value: "na", label: "N/A", color: "#d4d4d8" },
+];
 
 const PHASES_ORDER: PhaseEtape[] = [
   "administratif_financement",
@@ -32,36 +40,103 @@ function msToIso(ms: number) {
   return new Date(ms).toISOString().split("T")[0];
 }
 
-function DraggableMilestone({
+function StatusPopover({
   etape,
-  color,
+  projetId,
+  onClose,
+  onUpdate,
+}: {
+  etape: EtapeProjet;
+  projetId: string;
+  onClose: () => void;
+  onUpdate: (statut: StatutEtape) => void;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handle(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) onClose();
+    }
+    document.addEventListener("mousedown", handle);
+    return () => document.removeEventListener("mousedown", handle);
+  }, [onClose]);
+
+  return (
+    <div
+      ref={ref}
+      className="absolute z-30 bottom-full mb-2 left-1/2 -translate-x-1/2 bg-white border border-zinc-200 rounded-lg shadow-lg py-1 min-w-[140px]"
+    >
+      <p className="px-3 py-1 text-[10px] font-semibold text-zinc-400 uppercase tracking-wide border-b border-zinc-100 mb-1 truncate max-w-[200px]">
+        {etape.nom}
+      </p>
+      {STATUTS.map((s) => (
+        <button
+          key={s.value}
+          type="button"
+          onClick={() => {
+            onUpdate(s.value);
+            updateStatutEtape(etape.id, projetId, s.value);
+            onClose();
+          }}
+          className={`w-full flex items-center gap-2 px-3 py-1.5 text-xs text-left hover:bg-zinc-50 ${
+            etape.statut === s.value ? "font-semibold" : "text-zinc-700"
+          }`}
+        >
+          <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: s.color }} />
+          {s.label}
+          {etape.statut === s.value && <span className="ml-auto text-zinc-400">✓</span>}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function DraggableMilestone({
+  etape: initialEtape,
+  initialColor,
   initialPct,
   minMs,
   rangeMs,
   projetId,
+  canEdit,
 }: {
   etape: EtapeProjet;
-  color: string;
+  initialColor: string;
   initialPct: number;
   minMs: number;
   rangeMs: number;
   projetId: string;
+  canEdit: boolean;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [etape, setEtape] = useState(initialEtape);
   const [pct, setPct] = useState(initialPct);
   const [dragging, setDragging] = useState(false);
   const [dragDate, setDragDate] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [showPopover, setShowPopover] = useState(false);
+
+  // Sync when server re-renders
+  useEffect(() => { setEtape(initialEtape); setPct(initialPct); }, [initialEtape, initialPct]);
+
+  const color = (() => {
+    const todayMs = new Date().setHours(0, 0, 0, 0);
+    const cibleMs = etape.date_cible ? toDay(etape.date_cible) : 0;
+    const isLate = etape.statut !== "fait" && etape.statut !== "na" && cibleMs < todayMs;
+    return isLate ? "#ef4444" : STATUT_COLORS[etape.statut] ?? "#a1a1aa";
+  })();
 
   const startDrag = useCallback(
     (e: React.PointerEvent) => {
+      if (!canEdit) return;
       e.preventDefault();
       e.stopPropagation();
 
       const container = containerRef.current;
       if (!container) return;
 
-      setDragging(true);
+      const startX = e.clientX;
+      let moved = false;
 
       function computePct(clientX: number) {
         const rect = container!.getBoundingClientRect();
@@ -69,6 +144,11 @@ function DraggableMilestone({
       }
 
       function onMove(ev: PointerEvent) {
+        if (Math.abs(ev.clientX - startX) > 5) {
+          moved = true;
+          setDragging(true);
+        }
+        if (!moved) return;
         const newPct = computePct(ev.clientX);
         setPct(newPct);
         const newMs = minMs + (newPct / 100) * rangeMs;
@@ -79,11 +159,18 @@ function DraggableMilestone({
         window.removeEventListener("pointermove", onMove);
         window.removeEventListener("pointerup", onUp);
         setDragging(false);
+        setDragDate(null);
+
+        if (!moved) {
+          // Clic simple → popover statut
+          setShowPopover((v) => !v);
+          return;
+        }
 
         const newPct = computePct(ev.clientX);
         const newMs = minMs + (newPct / 100) * rangeMs;
         const newDate = msToIso(newMs);
-        setDragDate(null);
+        setEtape((prev) => ({ ...prev, date_cible: newDate }));
         setSaving(true);
         updateDateCible(etape.id, projetId, newDate).finally(() => setSaving(false));
       }
@@ -91,31 +178,47 @@ function DraggableMilestone({
       window.addEventListener("pointermove", onMove);
       window.addEventListener("pointerup", onUp);
     },
-    [etape.id, projetId, minMs, rangeMs]
+    [canEdit, etape.id, projetId, minMs, rangeMs]
   );
 
   return (
     <div ref={containerRef} className="flex-1 relative h-full flex items-center select-none">
-      {/* Background track */}
       <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-px bg-zinc-100" />
 
-      {/* Bar from left to date_cible */}
       <div
         className="absolute top-1/2 -translate-y-1/2 h-1 rounded-full opacity-20 transition-none"
         style={{ left: 0, width: `${pct}%`, backgroundColor: color }}
       />
 
-      {/* Milestone marker */}
+      {/* Marker */}
       <div
         className={`absolute top-1/2 z-10 w-3 h-3 rounded-full border-2 border-white shadow-sm transition-none ${
-          dragging ? "cursor-grabbing scale-125 shadow-md" : saving ? "opacity-50" : "cursor-grab"
+          canEdit
+            ? dragging
+              ? "cursor-grabbing scale-125 shadow-md"
+              : saving
+              ? "opacity-50"
+              : "cursor-pointer hover:scale-110"
+            : "cursor-default"
         }`}
         style={{ left: `${pct}%`, transform: "translate(-50%, -50%)", backgroundColor: color }}
         onPointerDown={startDrag}
-        title={!dragging ? `${etape.nom} — ${STATUT_ETAPE_LABELS[etape.statut]} — ${formatDate(etape.date_cible)} · Glisser pour modifier` : undefined}
+        title={canEdit ? `${etape.nom} — Cliquer pour changer le statut · Glisser pour modifier la date` : etape.nom}
       />
 
-      {/* Drag tooltip */}
+      {/* Popover statut */}
+      {showPopover && (
+        <div className="absolute z-30" style={{ left: `${pct}%`, top: "50%" }}>
+          <StatusPopover
+            etape={etape}
+            projetId={projetId}
+            onClose={() => setShowPopover(false)}
+            onUpdate={(statut) => setEtape((prev) => ({ ...prev, statut }))}
+          />
+        </div>
+      )}
+
+      {/* Drag date tooltip */}
       {dragging && dragDate && (
         <div
           className="absolute z-30 pointer-events-none"
@@ -128,8 +231,8 @@ function DraggableMilestone({
         </div>
       )}
 
-      {/* Hover label (when not dragging) */}
-      {!dragging && (
+      {/* Hover label (statut + date) */}
+      {!dragging && !showPopover && (
         <div
           className="absolute z-20 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
           style={{ left: `${pct}%`, top: "50%", transform: "translateX(-50%) translateY(-220%)" }}
@@ -148,11 +251,13 @@ export function GanttChart({
   dateOuverture,
   dateCreation,
   projetId,
+  canEdit,
 }: {
   etapes: EtapeProjet[];
   dateOuverture: string | null;
   dateCreation: string;
   projetId: string;
+  canEdit: boolean;
 }) {
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const todayMs = today.getTime();
@@ -193,7 +298,6 @@ export function GanttChart({
   return (
     <div className="overflow-x-auto">
       <div className="min-w-[700px]">
-        {/* Timeline header */}
         <div className="flex mb-2 pl-52">
           <div className="flex-1 relative h-5">
             {ticks.map((t) => (
@@ -208,9 +312,7 @@ export function GanttChart({
           </div>
         </div>
 
-        {/* Phase rows */}
         <div className="relative">
-          {/* Trait aujourd'hui */}
           <div
             className="absolute top-0 bottom-0 w-px bg-brand/50 z-10 pointer-events-none"
             style={{ left: `calc(13rem + (100% - 13rem) * ${todayPct} / 100)` }}
@@ -220,7 +322,6 @@ export function GanttChart({
             </span>
           </div>
 
-          {/* Trait ouverture */}
           {ouverturePct !== null && (
             <div
               className="absolute top-0 bottom-0 w-px bg-green-500/50 z-10 pointer-events-none"
@@ -251,17 +352,18 @@ export function GanttChart({
                   const ciblePct = pct(cibleMs);
 
                   return (
-                    <div key={etape.id} className="flex items-center h-7 group">
+                    <div key={etape.id} className="flex items-center h-8 group">
                       <div className="w-52 shrink-0 pr-3 text-xs text-zinc-600 truncate" title={etape.nom}>
                         {etape.nom}
                       </div>
                       <DraggableMilestone
                         etape={etape}
-                        color={color}
+                        initialColor={color}
                         initialPct={ciblePct}
                         minMs={minMs}
                         rangeMs={rangeMs}
                         projetId={projetId}
+                        canEdit={canEdit}
                       />
                     </div>
                   );
@@ -271,7 +373,6 @@ export function GanttChart({
           })}
         </div>
 
-        {/* Légende */}
         <div className="flex items-center gap-4 mt-6 flex-wrap text-xs text-zinc-500">
           {[
             { label: "Fait", color: STATUT_COLORS.fait },
@@ -285,7 +386,9 @@ export function GanttChart({
               {label}
             </div>
           ))}
-          <span className="ml-auto text-zinc-400">Glisser un marqueur pour modifier la date cible</span>
+          {canEdit && (
+            <span className="ml-auto text-zinc-400">Cliquer sur un marqueur pour changer le statut · Glisser pour modifier la date</span>
+          )}
         </div>
       </div>
     </div>
