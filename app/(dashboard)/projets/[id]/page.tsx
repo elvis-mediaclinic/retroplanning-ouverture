@@ -57,7 +57,7 @@ export default async function ProjetPage({
       .order("ordre"),
     supabase
       .from("profiles")
-      .select("id, nom, prenom, role")
+      .select("id, nom, prenom, role, fonction")
       .in("role", ["admin", "responsable_mc"]),
   ]);
 

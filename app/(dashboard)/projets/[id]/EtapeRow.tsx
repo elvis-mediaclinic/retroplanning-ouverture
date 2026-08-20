@@ -26,14 +26,15 @@ export function EtapeRow({
 
   const mcOptions: SelectOption[] = mcUsers.map((u) => ({
     value: u.id,
-    label: `${u.prenom} ${u.nom}`,
+    label: u.fonction ? `${u.prenom} ${u.nom} · ${u.fonction}` : `${u.prenom} ${u.nom}`,
   }));
 
   function mcNames(ids: string[] | null) {
     if (!ids || ids.length === 0) return null;
     return ids.map((id) => {
       const u = mcUsers.find((u) => u.id === id);
-      return u ? `${u.prenom} ${u.nom}` : id.slice(0, 8);
+      if (!u) return id.slice(0, 8);
+      return u.fonction ? `${u.prenom} ${u.nom} · ${u.fonction}` : `${u.prenom} ${u.nom}`;
     });
   }
 

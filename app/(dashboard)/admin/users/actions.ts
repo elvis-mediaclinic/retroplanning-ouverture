@@ -15,6 +15,24 @@ const CreateUserSchema = z.object({
 
 export type CreateUserState = { error?: string; success?: string } | undefined;
 
+export async function updateUser(
+  userId: string,
+  formData: FormData
+): Promise<{ error?: string } | undefined> {
+  await requireRole("admin");
+  const role = formData.get("role") as string;
+  const fonction = (formData.get("fonction") as string)?.trim() || null;
+
+  const validRoles = ["admin", "consultant", "franchise", "responsable_mc"];
+  if (!validRoles.includes(role)) return { error: "Rôle invalide." };
+
+  const service = createServiceClient();
+  const { error } = await service.from("profiles").update({ role, fonction }).eq("id", userId);
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin/users");
+}
+
 export async function createUser(
   _state: CreateUserState,
   formData: FormData

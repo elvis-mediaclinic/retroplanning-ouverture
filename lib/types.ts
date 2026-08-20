@@ -7,6 +7,7 @@ export type Profile = {
   prenom: string;
   email: string;
   telephone: string | null;
+  fonction: string | null;
   created_at: string;
 };
 
@@ -106,6 +107,7 @@ export type MCUser = {
   nom: string;
   prenom: string;
   role: UserRole;
+  fonction: string | null;
 };
 
 export type EtapeProjet = {

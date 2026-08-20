@@ -20,7 +20,7 @@ export function AddEtapeForm({
 
   const mcOptions: SelectOption[] = mcUsers.map((u) => ({
     value: u.id,
-    label: `${u.prenom} ${u.nom}`,
+    label: u.fonction ? `${u.prenom} ${u.nom} · ${u.fonction}` : `${u.prenom} ${u.nom}`,
   }));
 
   return (
