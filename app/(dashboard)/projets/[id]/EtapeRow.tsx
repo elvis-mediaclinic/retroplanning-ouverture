@@ -6,6 +6,7 @@ import type { EtapeProjet, StatutEtape } from "@/lib/types";
 import { STATUT_ETAPE_LABELS, RESP_MC_OPTIONS } from "@/lib/types";
 import { STATUT_ETAPE_COLORS, formatDate } from "@/lib/utils";
 import { MultiSelect } from "./MultiSelect";
+import { DateInput } from "./DateInput";
 
 export function EtapeRow({
   etape,
@@ -113,12 +114,12 @@ export function EtapeRow({
 
               <div className="space-y-1">
                 <label className="text-xs font-medium text-zinc-600">Date cible</label>
-                <input name="date_cible" type="date" defaultValue={etape.date_cible ?? ""} className="w-full rounded border border-zinc-300 px-2 py-1.5 text-xs" {...(!etape.date_cible ? { "data-empty": "" } : {})} />
+                <DateInput name="date_cible" defaultValue={etape.date_cible ?? ""} className="w-full rounded border border-zinc-300 px-2 py-1.5 text-xs" />
               </div>
 
               <div className="space-y-1">
                 <label className="text-xs font-medium text-zinc-600">Date de réalisation</label>
-                <input name="date_realisation" type="date" defaultValue={etape.date_realisation ?? ""} className="w-full rounded border border-zinc-300 px-2 py-1.5 text-xs" {...(!etape.date_realisation ? { "data-empty": "" } : {})} />
+                <DateInput name="date_realisation" defaultValue={etape.date_realisation ?? ""} className="w-full rounded border border-zinc-300 px-2 py-1.5 text-xs" />
               </div>
             </div>
 
