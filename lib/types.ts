@@ -101,6 +101,15 @@ export type EtapeTemplate = {
   responsable: ResponsableEtape;
 };
 
+export const RESP_MC_OPTIONS = [
+  "Développeur franchise",
+  "Marketing",
+  "Informatique",
+  "Technique / Formation",
+  "Direction",
+] as const;
+export type RespMC = typeof RESP_MC_OPTIONS[number];
+
 export type EtapeProjet = {
   id: string;
   projet_id: string;
@@ -108,6 +117,8 @@ export type EtapeProjet = {
   phase: PhaseEtape;
   nom: string;
   responsable: ResponsableEtape;
+  resp_mc: string | null;
+  resp_franchise: string | null;
   ordre: number;
   statut: StatutEtape;
   date_cible: string | null;
