@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useRef, useCallback, useState } from "react";
 import { updateEtape } from "./actions";
 import type { EtapeProjet, MCUser, StatutEtape } from "@/lib/types";
 import { STATUT_ETAPE_LABELS } from "@/lib/types";
@@ -23,6 +23,17 @@ export function EtapeRow({
 }) {
   const action = updateEtape.bind(null, etape.id, projetId);
   const [state, formAction, pending] = useActionState(action, undefined);
+  const formRef = useRef<HTMLFormElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [savedOnce, setSavedOnce] = useState(false);
+
+  const scheduleSubmit = useCallback(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      formRef.current?.requestSubmit();
+      setSavedOnce(true);
+    }, 600);
+  }, []);
 
   const mcOptions: SelectOption[] = mcUsers.map((u) => ({
     value: u.id,
@@ -108,12 +119,13 @@ export function EtapeRow({
 
       <div className="mx-3 mb-2 rounded-md border border-zinc-100 bg-zinc-50 p-4">
         {canEdit ? (
-          <form action={formAction} className="space-y-3">
+          <form ref={formRef} action={formAction} className="space-y-3">
             <div className="space-y-1">
               <label className="text-xs font-medium text-zinc-600">Nom</label>
               <input
                 name="nom"
                 defaultValue={etape.nom}
+                onChange={scheduleSubmit}
                 className="w-full rounded border border-zinc-300 px-2 py-1.5 text-xs"
               />
             </div>
@@ -121,7 +133,7 @@ export function EtapeRow({
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               <div className="space-y-1">
                 <label className="text-xs font-medium text-zinc-600">Statut</label>
-                <select name="statut" defaultValue={etape.statut} className="w-full rounded border border-zinc-300 px-2 py-1.5 text-xs">
+                <select name="statut" defaultValue={etape.statut} onChange={scheduleSubmit} className="w-full rounded border border-zinc-300 px-2 py-1.5 text-xs">
                   <option value="a_faire">À faire</option>
                   <option value="en_cours">En cours</option>
                   <option value="fait">Fait</option>
@@ -137,6 +149,7 @@ export function EtapeRow({
                   options={mcOptions}
                   defaultValue={etape.resp_mc ?? []}
                   placeholder="—"
+                  onChangeValues={scheduleSubmit}
                 />
               </div>
 
@@ -146,6 +159,7 @@ export function EtapeRow({
                   name="resp_franchise"
                   defaultValue={etape.resp_franchise ?? ""}
                   placeholder="Nom du porteur…"
+                  onChange={scheduleSubmit}
                   className="w-full rounded border border-zinc-300 px-2 py-1.5 text-xs"
                 />
               </div>
@@ -156,36 +170,46 @@ export function EtapeRow({
                   name="resp_externe"
                   defaultValue={etape.resp_externe ?? ""}
                   placeholder="Prestataire, agence…"
+                  onChange={scheduleSubmit}
                   className="w-full rounded border border-zinc-300 px-2 py-1.5 text-xs"
                 />
               </div>
 
               <div className="space-y-1">
                 <label className="text-xs font-medium text-zinc-600">Date cible</label>
-                <DateInput name="date_cible" defaultValue={etape.date_cible ?? ""} className="w-full rounded border border-zinc-300 px-2 py-1.5 text-xs" />
+                <DateInput name="date_cible" defaultValue={etape.date_cible ?? ""} onChange={scheduleSubmit} className="w-full rounded border border-zinc-300 px-2 py-1.5 text-xs" />
               </div>
 
               <div className="space-y-1">
                 <label className="text-xs font-medium text-zinc-600">Date de réalisation</label>
-                <DateInput name="date_realisation" defaultValue={etape.date_realisation ?? ""} className="w-full rounded border border-zinc-300 px-2 py-1.5 text-xs" />
+                <DateInput name="date_realisation" defaultValue={etape.date_realisation ?? ""} onChange={scheduleSubmit} className="w-full rounded border border-zinc-300 px-2 py-1.5 text-xs" />
               </div>
             </div>
 
             <div className="space-y-1">
               <label className="text-xs font-medium text-zinc-600">Lien document (SharePoint)</label>
-              <input name="lien_document" type="url" defaultValue={etape.lien_document ?? ""} placeholder="https://…" className="w-full rounded border border-zinc-300 px-2 py-1.5 text-xs" />
+              <input name="lien_document" type="url" defaultValue={etape.lien_document ?? ""} placeholder="https://…" onChange={scheduleSubmit} className="w-full rounded border border-zinc-300 px-2 py-1.5 text-xs" />
             </div>
 
             <div className="space-y-1">
               <label className="text-xs font-medium text-zinc-600">Commentaire</label>
-              <textarea name="commentaire" rows={2} defaultValue={etape.commentaire ?? ""} className="w-full rounded border border-zinc-300 px-2 py-1.5 text-xs" />
+              <textarea name="commentaire" rows={2} defaultValue={etape.commentaire ?? ""} onChange={scheduleSubmit} className="w-full rounded border border-zinc-300 px-2 py-1.5 text-xs" />
             </div>
 
-            {state?.error && <p className="text-xs text-red-600">{state.error}</p>}
-
-            <button type="submit" disabled={pending} className="btn-primary">
-              {pending ? "Enregistrement…" : "Enregistrer"}
-            </button>
+            <div className="flex items-center justify-between">
+              <p className="text-xs">
+                {pending
+                  ? <span className="text-zinc-400">Enregistrement…</span>
+                  : state?.error
+                  ? <span className="text-red-500">⚠ {state.error}</span>
+                  : savedOnce
+                  ? <span className="text-green-600">✓ Enregistré</span>
+                  : null}
+              </p>
+              <button type="submit" className="text-xs text-zinc-400 hover:text-zinc-700 underline">
+                Enregistrer
+              </button>
+            </div>
           </form>
         ) : (
           <div className="space-y-1 text-xs text-zinc-600">

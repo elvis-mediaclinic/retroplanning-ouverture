@@ -9,11 +9,13 @@ export function MultiSelect({
   options,
   defaultValue = [],
   placeholder = "—",
+  onChangeValues,
 }: {
   name: string;
   options: SelectOption[];
   defaultValue?: string[];
   placeholder?: string;
+  onChangeValues?: (values: string[]) => void;
 }) {
   const [selected, setSelected] = useState<string[]>(defaultValue);
   const [open, setOpen] = useState(false);
@@ -28,9 +30,11 @@ export function MultiSelect({
   }, []);
 
   function toggle(val: string) {
-    setSelected((prev) =>
-      prev.includes(val) ? prev.filter((x) => x !== val) : [...prev, val]
-    );
+    setSelected((prev) => {
+      const next = prev.includes(val) ? prev.filter((x) => x !== val) : [...prev, val];
+      onChangeValues?.(next);
+      return next;
+    });
   }
 
   const selectedLabels = selected
