@@ -5,6 +5,7 @@ import { updateEtape } from "./actions";
 import type { EtapeProjet, StatutEtape } from "@/lib/types";
 import { STATUT_ETAPE_LABELS, RESP_MC_OPTIONS } from "@/lib/types";
 import { STATUT_ETAPE_COLORS, formatDate } from "@/lib/utils";
+import { MultiSelect } from "./MultiSelect";
 
 export function EtapeRow({
   etape,
@@ -82,10 +83,7 @@ export function EtapeRow({
 
               <div className="space-y-1">
                 <label className="text-xs font-medium text-zinc-600">Resp. MC</label>
-                <select name="resp_mc" multiple defaultValue={etape.resp_mc ?? []} className="w-full rounded border border-zinc-300 px-2 py-1 text-xs h-auto min-h-[5rem]">
-                  {RESP_MC_OPTIONS.map((r) => <option key={r} value={r}>{r}</option>)}
-                </select>
-                <p className="text-[10px] text-zinc-400">Ctrl/Cmd + clic pour sélectionner plusieurs</p>
+                <MultiSelect name="resp_mc" options={RESP_MC_OPTIONS} defaultValue={etape.resp_mc ?? []} placeholder="—" />
               </div>
 
               <div className="space-y-1">

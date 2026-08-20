@@ -3,6 +3,7 @@
 import { useActionState, useRef } from "react";
 import { addEtape } from "./actions";
 import { RESP_MC_OPTIONS, type PhaseEtape } from "@/lib/types";
+import { MultiSelect } from "./MultiSelect";
 
 export function AddEtapeForm({ projetId, phase }: { projetId: string; phase: PhaseEtape }) {
   const action = addEtape.bind(null, projetId);
@@ -25,14 +26,9 @@ export function AddEtapeForm({ projetId, phase }: { projetId: string; phase: Pha
         required
         className="flex-1 min-w-40 rounded border border-zinc-200 bg-white px-2 py-1.5 text-xs placeholder:text-zinc-400"
       />
-      <select
-        name="resp_mc"
-        defaultValue=""
-        className="rounded border border-zinc-200 bg-white px-2 py-1.5 text-xs text-zinc-600"
-      >
-        <option value="">MC —</option>
-        {RESP_MC_OPTIONS.map((r) => <option key={r} value={r}>{r}</option>)}
-      </select>
+      <div className="w-48">
+        <MultiSelect name="resp_mc" options={RESP_MC_OPTIONS} placeholder="Resp. MC…" />
+      </div>
       <input
         name="resp_franchise"
         placeholder="Resp. franchisé…"
