@@ -2,11 +2,39 @@
 
 import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { createBrowserClient } from "@supabase/ssr";
 import { login } from "./actions";
 
 export default function LoginPage() {
   const router = useRouter();
   const [state, action, pending] = useActionState(login, undefined);
+
+  // Gère le flux implicite Supabase : tokens passés en #hash après clic sur lien d'invitation.
+  // Le serveur ne voit jamais le fragment, donc on le traite ici côté client.
+  useEffect(() => {
+    const hash = window.location.hash.slice(1);
+    if (!hash) return;
+    const params = new URLSearchParams(hash);
+    const accessToken = params.get("access_token");
+    const refreshToken = params.get("refresh_token");
+    const type = params.get("type");
+    if (!accessToken || !refreshToken) return;
+
+    const supabase = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
+    );
+    supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken }).then(
+      ({ error }) => {
+        if (error) return;
+        if (type === "invite" || type === "recovery") {
+          router.replace("/set-password");
+        } else {
+          router.replace("/");
+        }
+      }
+    );
+  }, [router]);
 
   useEffect(() => {
     if (state?.success) {
