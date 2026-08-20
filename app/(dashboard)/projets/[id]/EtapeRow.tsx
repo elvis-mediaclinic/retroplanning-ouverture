@@ -26,6 +26,7 @@ export function EtapeRow({
   const formRef = useRef<HTMLFormElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [savedOnce, setSavedOnce] = useState(false);
+  const [open, setOpen] = useState(false);
 
   const scheduleSubmit = useCallback(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -63,7 +64,11 @@ export function EtapeRow({
   const isMyEtape = currentUserId && etape.resp_mc?.includes(currentUserId);
 
   return (
-    <details className="group" key={etape.updated_at}>
+    <details
+      open={open}
+      onToggle={(e) => setOpen((e.target as HTMLDetailsElement).open)}
+      className="group"
+    >
       <summary className={`flex cursor-pointer list-none items-center gap-3 px-3 py-2.5 hover:bg-zinc-50 [&::-webkit-details-marker]:hidden ${isMyEtape ? "bg-indigo-50/60" : ""}`}>
         <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${STATUT_ETAPE_COLORS[etape.statut as StatutEtape]}`}>
           {STATUT_ETAPE_LABELS[etape.statut as StatutEtape]}
@@ -119,7 +124,7 @@ export function EtapeRow({
 
       <div className="mx-3 mb-2 rounded-md border border-zinc-100 bg-zinc-50 p-4">
         {canEdit ? (
-          <form ref={formRef} action={formAction} className="space-y-3">
+          <form key={etape.updated_at} ref={formRef} action={formAction} className="space-y-3">
             <div className="space-y-1">
               <label className="text-xs font-medium text-zinc-600">Nom</label>
               <input
