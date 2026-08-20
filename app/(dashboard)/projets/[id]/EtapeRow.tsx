@@ -74,7 +74,7 @@ export function EtapeRow({
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               <div className="space-y-1">
                 <label className="text-xs font-medium text-zinc-600">Statut</label>
                 <select name="statut" defaultValue={etape.statut} className="w-full rounded border border-zinc-300 px-2 py-1.5 text-xs">
@@ -109,6 +109,11 @@ export function EtapeRow({
                   placeholder="Prestataire, agence…"
                   className="w-full rounded border border-zinc-300 px-2 py-1.5 text-xs"
                 />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-zinc-600">Date cible</label>
+                <input name="date_cible" type="date" defaultValue={etape.date_cible ?? ""} className="w-full rounded border border-zinc-300 px-2 py-1.5 text-xs" />
               </div>
 
               <div className="space-y-1">
