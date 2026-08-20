@@ -38,6 +38,22 @@ textarea {
   box-sizing: border-box;
 }
 
+@media print {
+  /* Masque tout sauf le contenu principal */
+  aside, nav, header, footer,
+  [data-noprint], .btn-primary, .btn-secondary, .btn-danger {
+    display: none !important;
+  }
+  body { background: white; }
+  main { padding: 0 !important; }
+  /* Étapes : ouvrir tous les accordéons et masquer les contrôles */
+  details { display: block; }
+  details > summary { list-style: none; font-weight: 600; margin-bottom: 4px; }
+  details > summary::-webkit-details-marker { display: none; }
+  /* Évite les coupures de page au milieu d'une étape */
+  .group { break-inside: avoid; }
+}
+
 @layer components {
   .btn-primary {
     @apply rounded-md bg-brand px-3 py-2 text-sm font-medium text-white hover:bg-brand-dark disabled:opacity-50 transition-colors;

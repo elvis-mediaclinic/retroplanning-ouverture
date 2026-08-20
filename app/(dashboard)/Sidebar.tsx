@@ -30,7 +30,10 @@ const NAV: Record<UserRole, NavGroup[]> = {
     },
     {
       title: "Administration",
-      items: [{ href: "/admin/users", label: "Utilisateurs" }],
+      items: [
+        { href: "/admin/users", label: "Utilisateurs" },
+        { href: "/admin/template", label: "Template retroplanning" },
+      ],
     },
   ],
   consultant: [

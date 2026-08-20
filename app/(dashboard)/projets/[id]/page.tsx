@@ -14,6 +14,7 @@ import {
   type MCUser,
 } from "@/lib/types";
 import { InviteButton } from "./InviteButton";
+import { ExportButtons } from "./ExportButtons";
 import {
   STATUT_PROJET_COLORS,
   STATUT_ETAPE_COLORS,
@@ -120,6 +121,7 @@ export default async function ProjetPage({
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <ExportButtons etapes={etapes ?? []} projetNom={projet.nom} />
           <Link
             href={`/projets/${id}/gantt`}
             className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm text-zinc-600 hover:bg-zinc-50"
