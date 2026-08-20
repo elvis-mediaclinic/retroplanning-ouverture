@@ -94,7 +94,7 @@ export async function createUser(
 
   revalidatePath("/admin/users");
   return {
-    inviteLink: linkData?.properties.action_link,
+    inviteLink: linkData?.properties?.action_link,
     personName: `${prenom} ${nom}`,
     success: `Invitation envoyée à ${email}.`,
   };
