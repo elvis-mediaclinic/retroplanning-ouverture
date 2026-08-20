@@ -117,7 +117,7 @@ export type EtapeProjet = {
   phase: PhaseEtape;
   nom: string;
   responsable: ResponsableEtape;
-  resp_mc: string | null;
+  resp_mc: string[] | null;
   resp_franchise: string | null;
   ordre: number;
   statut: StatutEtape;

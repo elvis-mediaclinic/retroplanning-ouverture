@@ -10,7 +10,7 @@ const RESPONSABLE = ["franchise", "mc", "externe", "les_deux"] as const;
 const UpdateEtapeSchema = z.object({
   nom: z.string().min(1),
   responsable: z.enum(RESPONSABLE),
-  resp_mc: z.string().optional(),
+  resp_mc: z.array(z.string()).optional(),
   resp_franchise: z.string().optional(),
   statut: z.enum(["a_faire", "en_cours", "fait", "en_retard", "na"]),
   date_realisation: z.string().optional(),
@@ -31,7 +31,7 @@ export async function updateEtape(
   const parsed = UpdateEtapeSchema.safeParse({
     nom: formData.get("nom"),
     responsable: formData.get("responsable") || "franchise",
-    resp_mc: formData.get("resp_mc") || undefined,
+    resp_mc: formData.getAll("resp_mc").filter(Boolean) as string[],
     resp_franchise: formData.get("resp_franchise") || undefined,
     statut: formData.get("statut"),
     date_realisation: formData.get("date_realisation") || undefined,
@@ -49,7 +49,7 @@ export async function updateEtape(
     .update({
       nom: parsed.data.nom,
       responsable: parsed.data.responsable,
-      resp_mc: parsed.data.resp_mc || null,
+      resp_mc: parsed.data.resp_mc && parsed.data.resp_mc.length > 0 ? parsed.data.resp_mc : null,
       resp_franchise: parsed.data.resp_franchise || null,
       statut: parsed.data.statut,
       date_realisation: parsed.data.date_realisation ?? null,
@@ -76,7 +76,8 @@ export async function addEtape(
   const nom = (formData.get("nom") as string)?.trim();
   const phase = formData.get("phase") as string;
   const responsable = (formData.get("responsable") as string) || "franchise";
-  const resp_mc = (formData.get("resp_mc") as string) || null;
+  const resp_mc = formData.getAll("resp_mc").filter(Boolean) as string[];
+  const resp_mc_val = resp_mc.length > 0 ? resp_mc : null;
   const resp_franchise = (formData.get("resp_franchise") as string) || null;
 
   if (!nom) return { error: "Le nom est requis." };
@@ -99,7 +100,7 @@ export async function addEtape(
     phase,
     nom,
     responsable,
-    resp_mc,
+    resp_mc: resp_mc_val,
     resp_franchise,
     ordre: nextOrdre,
     statut: "a_faire",

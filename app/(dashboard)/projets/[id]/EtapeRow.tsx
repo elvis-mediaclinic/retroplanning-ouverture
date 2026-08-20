@@ -28,9 +28,9 @@ export function EtapeRow({
         <span className="flex-1 text-sm text-zinc-800">{etape.nom}</span>
 
         <span className="flex items-center gap-1 shrink-0">
-          {etape.resp_mc && (
+          {etape.resp_mc && etape.resp_mc.length > 0 && (
             <span className="rounded-full bg-indigo-100 text-indigo-700 px-2 py-0.5 text-xs font-medium">
-              MC · {etape.resp_mc}
+              MC · {etape.resp_mc.join(", ")}
             </span>
           )}
           {etape.resp_franchise && (
@@ -82,10 +82,10 @@ export function EtapeRow({
 
               <div className="space-y-1">
                 <label className="text-xs font-medium text-zinc-600">Resp. MC</label>
-                <select name="resp_mc" defaultValue={etape.resp_mc ?? ""} className="w-full rounded border border-zinc-300 px-2 py-1.5 text-xs">
-                  <option value="">—</option>
+                <select name="resp_mc" multiple defaultValue={etape.resp_mc ?? []} className="w-full rounded border border-zinc-300 px-2 py-1 text-xs h-auto min-h-[5rem]">
                   {RESP_MC_OPTIONS.map((r) => <option key={r} value={r}>{r}</option>)}
                 </select>
+                <p className="text-[10px] text-zinc-400">Ctrl/Cmd + clic pour sélectionner plusieurs</p>
               </div>
 
               <div className="space-y-1">
@@ -122,7 +122,7 @@ export function EtapeRow({
           </form>
         ) : (
           <div className="space-y-1 text-xs text-zinc-600">
-            {etape.resp_mc && <p>MC : <strong>{etape.resp_mc}</strong></p>}
+            {etape.resp_mc && etape.resp_mc.length > 0 && <p>MC : <strong>{etape.resp_mc.join(", ")}</strong></p>}
             {etape.resp_franchise && <p>Franchisé : <strong>{etape.resp_franchise}</strong></p>}
             {etape.date_realisation && <p>Réalisé le : <strong>{formatDate(etape.date_realisation)}</strong></p>}
             {etape.lien_document && (

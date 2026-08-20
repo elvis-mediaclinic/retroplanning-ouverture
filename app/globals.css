@@ -24,6 +24,20 @@ body {
   color-scheme: light;
 }
 
+/* Hauteur uniforme input / select / textarea */
+input:not([type="checkbox"]):not([type="radio"]):not([type="date"]),
+select {
+  height: 2rem;
+  box-sizing: border-box;
+}
+input[type="date"] {
+  height: 2rem;
+  box-sizing: border-box;
+}
+textarea {
+  box-sizing: border-box;
+}
+
 @layer components {
   .btn-primary {
     @apply rounded-md bg-brand px-3 py-2 text-sm font-medium text-white hover:bg-brand-dark disabled:opacity-50 transition-colors;
