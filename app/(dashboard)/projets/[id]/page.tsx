@@ -108,14 +108,22 @@ export default async function ProjetPage({
             {projet.surface_m2 && ` · ${projet.surface_m2} m²`}
           </p>
         </div>
-        {profile.role === "admin" && (
+        <div className="flex items-center gap-2">
           <Link
-            href={`/projets/${id}/edit`}
+            href={`/projets/${id}/gantt`}
             className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm text-zinc-600 hover:bg-zinc-50"
           >
-            Modifier
+            Vue Gantt
           </Link>
-        )}
+          {profile.role === "admin" && (
+            <Link
+              href={`/projets/${id}/edit`}
+              className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm text-zinc-600 hover:bg-zinc-50"
+            >
+              Modifier
+            </Link>
+          )}
+        </div>
       </div>
 
       {/* Infos & progression */}
