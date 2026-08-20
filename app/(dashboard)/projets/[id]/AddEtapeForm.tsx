@@ -30,7 +30,7 @@ export function AddEtapeForm({ projetId, phase }: { projetId: string; phase: Pha
         defaultValue="franchise"
         className="rounded border border-zinc-200 bg-white px-2 py-1.5 text-xs text-zinc-600"
       >
-        <option value="mc">Nous</option>
+        <option value="mc">Équipe MC</option>
         <option value="franchise">Franchisé</option>
         <option value="les_deux">Les deux</option>
         <option value="externe">Externe</option>

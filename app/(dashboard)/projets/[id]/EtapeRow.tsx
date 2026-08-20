@@ -95,7 +95,7 @@ export function EtapeRow({
                   defaultValue={etape.responsable}
                   className="w-full rounded border border-zinc-300 px-2 py-1.5 text-xs"
                 >
-                  <option value="mc">Nous</option>
+                  <option value="mc">Équipe MC</option>
                   <option value="franchise">Franchisé</option>
                   <option value="les_deux">Les deux</option>
                   <option value="externe">Externe</option>
