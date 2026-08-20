@@ -20,6 +20,17 @@ export function EtapeRow({
   const action = updateEtape.bind(null, etape.id, projetId);
   const [state, formAction, pending] = useActionState(action, undefined);
 
+  const dateAlert = (() => {
+    if (!etape.date_cible || etape.statut === "fait" || etape.statut === "na") return null;
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const cible = new Date(etape.date_cible + "T00:00:00");
+    const diff = Math.round((cible.getTime() - today.getTime()) / 86400000);
+    if (diff < 0) return "late" as const;
+    if (diff === 0) return "today" as const;
+    if (diff <= 7) return "soon" as const;
+    return null;
+  })();
+
   return (
     <details className="group" key={etape.updated_at}>
       <summary className="flex cursor-pointer list-none items-center gap-3 px-3 py-2.5 hover:bg-zinc-50 [&::-webkit-details-marker]:hidden">
@@ -52,7 +63,15 @@ export function EtapeRow({
           )}
         </span>
 
-        <span className="shrink-0 w-28 text-right text-xs text-zinc-400">
+        <span className={`shrink-0 w-36 text-right text-xs flex items-center justify-end gap-1 ${
+          dateAlert === "late" ? "text-red-600 font-semibold" :
+          dateAlert === "today" ? "text-amber-600 font-semibold" :
+          dateAlert === "soon" ? "text-yellow-600" :
+          "text-zinc-400"
+        }`}>
+          {dateAlert === "late" && <span title="Date dépassée">⚠️</span>}
+          {dateAlert === "today" && <span title="Aujourd'hui">🔴</span>}
+          {dateAlert === "soon" && <span title="Dans moins de 7 jours">🟡</span>}
           {etape.date_realisation
             ? `✓ ${formatDate(etape.date_realisation)}`
             : etape.date_cible
