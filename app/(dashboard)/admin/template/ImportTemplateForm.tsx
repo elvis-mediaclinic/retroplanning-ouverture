@@ -17,7 +17,7 @@ export function ImportTemplateForm() {
         <h2 className="text-sm font-semibold text-zinc-900">Importer depuis Excel</h2>
         <p className="text-xs text-zinc-500 mt-0.5">
           Exporte un retroplanning existant en Excel, modifie-le, puis importe-le ici pour remplacer le template.
-          Les colonnes attendues : <span className="font-mono">Phase</span>, <span className="font-mono">Nom de l&apos;étape</span>, <span className="font-mono">Ordre</span>, <span className="font-mono">Responsable</span>, <span className="font-mono">Délai (semaines)</span>.
+          Colonnes lues : <span className="font-mono">Phase</span>, <span className="font-mono">Nom de l&apos;étape</span>, <span className="font-mono">Ordre</span>. Les autres colonnes sont ignorées.
         </p>
       </div>
 

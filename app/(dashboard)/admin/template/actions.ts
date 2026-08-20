@@ -17,14 +17,6 @@ const PHASE_MAP: Record<string, string> = {
   "ouverture": "ouverture",
 };
 
-const RESP_MAP: Record<string, string> = {
-  "franchisé": "franchise",
-  "mc": "mc",
-  "externe": "externe",
-  "franchisé + mc": "les_deux",
-  "franchise": "franchise",
-  "les_deux": "les_deux",
-};
 
 export async function importTemplate(
   _state: ImportTemplateState,
@@ -47,10 +39,7 @@ export async function importTemplate(
   const etapes = rows.map((row, i) => {
     const phaseLabel = String(row["Phase"] ?? "").toLowerCase().trim();
     const phase = PHASE_MAP[phaseLabel];
-    const respLabel = String(row["Responsable"] ?? "mc").toLowerCase().trim();
-    const responsable = RESP_MAP[respLabel] ?? "mc";
     const nom = String(row["Nom de l'étape"] ?? "").trim();
-    const delai = row["Délai (semaines)"];
 
     if (!phase) return null;
     if (!nom) return null;
@@ -59,8 +48,8 @@ export async function importTemplate(
       phase,
       nom,
       ordre: Number(row["Ordre"] ?? i + 1),
-      responsable,
-      delai_semaines: delai !== "" && delai != null ? Number(delai) : null,
+      responsable: "mc", // valeur par défaut, ajustable manuellement par projet
+      delai_semaines: null,
     };
   }).filter((e): e is NonNullable<typeof e> => e !== null);
 
