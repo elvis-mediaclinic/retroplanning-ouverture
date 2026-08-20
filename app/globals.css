@@ -34,6 +34,15 @@ input[type="date"] {
   height: 2rem;
   box-sizing: border-box;
 }
+input[type="date"][data-empty]::-webkit-datetime-edit {
+  color: transparent;
+}
+input[type="date"][data-empty]:focus::-webkit-datetime-edit {
+  color: inherit;
+}
+input[type="date"][data-empty] {
+  border-style: dashed;
+}
 textarea {
   box-sizing: border-box;
 }

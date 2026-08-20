@@ -113,12 +113,12 @@ export function EtapeRow({
 
               <div className="space-y-1">
                 <label className="text-xs font-medium text-zinc-600">Date cible</label>
-                <input name="date_cible" type="date" defaultValue={etape.date_cible ?? ""} className="w-full rounded border border-zinc-300 px-2 py-1.5 text-xs" />
+                <input name="date_cible" type="date" defaultValue={etape.date_cible ?? ""} className="w-full rounded border border-zinc-300 px-2 py-1.5 text-xs" {...(!etape.date_cible ? { "data-empty": "" } : {})} />
               </div>
 
               <div className="space-y-1">
                 <label className="text-xs font-medium text-zinc-600">Date de réalisation</label>
-                <input name="date_realisation" type="date" defaultValue={etape.date_realisation ?? ""} className="w-full rounded border border-zinc-300 px-2 py-1.5 text-xs" />
+                <input name="date_realisation" type="date" defaultValue={etape.date_realisation ?? ""} className="w-full rounded border border-zinc-300 px-2 py-1.5 text-xs" {...(!etape.date_realisation ? { "data-empty": "" } : {})} />
               </div>
             </div>
 
