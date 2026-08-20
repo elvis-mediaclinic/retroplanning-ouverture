@@ -107,6 +107,7 @@ export const RESP_MC_OPTIONS = [
   "Informatique",
   "Technique / Formation",
   "Direction",
+  "Externe",
 ] as const;
 export type RespMC = typeof RESP_MC_OPTIONS[number];
 
