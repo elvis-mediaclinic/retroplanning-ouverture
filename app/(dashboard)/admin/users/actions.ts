@@ -14,12 +14,7 @@ const CreateUserSchema = z.object({
   fonction: z.string().optional(),
 });
 
-export type CreateUserState = {
-  error?: string;
-  inviteLink?: string;
-  nom?: string;
-  email?: string;
-} | undefined;
+export type CreateUserState = { error?: string; success?: string } | undefined;
 
 export async function updateUser(
   userId: string,
@@ -65,18 +60,14 @@ export async function createUser(
   const { email, nom, prenom, role, telephone, fonction } = parsed.data;
   const service = createServiceClient();
 
-  // Génère le lien d'invitation sans envoyer d'email — l'admin le partagera lui-même
-  const { data: linkData, error: linkError } = await service.auth.admin.generateLink({
-    type: "invite",
-    email,
-  });
+  const { data: invited, error: inviteError } = await service.auth.admin.inviteUserByEmail(email);
 
-  if (linkError || !linkData.user) {
-    return { error: `Impossible de créer l'invitation : ${linkError?.message ?? "erreur inconnue"}.` };
+  if (inviteError || !invited.user) {
+    return { error: `Impossible d'inviter ce compte : ${inviteError?.message ?? "erreur inconnue"}.` };
   }
 
   const { error: profileError } = await service.from("profiles").insert({
-    id: linkData.user.id,
+    id: invited.user.id,
     role,
     nom,
     prenom,
@@ -86,13 +77,9 @@ export async function createUser(
   });
 
   if (profileError) {
-    return { error: `Compte créé mais profil non enregistré : ${profileError.message}.` };
+    return { error: `Invitation envoyée mais profil non enregistré : ${profileError.message}.` };
   }
 
   revalidatePath("/admin/users");
-  return {
-    inviteLink: linkData.properties.action_link,
-    nom: `${prenom} ${nom}`,
-    email,
-  };
+  return { success: `Invitation envoyée à ${email}. Le compte sera actif dès qu'il aura cliqué sur le lien reçu par email.` };
 }
