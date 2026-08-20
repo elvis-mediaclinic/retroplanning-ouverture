@@ -90,7 +90,25 @@ export function GanttChart({
           </div>
         </div>
 
-        {/* Phase rows */}
+        {/* Phase rows — wrapper relatif pour les traits verticaux */}
+        <div className="relative">
+
+        {/* Trait aujourd'hui — pleine hauteur */}
+        <div className="absolute top-0 bottom-0 w-px bg-brand/50 z-10 pointer-events-none" style={{ left: `calc(13rem + (100% - 13rem) * ${todayPct} / 100)` }}>
+          <span className="absolute -top-5 -translate-x-1/2 text-[10px] text-brand font-semibold whitespace-nowrap bg-white px-1">
+            Aujourd&apos;hui
+          </span>
+        </div>
+
+        {/* Trait ouverture — pleine hauteur */}
+        {ouverturePct !== null && (
+          <div className="absolute top-0 bottom-0 w-px bg-green-500/50 z-10 pointer-events-none" style={{ left: `calc(13rem + (100% - 13rem) * ${ouverturePct} / 100)` }}>
+            <span className="absolute -top-5 -translate-x-1/2 text-[10px] text-green-600 font-semibold whitespace-nowrap bg-white px-1">
+              Ouverture
+            </span>
+          </div>
+        )}
+
         {PHASES_ORDER.map((phase) => {
           const rows = etapesParPhase[phase];
           if (!rows || rows.length === 0) return null;
@@ -149,28 +167,7 @@ export function GanttChart({
             </div>
           );
         })}
-
-        {/* Today + ouverture lines */}
-        <div className="flex mt-2">
-          <div className="w-52 shrink-0" />
-          <div className="flex-1 relative h-6">
-            {/* Today */}
-            <div className="absolute top-0 bottom-0 w-px bg-brand/60 z-10" style={{ left: `${todayPct}%` }}>
-              <span className="absolute -top-4 -translate-x-1/2 text-[10px] text-brand font-semibold whitespace-nowrap">
-                Aujourd&apos;hui
-              </span>
-            </div>
-
-            {/* Ouverture */}
-            {ouverturePct !== null && (
-              <div className="absolute top-0 bottom-0 w-px bg-green-500/60 z-10" style={{ left: `${ouverturePct}%` }}>
-                <span className="absolute -top-4 -translate-x-1/2 text-[10px] text-green-600 font-semibold whitespace-nowrap">
-                  Ouverture
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
+        </div>{/* fin wrapper relatif */}
 
         {/* Légende */}
         <div className="flex items-center gap-4 mt-6 flex-wrap">
