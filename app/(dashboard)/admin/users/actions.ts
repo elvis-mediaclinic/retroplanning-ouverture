@@ -94,7 +94,19 @@ export async function createUser(
   let emailSent = false;
   if (inviteLink) {
     try {
-      await sendInvitationEmail({ to: email, prenom, inviteLink });
+      await sendInvitationEmail({
+        to: email,
+        prenom,
+        nom,
+        inviteLink,
+        ctx: role === "franchise"
+          ? { role: "franchise", projetNom: "", villeNom: "" }
+          : role === "responsable_mc"
+          ? { role: "responsable_mc", fonction: fonction || null }
+          : role === "admin"
+          ? { role: "admin", fonction: fonction || null }
+          : { role: "consultant" },
+      });
       emailSent = true;
     } catch (e) {
       console.error("Erreur envoi email invitation :", e);

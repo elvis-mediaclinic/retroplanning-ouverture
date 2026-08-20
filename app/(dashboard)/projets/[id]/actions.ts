@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { verifySession, requireRole } from "@/lib/dal";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
+import { sendInvitationEmail } from "@/lib/mailer";
 
 const RESPONSABLE = ["franchise", "mc", "externe", "les_deux"] as const;
 
@@ -175,7 +176,7 @@ export async function inviterFranchise(
   const supabase = await createClient();
   const { data: projet } = await supabase
     .from("projets")
-    .select("nom, candidats(nom, prenom, email)")
+    .select("nom, villes(nom), candidats(nom, prenom, email)")
     .eq("id", projetId)
     .single();
 
@@ -186,19 +187,26 @@ export async function inviterFranchise(
     : (projet.candidats as { nom: string; prenom: string; email: string } | null);
   if (!candidatRaw?.email) return { error: "Ce projet n'a pas de candidat avec un email." };
 
-  const service = createServiceClient();
-  const { data: invited, error: inviteError } = await service.auth.admin.inviteUserByEmail(
-    candidatRaw.email,
-    { data: { nom: candidatRaw.nom, prenom: candidatRaw.prenom } }
-  );
+  const villeRaw = Array.isArray(projet.villes)
+    ? (projet.villes[0] as { nom: string } | undefined) ?? null
+    : (projet.villes as { nom: string } | null);
+  const villeNom = villeRaw?.nom ?? "";
 
-  if (inviteError || !invited.user) {
-    return { error: `Impossible d'inviter : ${inviteError?.message ?? "erreur inconnue"}.` };
+  const service = createServiceClient();
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+
+  const { data: linkData, error: linkError } = await service.auth.admin.generateLink({
+    type: "invite",
+    email: candidatRaw.email,
+    options: { redirectTo: `${siteUrl}/auth/callback` },
+  });
+
+  if (linkError || !linkData.user) {
+    return { error: `Impossible de créer le compte : ${linkError?.message ?? "erreur inconnue"}.` };
   }
 
-  // Crée le profil si absent (cas premier invite)
   const { error: profileError } = await service.from("profiles").upsert({
-    id: invited.user.id,
+    id: linkData.user.id,
     role: "franchise",
     nom: candidatRaw.nom,
     prenom: candidatRaw.prenom,
@@ -206,14 +214,25 @@ export async function inviterFranchise(
   }, { onConflict: "id", ignoreDuplicates: true });
 
   if (profileError) {
-    return { error: `Invitation envoyée mais profil non créé : ${profileError.message}.` };
+    return { error: `Compte créé mais profil non enregistré : ${profileError.message}.` };
   }
 
-  // Lie le profil franchisé au projet
-  await supabase
-    .from("projets")
-    .update({ franchisee_id: invited.user.id })
-    .eq("id", projetId);
+  await supabase.from("projets").update({ franchisee_id: linkData.user.id }).eq("id", projetId);
+
+  const inviteLink = linkData.properties?.action_link;
+  if (inviteLink) {
+    try {
+      await sendInvitationEmail({
+        to: candidatRaw.email,
+        prenom: candidatRaw.prenom,
+        nom: candidatRaw.nom,
+        inviteLink,
+        ctx: { role: "franchise", projetNom: projet.nom, villeNom },
+      });
+    } catch (e) {
+      console.error("Erreur envoi email franchisé :", e);
+    }
+  }
 
   revalidatePath(`/projets/${projetId}`);
   return { success: `Invitation envoyée à ${candidatRaw.email}.` };

@@ -1,5 +1,6 @@
 import "server-only";
 import nodemailer from "nodemailer";
+import type { UserRole } from "@/lib/types";
 
 export const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
@@ -11,19 +12,70 @@ export const transporter = nodemailer.createTransport({
   },
 });
 
+type InvitationContext =
+  | { role: "franchise"; projetNom: string; villeNom: string }
+  | { role: "responsable_mc"; fonction?: string | null }
+  | { role: "admin"; fonction?: string | null }
+  | { role: "consultant" };
+
+function buildEmailContent(
+  prenom: string,
+  nom: string,
+  inviteLink: string,
+  ctx: InvitationContext
+): { subject: string; intro: string } {
+  switch (ctx.role) {
+    case "franchise":
+      return {
+        subject: `Votre espace franchisé – Ouverture ${ctx.villeNom}`,
+        intro: `L'équipe Mediaclinic vous a créé un espace dédié pour suivre l'avancement
+          de votre projet d'ouverture <strong>${ctx.projetNom}</strong> à <strong>${ctx.villeNom}</strong>.
+          Vous y retrouverez le retroplanning complet, les étapes à valider et l'ensemble
+          des informations liées à votre ouverture.`,
+      };
+    case "responsable_mc":
+      return {
+        subject: "Votre accès Mediaclinic – Suivi des ouvertures",
+        intro: `Vous avez été ajouté(e) en tant que <strong>Responsable Mediaclinic</strong>${
+          ctx.fonction ? ` (${ctx.fonction})` : ""
+        } sur la plateforme de suivi des ouvertures. Vous pouvez y consulter les projets
+          en cours et les étapes qui vous sont confiées.`,
+      };
+    case "admin":
+      return {
+        subject: "Votre accès administrateur – Mediaclinic",
+        intro: `Un compte administrateur a été créé pour vous sur la plateforme de suivi
+          des ouvertures Mediaclinic${ctx.fonction ? ` (${ctx.fonction})` : ""}.
+          Vous avez accès à l'ensemble des projets, candidats et paramètres.`,
+      };
+    default:
+      return {
+        subject: "Votre accès Mediaclinic – Suivi des ouvertures",
+        intro: `L'équipe Mediaclinic vous a créé un accès sur la plateforme de suivi
+          des ouvertures.`,
+      };
+  }
+}
+
 export async function sendInvitationEmail({
   to,
   prenom,
+  nom,
   inviteLink,
+  ctx,
 }: {
   to: string;
   prenom: string;
+  nom: string;
   inviteLink: string;
+  ctx: InvitationContext;
 }) {
+  const { subject, intro } = buildEmailContent(prenom, nom, inviteLink, ctx);
+
   await transporter.sendMail({
     from: process.env.SMTP_FROM ?? `"Mediaclinic" <${process.env.SMTP_USER}>`,
     to,
-    subject: "Votre accès Mediaclinic – Suivi des ouvertures",
+    subject,
     html: `<!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -44,12 +96,13 @@ export async function sendInvitationEmail({
           <tr>
             <td style="background:#ffffff;border-radius:12px;border:1px solid #e4e4e7;padding:40px 36px;">
               <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:#18181b;">
-                Bonjour ${prenom},
+                Bonjour ${prenom} ${nom},
               </h1>
               <p style="margin:0 0 24px;font-size:14px;color:#52525b;line-height:1.6;">
-                L'équipe Mediaclinic vous a créé un accès pour suivre l'avancement
-                de votre projet d'ouverture. Cliquez sur le bouton ci-dessous pour
-                définir votre mot de passe et accéder à votre espace.
+                ${intro}
+              </p>
+              <p style="margin:0 0 24px;font-size:14px;color:#52525b;line-height:1.6;">
+                Cliquez sur le bouton ci-dessous pour définir votre mot de passe et accéder à votre espace.
               </p>
               <table cellpadding="0" cellspacing="0" style="margin:0 0 28px;">
                 <tr>
