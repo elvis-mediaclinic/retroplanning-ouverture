@@ -39,7 +39,12 @@ export function EtapeRow({
               F · {etape.resp_franchise}
             </span>
           )}
-          {!etape.resp_mc && !etape.resp_franchise && (
+          {etape.resp_externe && (
+            <span className="rounded-full bg-zinc-100 text-zinc-600 px-2 py-0.5 text-xs font-medium">
+              Ext · {etape.resp_externe}
+            </span>
+          )}
+          {!etape.resp_mc?.length && !etape.resp_franchise && !etape.resp_externe && (
             <span className="rounded-full bg-zinc-100 text-zinc-400 px-2 py-0.5 text-xs font-medium">
               —
             </span>
@@ -97,6 +102,16 @@ export function EtapeRow({
               </div>
 
               <div className="space-y-1">
+                <label className="text-xs font-medium text-zinc-600">Resp. externe</label>
+                <input
+                  name="resp_externe"
+                  defaultValue={etape.resp_externe ?? ""}
+                  placeholder="Prestataire, agence…"
+                  className="w-full rounded border border-zinc-300 px-2 py-1.5 text-xs"
+                />
+              </div>
+
+              <div className="space-y-1">
                 <label className="text-xs font-medium text-zinc-600">Date de réalisation</label>
                 <input name="date_realisation" type="date" defaultValue={etape.date_realisation ?? ""} className="w-full rounded border border-zinc-300 px-2 py-1.5 text-xs" />
               </div>
@@ -122,6 +137,7 @@ export function EtapeRow({
           <div className="space-y-1 text-xs text-zinc-600">
             {etape.resp_mc && etape.resp_mc.length > 0 && <p>MC : <strong>{etape.resp_mc.join(", ")}</strong></p>}
             {etape.resp_franchise && <p>Franchisé : <strong>{etape.resp_franchise}</strong></p>}
+            {etape.resp_externe && <p>Externe : <strong>{etape.resp_externe}</strong></p>}
             {etape.date_realisation && <p>Réalisé le : <strong>{formatDate(etape.date_realisation)}</strong></p>}
             {etape.lien_document && (
               <p>Document : <a href={etape.lien_document} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Ouvrir</a></p>

@@ -34,6 +34,11 @@ export function AddEtapeForm({ projetId, phase }: { projetId: string; phase: Pha
         placeholder="Resp. franchisé…"
         className="w-36 rounded border border-zinc-200 bg-white px-2 py-1.5 text-xs placeholder:text-zinc-400"
       />
+      <input
+        name="resp_externe"
+        placeholder="Externe…"
+        className="w-32 rounded border border-zinc-200 bg-white px-2 py-1.5 text-xs placeholder:text-zinc-400"
+      />
       <button
         type="submit"
         disabled={pending}

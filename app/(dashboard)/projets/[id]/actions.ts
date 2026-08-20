@@ -12,6 +12,7 @@ const UpdateEtapeSchema = z.object({
   responsable: z.enum(RESPONSABLE),
   resp_mc: z.array(z.string()).optional(),
   resp_franchise: z.string().optional(),
+  resp_externe: z.string().optional(),
   statut: z.enum(["a_faire", "en_cours", "fait", "en_retard", "na"]),
   date_realisation: z.string().optional(),
   lien_document: z.string().url({ message: "URL invalide." }).optional().or(z.literal("")),
@@ -33,6 +34,7 @@ export async function updateEtape(
     responsable: formData.get("responsable") || "franchise",
     resp_mc: formData.getAll("resp_mc").filter(Boolean) as string[],
     resp_franchise: formData.get("resp_franchise") || undefined,
+    resp_externe: formData.get("resp_externe") || undefined,
     statut: formData.get("statut"),
     date_realisation: formData.get("date_realisation") || undefined,
     lien_document: formData.get("lien_document") || undefined,
@@ -51,6 +53,7 @@ export async function updateEtape(
       responsable: parsed.data.responsable,
       resp_mc: parsed.data.resp_mc && parsed.data.resp_mc.length > 0 ? parsed.data.resp_mc : null,
       resp_franchise: parsed.data.resp_franchise || null,
+      resp_externe: parsed.data.resp_externe || null,
       statut: parsed.data.statut,
       date_realisation: parsed.data.date_realisation ?? null,
       lien_document: parsed.data.lien_document || null,
@@ -79,6 +82,7 @@ export async function addEtape(
   const resp_mc = formData.getAll("resp_mc").filter(Boolean) as string[];
   const resp_mc_val = resp_mc.length > 0 ? resp_mc : null;
   const resp_franchise = (formData.get("resp_franchise") as string) || null;
+  const resp_externe = (formData.get("resp_externe") as string) || null;
 
   if (!nom) return { error: "Le nom est requis." };
 
@@ -102,6 +106,7 @@ export async function addEtape(
     responsable,
     resp_mc: resp_mc_val,
     resp_franchise,
+    resp_externe,
     ordre: nextOrdre,
     statut: "a_faire",
   });

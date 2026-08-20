@@ -107,7 +107,6 @@ export const RESP_MC_OPTIONS = [
   "Informatique",
   "Technique / Formation",
   "Direction",
-  "Externe",
 ] as const;
 export type RespMC = typeof RESP_MC_OPTIONS[number];
 
@@ -120,6 +119,7 @@ export type EtapeProjet = {
   responsable: ResponsableEtape;
   resp_mc: string[] | null;
   resp_franchise: string | null;
+  resp_externe: string | null;
   ordre: number;
   statut: StatutEtape;
   date_cible: string | null;
