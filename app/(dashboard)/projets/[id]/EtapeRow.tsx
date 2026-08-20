@@ -20,7 +20,7 @@ export function EtapeRow({
   const [state, formAction, pending] = useActionState(action, undefined);
 
   return (
-    <details className="group">
+    <details className="group" key={etape.updated_at}>
       <summary className="flex cursor-pointer list-none items-center gap-3 px-3 py-2.5 hover:bg-zinc-50 [&::-webkit-details-marker]:hidden">
         <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${STATUT_ETAPE_COLORS[etape.statut as StatutEtape]}`}>
           {STATUT_ETAPE_LABELS[etape.statut as StatutEtape]}
