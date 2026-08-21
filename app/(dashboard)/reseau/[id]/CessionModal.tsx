@@ -125,16 +125,27 @@ export function CessionModal({ magasin, franchises, siretActuel }: Props) {
                 </div>
               )}
 
-              {/* Nouveau SIRET */}
+              {/* SIRET */}
               <div className="space-y-1">
-                <label className="text-sm font-medium text-zinc-700">
-                  Nouveau SIRET
-                  {siretActuel && (
-                    <span className="ml-2 text-xs font-normal text-zinc-400">Actuel : {siretActuel}</span>
-                  )}
-                </label>
-                <input name="nouveau_siret" type="text" placeholder="Laisser vide si inchangé ou inconnu"
-                  maxLength={14} className="input w-full" />
+                {dejaAppliquee ? (
+                  <>
+                    <label className="text-sm font-medium text-zinc-700">Ancien SIRET du cédant</label>
+                    <input name="ancien_siret" type="text" placeholder="Laisser vide si inconnu"
+                      maxLength={14} className="input w-full" />
+                    <p className="text-xs text-zinc-400">Sera ajouté à l'historique comme SIRET clôturé à la date de cession. Le SIRET actuel n'est pas modifié.</p>
+                  </>
+                ) : (
+                  <>
+                    <label className="text-sm font-medium text-zinc-700">
+                      Nouveau SIRET du repreneur
+                      {siretActuel && (
+                        <span className="ml-2 text-xs font-normal text-zinc-400">Actuel : {siretActuel}</span>
+                      )}
+                    </label>
+                    <input name="nouveau_siret" type="text" placeholder="Laisser vide si inchangé ou inconnu"
+                      maxLength={14} className="input w-full" />
+                  </>
+                )}
               </div>
 
               {/* Notes */}

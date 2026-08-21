@@ -232,6 +232,7 @@ export async function enregistrerCession(
 
   const cedantId = (formData.get("franchise_cedant_id") as string) || null;
   const nouveauSiret = (formData.get("nouveau_siret") as string)?.trim() || null;
+  const ancienSiret = (formData.get("ancien_siret") as string)?.trim() || null;
   const notes = (formData.get("notes") as string)?.trim() || null;
 
   // 1. Insérer la cession
@@ -241,13 +242,24 @@ export async function enregistrerCession(
     type_cession: typeCession,
     franchise_cedant_id: cedantId || null,
     franchise_repreneur_id: repreneurId,
-    nouveau_siret: nouveauSiret,
+    nouveau_siret: dejaAppliquee ? ancienSiret : nouveauSiret,
     notes,
   });
   if (cessionErr) return { error: cessionErr.message };
 
-  // 2. Clôturer l'ancien SIRET si un nouveau est fourni
-  if (nouveauSiret) {
+  // 2. Gestion des SIRET
+  if (dejaAppliquee) {
+    // Cession historique : insérer l'ancien SIRET comme entrée clôturée, sans toucher au SIRET actuel
+    if (ancienSiret) {
+      await supabase.from("magasin_sirets").insert({
+        magasin_id: magasinId,
+        siret: ancienSiret,
+        date_debut: "1900-01-01",
+        date_fin: dateCession,
+      });
+    }
+  } else if (nouveauSiret) {
+    // Cession courante : clôturer le SIRET actuel et insérer le nouveau
     await supabase
       .from("magasin_sirets")
       .update({ date_fin: dateCession })
