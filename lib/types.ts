@@ -118,6 +118,7 @@ export type Franchise = {
   tva_intracom: string | null;
   associes: FranchiseAsssocie[];
   notes: string | null;
+  archive: boolean;
   created_at: string;
   updated_at: string;
 };
@@ -138,6 +139,8 @@ export type Magasin = {
   format: FormatMagasin | null;
   surface_m2: number | null;
   notes: string | null;
+  archive: boolean;
+  date_fermeture: string | null;
   projet_id: string | null;
   created_at: string;
   updated_at: string;

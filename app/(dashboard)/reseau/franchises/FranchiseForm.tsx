@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useState, useId } from "react";
 import { saveFranchise } from "../actions";
 import type { Franchise, FranchiseAsssocie } from "@/lib/types";
 
@@ -12,6 +12,8 @@ export function FranchiseForm({ franchise }: Props) {
   const action = saveFranchise.bind(null, franchise?.id ?? null);
   const [state, formAction, pending] = useActionState(action, undefined);
 
+  const [archive, setArchive] = useState(franchise?.archive ?? false);
+  const archiveId = useId();
   const [associes, setAssocies] = useState<FranchiseAsssocie[]>(
     franchise?.associes?.length ? franchise.associes : [{ ...EMPTY }]
   );
@@ -102,6 +104,33 @@ export function FranchiseForm({ franchise }: Props) {
           </div>
         ))}
       </div>
+
+      {/* Archivage */}
+      {franchise && (
+        <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm space-y-2">
+          <h2 className="text-sm font-semibold text-zinc-900">Statut du franchisé</h2>
+          <div className="flex items-center gap-3">
+            <input type="hidden" name="archive" value="0" />
+            <input
+              id={archiveId}
+              type="checkbox"
+              name="archive"
+              value="1"
+              checked={archive}
+              onChange={(e) => setArchive(e.target.checked)}
+              className="h-4 w-4 rounded border-zinc-300 accent-brand"
+            />
+            <label htmlFor={archiveId} className="text-sm text-zinc-700 cursor-pointer">
+              Franchisé inactif (archiver)
+            </label>
+          </div>
+          {archive && (
+            <p className="text-xs text-zinc-400 ml-7">
+              Les magasins liés ne sont pas archivés automatiquement. Le franchisé peut être désarchivé à tout moment.
+            </p>
+          )}
+        </div>
+      )}
 
       {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
 

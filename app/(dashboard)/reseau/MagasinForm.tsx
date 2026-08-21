@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useState, useId } from "react";
 import Link from "next/link";
 import { saveMagasin } from "./actions";
 import type { Magasin, Franchise } from "@/lib/types";
@@ -18,6 +18,8 @@ export function MagasinForm({ magasin, projetId = null, projetNom, franchises }:
   const [state, formAction, pending] = useActionState(action, undefined);
 
   const [type, setType] = useState<"integre" | "franchise">(magasin?.type ?? "franchise");
+  const [archive, setArchive] = useState(magasin?.archive ?? false);
+  const archiveId = useId();
 
   return (
     <form action={formAction} className="space-y-6">
@@ -158,6 +160,37 @@ export function MagasinForm({ magasin, projetId = null, projetNom, franchises }:
           )}
         </div>
       )}
+
+      {/* Archivage */}
+      <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm space-y-3">
+        <h2 className="text-sm font-semibold text-zinc-900">Statut du magasin</h2>
+        <div className="flex items-center gap-3">
+          <input type="hidden" name="archive" value="0" />
+          <input
+            id={archiveId}
+            type="checkbox"
+            name="archive"
+            value="1"
+            checked={archive}
+            onChange={(e) => setArchive(e.target.checked)}
+            className="h-4 w-4 rounded border-zinc-300 accent-brand"
+          />
+          <label htmlFor={archiveId} className="text-sm text-zinc-700 cursor-pointer">
+            Magasin fermé (archiver)
+          </label>
+        </div>
+        {archive && (
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-zinc-700">Date de fermeture</label>
+            <input
+              name="date_fermeture"
+              type="date"
+              defaultValue={magasin?.date_fermeture ?? ""}
+              className="input w-48"
+            />
+          </div>
+        )}
+      </div>
 
       {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
 

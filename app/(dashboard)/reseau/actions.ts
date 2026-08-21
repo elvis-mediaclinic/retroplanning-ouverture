@@ -46,6 +46,7 @@ export async function saveFranchise(
     tva_intracom: (formData.get("tva_intracom") as string).trim() || null,
     associes,
     notes: (formData.get("notes") as string).trim() || null,
+    archive: formData.get("archive") === "1",
     updated_at: new Date().toISOString(),
   };
 
@@ -85,11 +86,15 @@ export async function saveMagasin(
 
   const type = (formData.get("type") as string) === "integre" ? "integre" : "franchise";
 
+  const archive = formData.get("archive") === "1";
+
   const payload = {
     nom,
     type,
     siret: (formData.get("siret") as string).trim() || null,
     franchise_id: type === "franchise" ? (formData.get("franchise_id") as string) || null : null,
+    archive,
+    date_fermeture: archive ? (formData.get("date_fermeture") as string) || null : null,
     adresse: (formData.get("adresse") as string).trim() || null,
     code_postal: (formData.get("code_postal") as string).trim() || null,
     ville: (formData.get("ville") as string).trim() || null,

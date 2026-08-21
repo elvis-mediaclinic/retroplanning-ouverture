@@ -13,14 +13,42 @@ function formatDate(d: string | null) {
 
 type MagasinWithFranchise = Magasin & { franchises: Franchise | null };
 
-export default async function ReseauPage() {
+function Tabs({ active }: { active: "actifs" | "archives" }) {
+  return (
+    <div className="flex border-b border-zinc-200 mb-6">
+      {(["actifs", "archives"] as const).map((tab) => (
+        <Link
+          key={tab}
+          href={tab === "actifs" ? "/reseau" : "/reseau?tab=archives"}
+          className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+            active === tab
+              ? "border-brand text-brand"
+              : "border-transparent text-zinc-500 hover:text-zinc-900"
+          }`}
+        >
+          {tab === "actifs" ? "Actifs" : "Archivés"}
+        </Link>
+      ))}
+    </div>
+  );
+}
+
+export default async function ReseauPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string }>;
+}) {
   await requireMC();
   const profile = await getProfile();
+  const { tab } = await searchParams;
+  const showArchives = tab === "archives";
+
   const supabase = await createClient();
 
   const { data } = await supabase
     .from("magasins")
     .select("*, franchises(*)")
+    .eq("archive", showArchives)
     .order("date_ouverture", { ascending: false });
 
   const magasins = (data ?? []) as MagasinWithFranchise[];
@@ -32,7 +60,7 @@ export default async function ReseauPage() {
         <div>
           <h1 className="text-xl font-semibold text-zinc-900">Réseau</h1>
           <p className="mt-1 text-sm text-zinc-500">
-            {magasins.length} magasin{magasins.length !== 1 ? "s" : ""} dans le réseau
+            {magasins.length} magasin{magasins.length !== 1 ? "s" : ""} {showArchives ? "archivés" : "dans le réseau"}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -41,7 +69,7 @@ export default async function ReseauPage() {
               Franchisés
             </Link>
           )}
-          {isAdmin && (
+          {isAdmin && !showArchives && (
             <Link href="/reseau/new" className="btn-primary text-sm">
               + Ajouter un magasin
             </Link>
@@ -49,10 +77,14 @@ export default async function ReseauPage() {
         </div>
       </div>
 
+      <Tabs active={showArchives ? "archives" : "actifs"} />
+
       {magasins.length === 0 ? (
         <div className="rounded-lg border border-zinc-200 bg-white p-12 text-center shadow-sm">
-          <p className="text-sm text-zinc-400">Aucun magasin dans le réseau pour l'instant.</p>
-          {isAdmin && (
+          <p className="text-sm text-zinc-400">
+            {showArchives ? "Aucun magasin archivé." : "Aucun magasin dans le réseau pour l'instant."}
+          </p>
+          {isAdmin && !showArchives && (
             <Link href="/reseau/new" className="mt-3 inline-block text-sm text-brand hover:underline">
               Ajouter le premier magasin
             </Link>
@@ -61,10 +93,19 @@ export default async function ReseauPage() {
       ) : (
         <div className="space-y-4">
           {magasins.map((m) => (
-            <div key={m.id} className="rounded-lg border border-zinc-200 bg-white shadow-sm overflow-hidden">
+            <div key={m.id} className={`rounded-lg border bg-white shadow-sm overflow-hidden ${
+              m.archive ? "border-zinc-200 opacity-80" : "border-zinc-200"
+            }`}>
               <div className="flex items-start justify-between px-5 py-4 border-b border-zinc-100">
                 <div>
-                  <h2 className="font-semibold text-zinc-900">{m.nom}</h2>
+                  <div className="flex items-center gap-2">
+                    <h2 className="font-semibold text-zinc-900">{m.nom}</h2>
+                    {m.archive && m.date_fermeture && (
+                      <span className="text-xs text-zinc-400 bg-zinc-100 rounded px-2 py-0.5">
+                        Fermé le {formatDate(m.date_fermeture)}
+                      </span>
+                    )}
+                  </div>
                   <p className="text-sm text-zinc-500 mt-0.5">
                     {[m.adresse, m.code_postal, m.ville].filter(Boolean).join(", ") || "Adresse non renseignée"}
                   </p>
@@ -112,7 +153,6 @@ export default async function ReseauPage() {
                 </div>
               </div>
 
-              {/* Franchisé lié */}
               {m.franchises && (
                 <div className="px-5 py-3 border-t border-zinc-100 bg-zinc-50">
                   <div className="flex items-center justify-between mb-2">
@@ -124,7 +164,12 @@ export default async function ReseauPage() {
                       </Link>
                     )}
                   </div>
-                  <p className="text-sm font-medium text-zinc-800 mb-1">{m.franchises.nom}</p>
+                  <p className="text-sm font-medium text-zinc-800 mb-1">
+                    {m.franchises.nom}
+                    {m.franchises.archive && (
+                      <span className="ml-2 text-xs text-zinc-400 bg-zinc-200 rounded px-1.5 py-0.5">Archivé</span>
+                    )}
+                  </p>
                   {m.franchises.associes.length > 0 && (
                     <div className="flex flex-wrap gap-4">
                       {m.franchises.associes.map((a, i) => (
