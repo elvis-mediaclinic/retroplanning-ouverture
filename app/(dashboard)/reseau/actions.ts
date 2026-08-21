@@ -147,12 +147,38 @@ export async function saveMagasin(
     updated_at: new Date().toISOString(),
   };
 
+  const siret = (formData.get("siret") as string | null)?.trim() || null;
+
   if (id) {
     const { error } = await supabase.from("magasins").update(payload).eq("id", id);
     if (error) return { error: error.message };
+
+    // Insérer le premier SIRET si aucun n'existe encore
+    if (siret) {
+      const { count } = await supabase
+        .from("magasin_sirets")
+        .select("id", { count: "exact", head: true })
+        .eq("magasin_id", id);
+      if ((count ?? 0) === 0) {
+        await supabase.from("magasin_sirets").insert({
+          magasin_id: id,
+          siret,
+          date_debut: (payload as Record<string, unknown>).date_ouverture as string ?? new Date().toISOString().slice(0, 10),
+        });
+      }
+    }
   } else {
-    const { error } = await supabase.from("magasins").insert(payload);
-    if (error) return { error: error.message };
+    const { data: created, error } = await supabase.from("magasins").insert(payload).select("id").single();
+    if (error || !created) return { error: error?.message ?? "Erreur inconnue." };
+
+    // Insérer le SIRET initial si fourni
+    if (siret) {
+      await supabase.from("magasin_sirets").insert({
+        magasin_id: created.id,
+        siret,
+        date_debut: (payload as Record<string, unknown>).date_ouverture as string ?? new Date().toISOString().slice(0, 10),
+      });
+    }
   }
 
   revalidatePath("/reseau");
