@@ -125,7 +125,7 @@ export async function saveMagasin(
 
   const type = (formData.get("type") as string) === "integre" ? "integre" : "franchise";
 
-  const archive = formData.get("archive") === "1";
+  const archive = formData.getAll("archive").includes("1");
 
   const payload = {
     nom,
