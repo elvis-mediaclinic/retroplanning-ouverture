@@ -171,7 +171,7 @@ export default async function AnnoncePage({
   const { id } = await params;
   const supabase = await createClient();
 
-  const [{ data: annonce }, { data: conceptPage }] = await Promise.all([
+  const [{ data: annonce }, { data: conceptPage }, { data: { user } }] = await Promise.all([
     supabase
       .from("annonces")
       .select("id, titre, accroche, contenu, contenu_json, sections, actif, villes(id, nom)")
@@ -179,6 +179,7 @@ export default async function AnnoncePage({
       .eq("actif", true)
       .single(),
     supabase.from("pages").select("sections").eq("key", "concept").maybeSingle(),
+    supabase.auth.getUser(),
   ]);
 
   if (!annonce) notFound();
@@ -462,8 +463,8 @@ export default async function AnnoncePage({
         </p>
       </main>
 
-      {/* Suivi d'audience RGPD — affiche la bannière si pas encore de consentement */}
-      <ViewTracker annonceId={annonce.id} />
+      {/* Suivi d'audience RGPD — ignoré si l'utilisateur est connecté */}
+      {!user && <ViewTracker annonceId={annonce.id} />}
     </div>
   );
 }
