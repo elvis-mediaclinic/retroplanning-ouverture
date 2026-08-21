@@ -26,12 +26,12 @@ export default async function DashboardPage() {
       supabase
         .from("candidats")
         .select("id, statut")
-        .not("statut", "in", '("refuse","signe")'),
+        .in("statut", ["prospect", "en_evaluation"]),
     ]);
 
   const stats = [
     {
-      label: "Ouvertures actives",
+      label: "Ouvertures en cours",
       value: (projets ?? []).filter((p) =>
         ["prospection", "en_cours"].includes(p.statut)
       ).length,
