@@ -12,7 +12,8 @@ import {
   type PhaseEtape,
 } from "@/lib/types";
 import { STATUT_PROJET_COLORS as COLORS, STATUT_ETAPE_COLORS } from "@/lib/utils";
-import { FormatDonut, getFormatColor, type FormatSegment } from "./FormatDonut";
+import { FormatDonut } from "./FormatDonut";
+import { getFormatColor, type FormatSegment } from "@/lib/format-colors";
 
 function formatDate(d: string | null) {
   if (!d) return "—";

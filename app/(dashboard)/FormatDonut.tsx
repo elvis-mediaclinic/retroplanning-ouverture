@@ -1,21 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import type { FormatSegment } from "@/lib/format-colors";
 
-export type FormatSegment = { key: string; label: string; count: number; color: string };
-
-// Palette catégorielle — 5 formats max, hues distincts, validée ΔE CVD
-const FORMAT_COLORS: Record<string, string> = {
-  classique:     "#6366f1", // indigo
-  galerie:       "#0ea5e9", // ciel
-  centre_ville:  "#10b981", // émeraude
-  kiosque:       "#f59e0b", // ambre
-  shop_in_shop:  "#ec4899", // rose
-};
-
-export function getFormatColor(key: string) {
-  return FORMAT_COLORS[key] ?? "#a1a1aa";
-}
+export type { FormatSegment };
 
 type Props = { segments: FormatSegment[]; total: number };
 
