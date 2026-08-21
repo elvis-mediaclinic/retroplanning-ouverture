@@ -46,7 +46,7 @@ export async function saveFranchise(
     tva_intracom: (formData.get("tva_intracom") as string).trim() || null,
     associes,
     notes: (formData.get("notes") as string).trim() || null,
-    archive: formData.get("archive") === "1",
+    archive: formData.getAll("archive").includes("1"),
     updated_at: new Date().toISOString(),
   };
 
