@@ -70,6 +70,45 @@ export async function deleteFranchise(id: string) {
   redirect("/reseau/franchises");
 }
 
+// Action légère pour créer un franchisé depuis la modal du formulaire magasin
+// Retourne les données au lieu de rediriger
+export async function createFranchiseInline(
+  formData: FormData
+): Promise<{ id: string; nom: string } | { error: string }> {
+  await requireRole("admin");
+  const supabase = await createClient();
+
+  const nom = (formData.get("nom") as string).trim();
+  if (!nom) return { error: "Nom requis." };
+
+  const associes: FranchiseAsssocie[] = [];
+  let i = 0;
+  while (formData.has(`associes[${i}][prenom]`)) {
+    const prenom = (formData.get(`associes[${i}][prenom]`) as string).trim();
+    const assNom = (formData.get(`associes[${i}][nom]`) as string).trim();
+    if (prenom || assNom) {
+      associes.push({
+        prenom,
+        nom: assNom,
+        telephone: (formData.get(`associes[${i}][telephone]`) as string).trim(),
+        email: (formData.get(`associes[${i}][email]`) as string).trim(),
+      });
+    }
+    i++;
+  }
+
+  const { data, error } = await supabase
+    .from("franchises")
+    .insert({ nom, associes, updated_at: new Date().toISOString() })
+    .select("id, nom")
+    .single();
+
+  if (error || !data) return { error: error?.message ?? "Erreur inconnue." };
+
+  revalidatePath("/reseau");
+  return { id: data.id, nom: data.nom };
+}
+
 // ─── Magasins ────────────────────────────────────────────────────────────────
 
 export async function saveMagasin(
