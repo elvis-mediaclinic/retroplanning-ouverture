@@ -11,9 +11,10 @@ type Props = {
   projetId?: string | null;
   projetNom?: string | null;
   franchises: Franchise[];
+  siretActuel?: string | null;
 };
 
-export function MagasinForm({ magasin, projetId = null, projetNom, franchises: initialFranchises }: Props) {
+export function MagasinForm({ magasin, projetId = null, projetNom, franchises: initialFranchises, siretActuel }: Props) {
   const action = saveMagasin.bind(null, magasin?.id ?? null, projetId);
   const [state, formAction, pending] = useActionState(action, undefined);
 
@@ -87,11 +88,15 @@ export function MagasinForm({ magasin, projetId = null, projetNom, franchises: i
               <input name="nom" type="text" required defaultValue={magasin?.nom} className="input w-full" />
             </div>
 
-            <div className="space-y-1">
-              <label className="text-sm font-medium text-zinc-700">SIRET</label>
-              <input name="siret" type="text" defaultValue={magasin?.siret ?? ""} className="input w-full"
-                placeholder="14 chiffres" maxLength={14} />
-            </div>
+            {siretActuel !== undefined && (
+              <div className="space-y-1">
+                <label className="text-sm font-medium text-zinc-700">SIRET actuel</label>
+                <p className="font-mono text-sm text-zinc-700 rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2">
+                  {siretActuel ?? <span className="text-zinc-400 not-italic">Non renseigné</span>}
+                </p>
+                <p className="text-xs text-zinc-400">Le SIRET se met à jour via « Enregistrer une cession ».</p>
+              </div>
+            )}
 
             <div className="sm:col-span-2 space-y-1">
               <label className="text-sm font-medium text-zinc-700">Adresse</label>

@@ -128,7 +128,6 @@ export type Magasin = {
   nom: string;
   type: "integre" | "franchise";
   franchise_id: string | null;
-  siret: string | null;
   adresse: string | null;
   code_postal: string | null;
   ville: string | null;
@@ -144,6 +143,29 @@ export type Magasin = {
   projet_id: string | null;
   created_at: string;
   updated_at: string;
+};
+
+export type MagasinSiret = {
+  id: string;
+  magasin_id: string;
+  siret: string;
+  date_debut: string;
+  date_fin: string | null;
+  created_at: string;
+};
+
+export type TypeCession = "franchise_a_franchise" | "integre_a_franchise" | "franchise_a_integre";
+
+export type MagasinCession = {
+  id: string;
+  magasin_id: string;
+  date_cession: string;
+  type_cession: TypeCession;
+  franchise_cedant_id: string | null;
+  franchise_repreneur_id: string | null;
+  nouveau_siret: string | null;
+  notes: string | null;
+  created_at: string;
 };
 
 export type MCUser = {

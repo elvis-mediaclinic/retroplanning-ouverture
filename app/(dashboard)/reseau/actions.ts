@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireRole } from "@/lib/dal";
 import { createClient } from "@/lib/supabase/server";
-import type { FranchiseAsssocie } from "@/lib/types";
+import type { FranchiseAsssocie, TypeCession } from "@/lib/types";
 
 export type MagasinState = { error?: string } | undefined;
 export type FranchiseState = { error?: string } | undefined;
@@ -130,7 +130,6 @@ export async function saveMagasin(
   const payload = {
     nom,
     type,
-    siret: (formData.get("siret") as string).trim() || null,
     franchise_id: type === "franchise" ? (formData.get("franchise_id") as string) || null : null,
     archive,
     date_fermeture: archive ? (formData.get("date_fermeture") as string) || null : null,
@@ -167,4 +166,80 @@ export async function deleteMagasin(id: string) {
   await supabase.from("magasins").delete().eq("id", id);
   revalidatePath("/reseau");
   redirect("/reseau");
+}
+
+// ─── Cessions ────────────────────────────────────────────────────────────────
+
+export type CessionState = { error?: string } | undefined;
+
+export async function enregistrerCession(
+  magasinId: string,
+  _state: CessionState,
+  formData: FormData
+): Promise<CessionState> {
+  await requireRole("admin");
+  const supabase = await createClient();
+
+  const typeCession = formData.get("type_cession") as TypeCession;
+  const dateCession = formData.get("date_cession") as string;
+  if (!dateCession) return { error: "Date de cession requise." };
+  if (!typeCession) return { error: "Type de cession requis." };
+
+  // Résoudre le repreneur (existant ou nouveau franchisé à créer)
+  let repreneurId: string | null = (formData.get("franchise_repreneur_id") as string) || null;
+  const nouveauFranchiseNom = (formData.get("nouveau_franchise_nom") as string)?.trim();
+
+  if (!repreneurId && nouveauFranchiseNom && typeCession !== "franchise_a_integre") {
+    const { data: nf, error: nfErr } = await supabase
+      .from("franchises")
+      .insert({ nom: nouveauFranchiseNom, associes: [], updated_at: new Date().toISOString() })
+      .select("id")
+      .single();
+    if (nfErr || !nf) return { error: "Impossible de créer le franchisé repreneur." };
+    repreneurId = nf.id;
+  }
+
+  const cedantId = (formData.get("franchise_cedant_id") as string) || null;
+  const nouveauSiret = (formData.get("nouveau_siret") as string)?.trim() || null;
+  const notes = (formData.get("notes") as string)?.trim() || null;
+
+  // 1. Insérer la cession
+  const { error: cessionErr } = await supabase.from("magasin_cessions").insert({
+    magasin_id: magasinId,
+    date_cession: dateCession,
+    type_cession: typeCession,
+    franchise_cedant_id: cedantId || null,
+    franchise_repreneur_id: repreneurId,
+    nouveau_siret: nouveauSiret,
+    notes,
+  });
+  if (cessionErr) return { error: cessionErr.message };
+
+  // 2. Clôturer l'ancien SIRET si un nouveau est fourni
+  if (nouveauSiret) {
+    await supabase
+      .from("magasin_sirets")
+      .update({ date_fin: dateCession })
+      .eq("magasin_id", magasinId)
+      .is("date_fin", null);
+
+    await supabase.from("magasin_sirets").insert({
+      magasin_id: magasinId,
+      siret: nouveauSiret,
+      date_debut: dateCession,
+    });
+  }
+
+  // 3. Mettre à jour le magasin (type + franchisé)
+  const nouveauType = typeCession === "franchise_a_integre" ? "integre" : "franchise";
+  const nouvFranchiseId = typeCession === "franchise_a_integre" ? null : repreneurId;
+
+  await supabase
+    .from("magasins")
+    .update({ type: nouveauType, franchise_id: nouvFranchiseId, updated_at: new Date().toISOString() })
+    .eq("id", magasinId);
+
+  revalidatePath(`/reseau/${magasinId}`);
+  revalidatePath("/reseau");
+  return {};
 }
