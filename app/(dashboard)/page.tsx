@@ -102,7 +102,7 @@ export default async function DashboardPage() {
   const integreCount = actifs.filter((m) => m.type === "integre").length;
   const franchiseCount = actifs.filter((m) => m.type === "franchise").length;
 
-  // Répartition par format (magasins actifs uniquement)
+  // Répartition par format — actifs
   const formatSegments: FormatSegment[] = Object.entries(FORMAT_LABELS)
     .map(([key, label]) => ({
       key,
@@ -112,6 +112,17 @@ export default async function DashboardPage() {
     }))
     .filter((s) => s.count > 0);
   const formatTotal = formatSegments.reduce((s, f) => s + f.count, 0);
+
+  // Répartition par format — archivés
+  const formatSegmentsArchives: FormatSegment[] = Object.entries(FORMAT_LABELS)
+    .map(([key, label]) => ({
+      key,
+      label,
+      count: archives.filter((m) => m.format === key).length,
+      color: getFormatColor(key),
+    }))
+    .filter((s) => s.count > 0);
+  const formatTotalArchives = formatSegmentsArchives.reduce((s, f) => s + f.count, 0);
 
   // Annonces actives
   const annoncesActives = (annonces ?? []).filter((a) => a.actif).length;
@@ -123,6 +134,60 @@ export default async function DashboardPage() {
         <h1 className="text-2xl font-bold text-zinc-900">Suivi développement franchise</h1>
         <p className="mt-1 text-sm text-zinc-500">Bonjour {profile.prenom} !</p>
       </div>
+
+      {/* ── Réseau ───────────────────────────────────────────────── */}
+      <section>
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Réseau</h2>
+          <Link href="/reseau" className="text-xs text-zinc-500 hover:text-zinc-900">
+            Voir le réseau →
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+          {/* Carte totaux — pleine largeur sur mobile, 1/3 sur desktop */}
+          <div className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
+            <p className="text-xs font-semibold text-zinc-500 mb-4">Magasins dans le réseau</p>
+            <div className="flex items-center gap-8">
+              <div className="text-center">
+                <p className="text-4xl font-bold text-zinc-900">{actifs.length}</p>
+                <p className="text-xs text-zinc-400 mt-1">ouverts</p>
+              </div>
+              <div className="h-12 w-px bg-zinc-100" />
+              <div className="flex gap-6">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-blue-600">{integreCount}</p>
+                  <p className="text-xs text-zinc-400 mt-0.5">intégré{integreCount > 1 ? "s" : ""}</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-zinc-700">{franchiseCount}</p>
+                  <p className="text-xs text-zinc-400 mt-0.5">franchisé{franchiseCount > 1 ? "s" : ""}</p>
+                </div>
+                {archives.length > 0 && (
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-zinc-300">{archives.length}</p>
+                    <p className="text-xs text-zinc-300 mt-0.5">archivé{archives.length > 1 ? "s" : ""}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Donut formats — actifs */}
+          <div className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
+            <p className="text-xs font-semibold text-zinc-500 mb-4">Répartition par format — ouverts</p>
+            <FormatDonut segments={formatSegments} total={formatTotal} />
+          </div>
+
+          {/* Donut formats — archivés */}
+          {formatTotalArchives > 0 && (
+            <div className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm opacity-70">
+              <p className="text-xs font-semibold text-zinc-500 mb-4">Répartition par format — archivés</p>
+              <FormatDonut segments={formatSegmentsArchives} total={formatTotalArchives} />
+            </div>
+          )}
+        </div>
+      </section>
 
       {/* ── Développement ─────────────────────────────────────────── */}
       <section>
@@ -151,51 +216,6 @@ export default async function DashboardPage() {
               <p className="mt-0.5 text-xs text-zinc-500">{label}</p>
             </Link>
           ))}
-        </div>
-      </section>
-
-      {/* ── Réseau ───────────────────────────────────────────────── */}
-      <section>
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Réseau</h2>
-          <Link href="/reseau" className="text-xs text-zinc-500 hover:text-zinc-900">
-            Voir le réseau →
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {/* Carte totaux */}
-          <div className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
-            <p className="text-xs font-semibold text-zinc-500 mb-4">Magasins dans le réseau</p>
-            <div className="flex items-end gap-6">
-              <div>
-                <p className="text-4xl font-bold text-zinc-900">{actifs.length}</p>
-                <p className="text-xs text-zinc-400 mt-0.5">ouverts</p>
-              </div>
-              <div className="space-y-1 pb-1">
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-blue-400 shrink-0" />
-                  <span className="text-sm text-zinc-600">{integreCount} intégré{integreCount > 1 ? "s" : ""}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-zinc-400 shrink-0" />
-                  <span className="text-sm text-zinc-600">{franchiseCount} franchisé{franchiseCount > 1 ? "s" : ""}</span>
-                </div>
-                {archives.length > 0 && (
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-zinc-200 shrink-0" />
-                    <span className="text-sm text-zinc-400">{archives.length} archivé{archives.length > 1 ? "s" : ""}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Carte donut formats */}
-          <div className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
-            <p className="text-xs font-semibold text-zinc-500 mb-4">Répartition par format</p>
-            <FormatDonut segments={formatSegments} total={formatTotal} />
-          </div>
         </div>
       </section>
 
