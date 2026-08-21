@@ -55,6 +55,9 @@ textarea {
 }
 
 @layer components {
+  .input {
+    @apply rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 focus:border-brand focus:outline-none;
+  }
   .btn-primary {
     @apply rounded-md bg-brand px-3 py-2 text-sm font-medium text-white hover:bg-brand-dark disabled:opacity-50 transition-colors;
   }

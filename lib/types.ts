@@ -102,6 +102,32 @@ export type EtapeTemplate = {
   responsable: ResponsableEtape;
 };
 
+export type FranchiseAsssocie = {
+  prenom: string;
+  nom: string;
+  telephone: string;
+  email: string;
+};
+
+export type Magasin = {
+  id: string;
+  nom: string;
+  franchises: FranchiseAsssocie[];
+  adresse: string | null;
+  code_postal: string | null;
+  ville: string | null;
+  telephone: string | null;
+  email: string | null;
+  date_signature_contrat: string | null;
+  date_ouverture: string | null;
+  format: FormatMagasin | null;
+  surface_m2: number | null;
+  notes: string | null;
+  projet_id: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 export type MCUser = {
   id: string;
   nom: string;

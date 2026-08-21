@@ -72,10 +72,17 @@ export default async function ProjetPage({
   }
 
   const isMC = profile.role === "admin" || profile.role === "consultant" || profile.role === "responsable_mc";
-  // admin/franchise : peuvent tout modifier
-  // responsable_mc : peuvent modifier uniquement les étapes où ils sont assignés (géré dans EtapeRow)
   const canEditAll = profile.role === "admin" || profile.role === "franchise";
   const isResponsableMC = profile.role === "responsable_mc";
+
+  // Bouton "Ajouter au réseau" : admin + date d'ouverture dépassée + pas encore dans le réseau
+  const { data: magasinLie } = profile.role === "admin"
+    ? await (await createClient()).from("magasins").select("id").eq("projet_id", id).maybeSingle()
+    : { data: null };
+  const dateOuverturePassee =
+    projet.date_cible_ouverture !== null &&
+    new Date(projet.date_cible_ouverture + "T00:00:00") <= new Date();
+  const showAddReseau = profile.role === "admin" && dateOuverturePassee && !magasinLie;
 
   const etapesParPhase = PHASES_ORDER.reduce<Record<PhaseEtape, EtapeProjet[]>>(
     (acc, phase) => {
@@ -121,6 +128,14 @@ export default async function ProjetPage({
           </p>
         </div>
         <div className="flex items-center gap-2">
+          {showAddReseau && (
+            <Link
+              href={`/reseau/new?projet_id=${id}&projet_nom=${encodeURIComponent(projet.nom)}`}
+              className="rounded-md border border-green-300 bg-green-50 px-3 py-1.5 text-sm font-medium text-green-700 hover:bg-green-100"
+            >
+              + Ajouter au réseau
+            </Link>
+          )}
           <ExportButtons etapes={etapes ?? []} projetNom={projet.nom} mcUsers={mcUsers} />
           <Link
             href={`/projets/${id}/gantt`}
