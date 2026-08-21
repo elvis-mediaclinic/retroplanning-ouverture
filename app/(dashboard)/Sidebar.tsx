@@ -30,6 +30,7 @@ const NAV: Record<UserRole, NavGroup[]> = {
       items: [
         { href: "/villes", label: "Villes" },
         { href: "/candidats", label: "Candidats" },
+        { href: "/annonces", label: "Annonces" },
       ],
     },
     {
@@ -63,6 +64,7 @@ const NAV: Record<UserRole, NavGroup[]> = {
       items: [
         { href: "/villes", label: "Villes" },
         { href: "/candidats", label: "Candidats" },
+        { href: "/annonces", label: "Annonces" },
       ],
     },
     {
