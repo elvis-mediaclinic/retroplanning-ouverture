@@ -15,6 +15,7 @@ type Candidat = {
   apport_personnel: number | null;
   profil_id: string | null;
   candidat_villes: Array<{ villes: { nom: string } | { nom: string }[] | null }> | null;
+  projets: Array<{ id: string; statut: string }> | null;
 };
 
 function getVilles(c: Candidat) {
@@ -26,7 +27,8 @@ function getVilles(c: Candidat) {
   return noms.length > 0 ? noms.join(", ") : (c.zone_souhaitee ?? "—");
 }
 
-function CandidatRow({ c }: { c: Candidat }) {
+function CandidatRow({ c, showProjet }: { c: Candidat; showProjet?: boolean }) {
+  const projetsActifs = (c.projets ?? []).filter((p) => ["prospection", "en_cours"].includes(p.statut));
   return (
     <tr className="border-b border-zinc-100 last:border-0">
       <td className="py-2 px-4">
@@ -38,6 +40,20 @@ function CandidatRow({ c }: { c: Candidat }) {
       <td className="py-2 px-4 text-zinc-500">
         {c.apport_personnel ? `${c.apport_personnel.toLocaleString("fr-FR")} €` : "—"}
       </td>
+      {showProjet && (
+        <td className="py-2 px-4">
+          {projetsActifs.length > 0 ? (
+            <div className="flex flex-wrap gap-1">
+              {projetsActifs.map((p) => (
+                <Link key={p.id} href={`/projets/${p.id}`}
+                  className="rounded-full bg-brand/10 px-2 py-0.5 text-xs font-medium text-brand hover:bg-brand/20">
+                  Projet →
+                </Link>
+              ))}
+            </div>
+          ) : "—"}
+        </td>
+      )}
       <td className="py-2 px-4">
         <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
           STATUT_CANDIDAT_COLORS[c.statut as keyof typeof STATUT_CANDIDAT_COLORS]
@@ -54,7 +70,7 @@ function CandidatRow({ c }: { c: Candidat }) {
   );
 }
 
-function CandidatTable({ candidats, empty }: { candidats: Candidat[]; empty: string }) {
+function CandidatTable({ candidats, empty, showProjet }: { candidats: Candidat[]; empty: string; showProjet?: boolean }) {
   if (candidats.length === 0) {
     return <p className="text-sm text-zinc-400 py-3">{empty}</p>;
   }
@@ -67,12 +83,13 @@ function CandidatTable({ candidats, empty }: { candidats: Candidat[]; empty: str
             <th className="py-2 px-4 font-medium text-zinc-600">Email</th>
             <th className="py-2 px-4 font-medium text-zinc-600">Zone</th>
             <th className="py-2 px-4 font-medium text-zinc-600">Apport</th>
+            {showProjet && <th className="py-2 px-4 font-medium text-zinc-600">Projet</th>}
             <th className="py-2 px-4 font-medium text-zinc-600">Statut</th>
             <th className="py-2 px-4" />
           </tr>
         </thead>
         <tbody>
-          {candidats.map((c) => <CandidatRow key={c.id} c={c} />)}
+          {candidats.map((c) => <CandidatRow key={c.id} c={c} showProjet={showProjet} />)}
         </tbody>
       </table>
     </div>
@@ -85,14 +102,19 @@ export default async function CandidatsPage() {
 
   const { data } = await supabase
     .from("candidats")
-    .select("id, nom, prenom, email, telephone, zone_souhaitee, statut, apport_personnel, profil_id, candidat_villes(villes(nom))")
+    .select("id, nom, prenom, email, telephone, zone_souhaitee, statut, apport_personnel, profil_id, candidat_villes(villes(nom)), projets(id, statut)")
     .order("created_at", { ascending: false });
 
   const candidats = (data ?? []) as Candidat[];
 
-  const enCours = candidats.filter((c) => ["prospect", "en_evaluation", "valide"].includes(c.statut));
-  const signes  = candidats.filter((c) => c.statut === "signe");
-  const refuses = candidats.filter((c) => c.statut === "refuse");
+  const hasProjetActif = (c: Candidat) =>
+    (c.projets ?? []).some((p) => ["prospection", "en_cours"].includes(p.statut));
+
+  const avecProjet = candidats.filter((c) => c.statut === "valide" && hasProjetActif(c));
+  const enCours    = candidats.filter((c) => ["prospect", "en_evaluation"].includes(c.statut) ||
+    (c.statut === "valide" && !hasProjetActif(c)));
+  const signes     = candidats.filter((c) => c.statut === "signe");
+  const refuses    = candidats.filter((c) => c.statut === "refuse");
 
   return (
     <div className="space-y-8">
@@ -100,7 +122,8 @@ export default async function CandidatsPage() {
         <div>
           <h1 className="text-lg font-semibold text-zinc-900">Candidats franchisés</h1>
           <p className="text-sm text-zinc-500">
-            {enCours.length} en cours · {signes.length} signé{signes.length !== 1 ? "s" : ""}
+            {avecProjet.length > 0 && `${avecProjet.length} projet en cours · `}
+            {enCours.length} en évaluation · {signes.length} signé{signes.length !== 1 ? "s" : ""}
             {refuses.length > 0 && ` · ${refuses.length} refusé${refuses.length !== 1 ? "s" : ""}`}
           </p>
         </div>
@@ -115,9 +138,17 @@ export default async function CandidatsPage() {
         </section>
       )}
 
-      {/* En cours */}
+      {/* Validés avec projet en cours */}
+      {avecProjet.length > 0 && (
+        <section>
+          <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-zinc-400">Validés — projet en cours</h2>
+          <CandidatTable candidats={avecProjet} empty="" showProjet />
+        </section>
+      )}
+
+      {/* En évaluation */}
       <section>
-        <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-zinc-400">En cours</h2>
+        <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-zinc-400">En évaluation</h2>
         <CandidatTable candidats={enCours} empty="Aucun candidat en cours." />
       </section>
 
