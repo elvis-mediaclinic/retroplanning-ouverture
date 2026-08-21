@@ -216,8 +216,8 @@ export default async function DashboardPage() {
                 </div>
                 <ul className="divide-y divide-zinc-100">
                   {pe.map((e: any) => {
-                    const retard = e.statut === "en_retard";
-                    const aujourd = e.date_cible === today;
+                    const retard = e.statut === "en_retard" || (e.date_cible != null && e.date_cible < today);
+                    const aujourd = !retard && e.date_cible === today;
                     return (
                       <li key={e.id} className={`flex items-center gap-3 px-4 py-2.5 ${retard ? "bg-red-50" : ""}`}>
                         {/* Barre urgence */}
