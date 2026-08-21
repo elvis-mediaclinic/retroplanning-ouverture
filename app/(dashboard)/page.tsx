@@ -219,25 +219,33 @@ export default async function DashboardPage() {
                     const retard = e.statut === "en_retard";
                     const aujourd = e.date_cible === today;
                     return (
-                      <li key={e.id} className="flex items-center gap-3 px-4 py-2.5">
-                        {/* Indicateur urgence */}
-                        <span className={`w-1.5 h-5 rounded-full shrink-0 ${
-                          retard ? "bg-red-400" : aujourd ? "bg-amber-400" : "bg-zinc-300"
+                      <li key={e.id} className={`flex items-center gap-3 px-4 py-2.5 ${retard ? "bg-red-50" : ""}`}>
+                        {/* Barre urgence */}
+                        <span className={`w-1.5 h-6 rounded-full shrink-0 ${
+                          retard ? "bg-red-500" : aujourd ? "bg-amber-400" : "bg-zinc-300"
                         }`} />
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-zinc-900 truncate">{e.nom}</p>
+                          <p className={`text-sm font-medium truncate ${retard ? "text-red-900" : "text-zinc-900"}`}>
+                            {e.nom}
+                          </p>
                           <p className="text-xs text-zinc-400">
                             {PHASE_LABELS[e.phase as PhaseEtape]}
                           </p>
                         </div>
-                        <span className={`text-xs rounded-full px-2 py-0.5 font-medium shrink-0 ${
-                          STATUT_ETAPE_COLORS[e.statut as StatutEtape] ?? "bg-zinc-100 text-zinc-500"
-                        }`}>
-                          {STATUT_ETAPE_LABELS[e.statut as StatutEtape]}
-                        </span>
-                        <span className={`text-xs shrink-0 ${retard ? "text-red-500 font-medium" : aujourd ? "text-amber-600 font-medium" : "text-zinc-400"}`}>
-                          {e.date_cible ? formatDate(e.date_cible) : "—"}
-                        </span>
+                        {/* Badge date/urgence */}
+                        {retard ? (
+                          <span className="text-xs rounded-full px-2.5 py-0.5 font-semibold shrink-0 bg-red-100 text-red-700 ring-1 ring-red-200">
+                            En retard · {e.date_cible ? formatDate(e.date_cible) : "—"}
+                          </span>
+                        ) : aujourd ? (
+                          <span className="text-xs rounded-full px-2.5 py-0.5 font-semibold shrink-0 bg-amber-100 text-amber-700">
+                            Aujourd&apos;hui
+                          </span>
+                        ) : (
+                          <span className="text-xs text-zinc-400 shrink-0">
+                            {e.date_cible ? formatDate(e.date_cible) : "—"}
+                          </span>
+                        )}
                       </li>
                     );
                   })}
