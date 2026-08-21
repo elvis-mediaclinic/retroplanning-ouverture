@@ -25,6 +25,7 @@ export function CessionModal({ magasin, franchises, siretActuel }: Props) {
     magasin.type === "integre" ? "integre_a_franchise" : "franchise_a_franchise"
   );
   const [repreneurMode, setRepreneurMode] = useState<"existant" | "nouveau">("existant");
+  const [dejaAppliquee, setDejaAppliquee] = useState(false);
 
   const cedantAuto = magasin.type === "franchise" ? magasin.franchise_id : null;
   const showCedant = type === "franchise_a_franchise";
@@ -141,6 +142,25 @@ export function CessionModal({ magasin, franchises, siretActuel }: Props) {
                 <label className="text-sm font-medium text-zinc-700">Notes</label>
                 <textarea name="notes" rows={2} className="input w-full resize-none"
                   placeholder="Conditions, remarques…" />
+              </div>
+
+              {/* Cession historique */}
+              <div className="rounded-md border border-amber-200 bg-amber-50 p-3 space-y-1">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="hidden" name="deja_appliquee" value="0" />
+                  <input
+                    type="checkbox"
+                    name="deja_appliquee"
+                    value="1"
+                    checked={dejaAppliquee}
+                    onChange={(e) => setDejaAppliquee(e.target.checked)}
+                    className="h-4 w-4 accent-brand"
+                  />
+                  <span className="text-sm font-medium text-amber-800">Cession déjà appliquée</span>
+                </label>
+                <p className="text-xs text-amber-700 pl-6">
+                  Cocher pour enregistrer un événement passé sans modifier l&apos;état actuel du magasin.
+                </p>
               </div>
 
               {state?.error && <p className="text-sm text-red-600">{state.error}</p>}

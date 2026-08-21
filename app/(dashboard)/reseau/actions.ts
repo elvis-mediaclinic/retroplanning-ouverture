@@ -230,14 +230,16 @@ export async function enregistrerCession(
     });
   }
 
-  // 3. Mettre à jour le magasin (type + franchisé)
-  const nouveauType = typeCession === "franchise_a_integre" ? "integre" : "franchise";
-  const nouvFranchiseId = typeCession === "franchise_a_integre" ? null : repreneurId;
-
-  await supabase
-    .from("magasins")
-    .update({ type: nouveauType, franchise_id: nouvFranchiseId, updated_at: new Date().toISOString() })
-    .eq("id", magasinId);
+  // 3. Mettre à jour le magasin (type + franchisé) — sauf si cession déjà appliquée
+  const dejaAppliquee = formData.get("deja_appliquee") === "1";
+  if (!dejaAppliquee) {
+    const nouveauType = typeCession === "franchise_a_integre" ? "integre" : "franchise";
+    const nouvFranchiseId = typeCession === "franchise_a_integre" ? null : repreneurId;
+    await supabase
+      .from("magasins")
+      .update({ type: nouveauType, franchise_id: nouvFranchiseId, updated_at: new Date().toISOString() })
+      .eq("id", magasinId);
+  }
 
   revalidatePath(`/reseau/${magasinId}`);
   revalidatePath("/reseau");
