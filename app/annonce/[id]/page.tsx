@@ -352,7 +352,7 @@ export default async function AnnoncePage({
               </>
             )}
           </div>
-          <a href="/annonces" className="text-sm text-zinc-500 hover:text-brand transition-colors">
+          <a href="/opportunites" className="text-sm text-zinc-500 hover:text-brand transition-colors">
             ← Toutes les opportunités
           </a>
         </div>
