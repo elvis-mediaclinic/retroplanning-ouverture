@@ -148,25 +148,25 @@ export default async function DashboardPage() {
           {/* Ligne 1 — totaux pleine largeur */}
           <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
             <p className="text-xs font-semibold text-zinc-500 mb-5">Magasins dans le réseau</p>
-            <div className="flex items-center gap-10">
-              <div className="text-center">
+            <div className="flex items-center gap-8">
+              <div className="flex items-baseline gap-2">
                 <p className="text-5xl font-bold text-zinc-900">{actifs.length}</p>
-                <p className="text-xs text-zinc-400 mt-1">ouverts</p>
+                <p className="text-sm text-zinc-400">ouverts</p>
               </div>
-              <div className="h-14 w-px bg-zinc-100" />
-              <div className="flex gap-10">
-                <div className="text-center">
+              <div className="h-10 w-px bg-zinc-100" />
+              <div className="flex items-center gap-6">
+                <div className="flex items-baseline gap-2">
                   <p className="text-3xl font-bold text-blue-600">{integreCount}</p>
-                  <p className="text-xs text-zinc-400 mt-1">intégré{integreCount > 1 ? "s" : ""}</p>
+                  <p className="text-sm text-zinc-400">intégré{integreCount > 1 ? "s" : ""}</p>
                 </div>
-                <div className="text-center">
+                <div className="flex items-baseline gap-2">
                   <p className="text-3xl font-bold text-zinc-700">{franchiseCount}</p>
-                  <p className="text-xs text-zinc-400 mt-1">franchisé{franchiseCount > 1 ? "s" : ""}</p>
+                  <p className="text-sm text-zinc-400">franchisé{franchiseCount > 1 ? "s" : ""}</p>
                 </div>
                 {archives.length > 0 && (
-                  <div className="text-center">
+                  <div className="flex items-baseline gap-2">
                     <p className="text-3xl font-bold text-zinc-300">{archives.length}</p>
-                    <p className="text-xs text-zinc-300 mt-1">archivé{archives.length > 1 ? "s" : ""}</p>
+                    <p className="text-sm text-zinc-300">archivé{archives.length > 1 ? "s" : ""}</p>
                   </div>
                 )}
               </div>
