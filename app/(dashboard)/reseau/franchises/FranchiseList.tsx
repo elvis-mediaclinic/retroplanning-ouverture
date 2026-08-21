@@ -33,12 +33,17 @@ export function FranchiseList({
 
   return (
     <div className="space-y-4">
+      {/* Leurres pour Safari */}
+      <input type="text" name="fake_user" style={{ display: "none" }} aria-hidden="true" readOnly tabIndex={-1} />
+      <input type="password" name="fake_pass" style={{ display: "none" }} aria-hidden="true" readOnly tabIndex={-1} />
       <input
         type="text"
         placeholder="Rechercher un franchisé, associé, SIREN…"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        autoComplete="nope"
+        autoComplete="off"
+        data-form-type="other"
+        data-lpignore="true"
         className="input w-full"
       />
 

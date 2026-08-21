@@ -44,12 +44,17 @@ export function MagasinList({
     <div className="space-y-4">
       {/* Barre de recherche + filtres */}
       <div className="flex flex-wrap gap-2">
+        {/* Leurres pour Safari qui détecte les champs texte comme des logins */}
+        <input type="text" name="fake_user" style={{ display: "none" }} aria-hidden="true" readOnly tabIndex={-1} />
+        <input type="password" name="fake_pass" style={{ display: "none" }} aria-hidden="true" readOnly tabIndex={-1} />
         <input
           type="text"
           placeholder="Rechercher un magasin, ville…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          autoComplete="nope"
+          autoComplete="off"
+          data-form-type="other"
+          data-lpignore="true"
           className="input flex-1 min-w-48"
         />
         <select value={filterType} onChange={(e) => setFilterType(e.target.value as typeof filterType)} className="input">
