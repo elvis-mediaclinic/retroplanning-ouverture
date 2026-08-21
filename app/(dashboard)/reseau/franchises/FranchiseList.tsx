@@ -34,11 +34,11 @@ export function FranchiseList({
   return (
     <div className="space-y-4">
       <input
-        type="search"
+        type="text"
         placeholder="Rechercher un franchisé, associé, SIREN…"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        autoComplete="off"
+        autoComplete="nope"
         className="input w-full"
       />
 

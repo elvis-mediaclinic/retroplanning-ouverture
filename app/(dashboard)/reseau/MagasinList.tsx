@@ -45,11 +45,11 @@ export function MagasinList({
       {/* Barre de recherche + filtres */}
       <div className="flex flex-wrap gap-2">
         <input
-          type="search"
+          type="text"
           placeholder="Rechercher un magasin, ville…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          autoComplete="off"
+          autoComplete="nope"
           className="input flex-1 min-w-48"
         />
         <select value={filterType} onChange={(e) => setFilterType(e.target.value as typeof filterType)} className="input">
