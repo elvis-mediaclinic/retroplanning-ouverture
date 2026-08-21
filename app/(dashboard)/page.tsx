@@ -55,10 +55,10 @@ export default async function DashboardPage() {
     supabase.from("candidats").select("id").in("statut", ["prospect", "en_evaluation"]),
     supabase.from("magasins").select("id, type, format, archive"),
     supabase.from("annonces").select("id, actif"),
-    // Étapes urgentes : en retard ou échéance dans 7 jours
+    // Étapes urgentes : en retard ou échéance dans 7 jours (sans join pour éviter erreur PostgREST)
     supabase
       .from("etapes_projet")
-      .select("id, nom, phase, statut, date_cible, resp_mc, projet_id, projets(id, nom)")
+      .select("id, nom, phase, statut, date_cible, resp_mc, projet_id")
       .in("statut", ["a_faire", "en_cours", "en_retard"])
       .or(`statut.eq.en_retard,date_cible.lte.${sevenDays}`)
       .order("date_cible", { ascending: true, nullsFirst: false }),
@@ -72,11 +72,22 @@ export default async function DashboardPage() {
     );
   }
 
+  // Noms des projets concernés (requête séparée pour éviter join PostgREST)
+  const projetIds = [...new Set(etapes.map((e) => e.projet_id).filter(Boolean))];
+  const projetNoms: Record<string, string> = {};
+  if (projetIds.length > 0) {
+    const { data: projetRows } = await supabase
+      .from("projets")
+      .select("id, nom")
+      .in("id", projetIds);
+    (projetRows ?? []).forEach((p) => { projetNoms[p.id] = p.nom; });
+  }
+
   // Groupement des étapes par projet
   const etapesParProjet = etapes.reduce<Record<string, { projetNom: string; etapes: typeof etapes }>>(
     (acc, e) => {
       const pid = e.projet_id;
-      if (!acc[pid]) acc[pid] = { projetNom: e.projets?.nom ?? "Projet inconnu", etapes: [] };
+      if (!acc[pid]) acc[pid] = { projetNom: projetNoms[pid] ?? "Projet inconnu", etapes: [] };
       acc[pid].etapes.push(e);
       return acc;
     },
