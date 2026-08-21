@@ -101,6 +101,7 @@ export default async function DashboardPage() {
   const archives = magasinList.filter((m) => m.archive);
   const integreCount = actifs.filter((m) => m.type === "integre").length;
   const franchiseCount = actifs.filter((m) => m.type === "franchise").length;
+  const ouverturesEnCours = (projets ?? []).filter((p) => ["prospection", "en_cours"].includes(p.statut)).length;
 
   // Répartition par format — actifs
   const formatSegments: FormatSegment[] = Object.entries(FORMAT_LABELS)
@@ -163,6 +164,12 @@ export default async function DashboardPage() {
                   <p className="text-3xl font-bold text-zinc-700">{franchiseCount}</p>
                   <p className="text-sm text-zinc-400">franchisé{franchiseCount > 1 ? "s" : ""}</p>
                 </div>
+                {ouverturesEnCours > 0 && (
+                  <div className="flex items-baseline gap-2">
+                    <p className="text-3xl font-bold text-amber-500">{ouverturesEnCours}</p>
+                    <p className="text-sm text-zinc-400">ouverture{ouverturesEnCours > 1 ? "s" : ""} en cours</p>
+                  </div>
+                )}
                 {archives.length > 0 && (
                   <div className="flex items-baseline gap-2">
                     <p className="text-3xl font-bold text-zinc-300">{archives.length}</p>
