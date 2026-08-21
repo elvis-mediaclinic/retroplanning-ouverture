@@ -4,17 +4,128 @@ import { createClient } from "@/lib/supabase/server";
 import { STATUT_VILLE_LABELS } from "@/lib/types";
 import { STATUT_VILLE_COLORS } from "@/lib/utils";
 
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://retroplanning-ouverture.vercel.app";
+
+type Ville = {
+  id: string;
+  nom: string;
+  departement: string | null;
+  region: string | null;
+  population: number | null;
+  statut: string;
+  annonces: Array<{ id: string; actif: boolean }> | null;
+  candidatures: Array<{ id: string }> | null;
+  projets: Array<{ id: string; statut: string }> | null;
+};
+
+function VilleRow({ v, canEdit }: { v: Ville; canEdit: boolean }) {
+  const annonce = v.annonces?.[0] ?? null;
+  const nbCandidatures = v.candidatures?.length ?? 0;
+  const projetsActifs = (v.projets ?? []).filter((p) =>
+    ["prospection", "en_cours"].includes(p.statut)
+  );
+
+  return (
+    <tr className="border-b border-zinc-100 last:border-0">
+      <td className="py-2 px-4 font-medium text-zinc-900">{v.nom}</td>
+      <td className="py-2 px-4 text-zinc-500">
+        {[v.departement, v.region].filter(Boolean).join(" · ") || "—"}
+      </td>
+      <td className="py-2 px-4 text-zinc-500">
+        {v.population ? v.population.toLocaleString("fr-FR") : "—"}
+      </td>
+      <td className="py-2 px-4">
+        {projetsActifs.length > 0 ? (
+          <div className="flex flex-wrap gap-1">
+            {projetsActifs.map((p) => (
+              <Link key={p.id} href={`/projets/${p.id}`}
+                className="rounded-full bg-brand/10 px-2 py-0.5 text-xs font-medium text-brand hover:bg-brand/20">
+                Projet →
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <span className="text-xs text-zinc-400">—</span>
+        )}
+      </td>
+      <td className="py-2 px-4">
+        {annonce ? (
+          <div className="flex items-center gap-2">
+            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+              annonce.actif ? "bg-green-100 text-green-700" : "bg-zinc-100 text-zinc-500"
+            }`}>
+              {annonce.actif ? "Publiée" : "Brouillon"}
+            </span>
+            {annonce.actif && (
+              <a href={`${baseUrl}/annonce/${annonce.id}`} target="_blank" rel="noopener noreferrer"
+                className="text-xs text-brand hover:text-brand-dark">
+                Voir ↗
+              </a>
+            )}
+          </div>
+        ) : (
+          <span className="text-xs text-zinc-400">—</span>
+        )}
+      </td>
+      <td className="py-2 px-4">
+        {nbCandidatures > 0 ? (
+          <span className="inline-flex items-center rounded-full bg-brand/10 px-2 py-0.5 text-xs font-medium text-brand">
+            {nbCandidatures}
+          </span>
+        ) : (
+          <span className="text-xs text-zinc-400">—</span>
+        )}
+      </td>
+      <td className="py-2 px-4 text-right">
+        <Link href={`/villes/${v.id}`} className="text-xs text-zinc-500 hover:text-zinc-900">
+          {canEdit ? "Éditer" : "Voir"}
+        </Link>
+      </td>
+    </tr>
+  );
+}
+
+function VilleTable({ villes, canEdit, empty }: { villes: Ville[]; canEdit: boolean; empty: string }) {
+  if (villes.length === 0) {
+    return <p className="text-sm text-zinc-400 py-3">{empty}</p>;
+  }
+  return (
+    <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="border-b border-zinc-200 bg-zinc-50 text-left">
+            <th className="py-2 px-4 font-medium text-zinc-600">Ville</th>
+            <th className="py-2 px-4 font-medium text-zinc-600">Dép. / Région</th>
+            <th className="py-2 px-4 font-medium text-zinc-600">Population</th>
+            <th className="py-2 px-4 font-medium text-zinc-600">Projet</th>
+            <th className="py-2 px-4 font-medium text-zinc-600">Annonce</th>
+            <th className="py-2 px-4 font-medium text-zinc-600">Candidatures</th>
+            <th className="py-2 px-4" />
+          </tr>
+        </thead>
+        <tbody>
+          {villes.map((v) => <VilleRow key={v.id} v={v} canEdit={canEdit} />)}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 export default async function VillesPage() {
   await requireMC();
   const profile = await getProfile();
   const supabase = await createClient();
 
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://retroplanning-ouverture.vercel.app";
-
-  const { data: villes } = await supabase
+  const { data } = await supabase
     .from("villes")
-    .select("id, nom, departement, region, population, statut, annonces(id, actif), candidatures(id)")
+    .select("id, nom, departement, region, population, statut, annonces(id, actif), candidatures(id), projets(id, statut)")
+    .neq("statut", "abandonnee")
     .order("nom");
+
+  const villes = ((data ?? []) as Ville[]);
+
+  const enEtude = villes.filter((v) => v.statut === "en_etude");
+  const validees = villes.filter((v) => v.statut === "validee");
 
   const canEdit =
     profile.role === "admin" ||
@@ -22,11 +133,13 @@ export default async function VillesPage() {
     (profile.role === "responsable_mc" && !!profile.fonction?.toLowerCase().includes("marketing"));
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-lg font-semibold text-zinc-900">Villes</h1>
-          <p className="text-sm text-zinc-500">Villes en cours de prospection</p>
+          <p className="text-sm text-zinc-500">
+            {enEtude.length} en étude · {validees.length} validée{validees.length !== 1 ? "s" : ""}
+          </p>
         </div>
         {canEdit && (
           <Link href="/villes/new" className="btn-primary">
@@ -35,88 +148,23 @@ export default async function VillesPage() {
         )}
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-zinc-200 bg-zinc-50 text-left">
-              <th className="py-2 px-4 font-medium text-zinc-600">Ville</th>
-              <th className="py-2 px-4 font-medium text-zinc-600">Dép. / Région</th>
-              <th className="py-2 px-4 font-medium text-zinc-600">Population</th>
-              <th className="py-2 px-4 font-medium text-zinc-600">Statut</th>
-              <th className="py-2 px-4 font-medium text-zinc-600">Annonce</th>
-              <th className="py-2 px-4 font-medium text-zinc-600">Candidatures</th>
-              <th className="py-2 px-4"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {(villes ?? []).map((v) => {
-              const annonces = v.annonces as unknown as Array<{ id: string; actif: boolean }> | null;
-              const annonce = annonces?.[0] ?? null;
-              const candidatures = v.candidatures as unknown as Array<{ id: string }> | null;
-              const nbCandidatures = candidatures?.length ?? 0;
+      {/* Validées — projet en cours */}
+      {validees.length > 0 && (
+        <section>
+          <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-zinc-400">
+            Validées — projet en cours
+          </h2>
+          <VilleTable villes={validees} canEdit={canEdit} empty="Aucune ville validée." />
+        </section>
+      )}
 
-              return (
-                <tr key={v.id} className="border-b border-zinc-100 last:border-0">
-                  <td className="py-2 px-4 font-medium text-zinc-900">{v.nom}</td>
-                  <td className="py-2 px-4 text-zinc-500">
-                    {[v.departement, v.region].filter(Boolean).join(" · ") || "—"}
-                  </td>
-                  <td className="py-2 px-4 text-zinc-500">
-                    {v.population ? v.population.toLocaleString("fr-FR") : "—"}
-                  </td>
-                  <td className="py-2 px-4">
-                    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                      STATUT_VILLE_COLORS[v.statut as keyof typeof STATUT_VILLE_COLORS]
-                    }`}>
-                      {STATUT_VILLE_LABELS[v.statut as keyof typeof STATUT_VILLE_LABELS]}
-                    </span>
-                  </td>
-                  <td className="py-2 px-4">
-                    {annonce ? (
-                      <div className="flex items-center gap-2">
-                        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
-                          annonce.actif ? "bg-green-100 text-green-700" : "bg-zinc-100 text-zinc-500"
-                        }`}>
-                          {annonce.actif ? "Publiée" : "Brouillon"}
-                        </span>
-                        {annonce.actif && (
-                          <a href={`${baseUrl}/annonce/${annonce.id}`} target="_blank" rel="noopener noreferrer"
-                            className="text-xs text-brand hover:text-brand-dark">
-                            Voir ↗
-                          </a>
-                        )}
-                      </div>
-                    ) : (
-                      <span className="text-xs text-zinc-400">—</span>
-                    )}
-                  </td>
-                  <td className="py-2 px-4">
-                    {nbCandidatures > 0 ? (
-                      <span className="inline-flex items-center rounded-full bg-brand/10 px-2 py-0.5 text-xs font-medium text-brand">
-                        {nbCandidatures}
-                      </span>
-                    ) : (
-                      <span className="text-xs text-zinc-400">—</span>
-                    )}
-                  </td>
-                  <td className="py-2 px-4 text-right">
-                    <Link href={`/villes/${v.id}`} className="text-xs text-zinc-500 hover:text-zinc-900">
-                      {canEdit ? "Éditer" : "Voir"}
-                    </Link>
-                  </td>
-                </tr>
-              );
-            })}
-            {(villes ?? []).length === 0 && (
-              <tr>
-                <td colSpan={7} className="py-6 px-4 text-center text-zinc-400">
-                  Aucune ville pour l&apos;instant.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      {/* En étude */}
+      <section>
+        <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-zinc-400">
+          En étude
+        </h2>
+        <VilleTable villes={enEtude} canEdit={canEdit} empty="Aucune ville en étude." />
+      </section>
     </div>
   );
 }
