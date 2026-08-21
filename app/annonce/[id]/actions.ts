@@ -3,6 +3,13 @@
 import * as z from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
+
+export async function recordView(annonceId: string, visitorId: string) {
+  if (!annonceId || !visitorId) return;
+  const service = createServiceClient();
+  // Ignore l'erreur 23505 (unique violation = vue déjà comptée aujourd'hui)
+  await service.from("annonce_views").insert({ annonce_id: annonceId, visitor_id: visitorId });
+}
 import { transporter } from "@/lib/mailer";
 
 const Schema = z.object({

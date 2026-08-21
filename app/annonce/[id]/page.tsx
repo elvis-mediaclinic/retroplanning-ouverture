@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { CandidatureForm } from "./CandidatureForm";
+import { ViewTracker } from "./ViewTracker";
 
 // ── BlockNote JSON renderer ──────────────────────────────────────────────────
 
@@ -460,6 +461,9 @@ export default async function AnnoncePage({
           © Mediaclinic — Réseau de franchise
         </p>
       </main>
+
+      {/* Suivi d'audience RGPD — affiche la bannière si pas encore de consentement */}
+      <ViewTracker annonceId={annonce.id} />
     </div>
   );
 }

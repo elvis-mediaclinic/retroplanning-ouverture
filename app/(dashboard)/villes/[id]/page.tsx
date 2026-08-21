@@ -35,6 +35,21 @@ export default async function EditVillePage({
     profile.role === "consultant" ||
     (profile.role === "responsable_mc" && !!profile.fonction?.toLowerCase().includes("marketing"));
 
+  // Stats de vues — uniquement pour les éditeurs
+  let viewStats: { total: number; unique: number } | null = null;
+  if (annonce?.id && canEdit) {
+    const { data: views } = await supabase
+      .from("annonce_views")
+      .select("visitor_id")
+      .eq("annonce_id", annonce.id);
+    if (views) {
+      viewStats = {
+        total: views.length,
+        unique: new Set(views.map((v) => v.visitor_id)).size,
+      };
+    }
+  }
+
   const action = updateVille.bind(null, id);
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://retroplanning-ouverture.vercel.app";
   const publicUrl = annonce ? `${baseUrl}/annonce/${annonce.id}` : `${baseUrl}/annonce/[id]`;
@@ -80,7 +95,19 @@ export default async function EditVillePage({
       {/* Annonce publique */}
       {canEdit && (
         <section className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
-          <h2 className="text-sm font-semibold text-zinc-900 mb-4">Annonce franchisé</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-semibold text-zinc-900">Annonce franchisé</h2>
+            {viewStats && annonce?.actif && (
+              <div className="flex items-center gap-4 text-xs text-zinc-500">
+                <span>
+                  <span className="font-semibold text-zinc-900">{viewStats.total}</span> vue{viewStats.total !== 1 ? "s" : ""}
+                </span>
+                <span>
+                  <span className="font-semibold text-zinc-900">{viewStats.unique}</span> visiteur{viewStats.unique !== 1 ? "s" : ""} unique{viewStats.unique !== 1 ? "s" : ""}
+                </span>
+              </div>
+            )}
+          </div>
           <AnnonceEditor villeId={id} annonce={annonce ?? null} publicUrl={publicUrl} />
         </section>
       )}
