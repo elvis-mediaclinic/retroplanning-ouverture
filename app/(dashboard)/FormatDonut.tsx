@@ -71,12 +71,12 @@ export function FormatDonut({ segments, total }: Props) {
             />
           ))}
           {/* Centre : valeur survolée ou total */}
-          <text x={cx} y={cy - 7} textAnchor="middle" className="fill-zinc-900 dark:fill-zinc-100"
-            style={{ fontSize: 22, fontWeight: 700, fontFamily: "inherit" }}>
+          <text x={cx} y={cy - 7} textAnchor="middle"
+            style={{ fontSize: 22, fontWeight: 700, fontFamily: "inherit", fill: "#18181b" }}>
             {hoveredSeg ? hoveredSeg.count : total}
           </text>
-          <text x={cx} y={cy + 13} textAnchor="middle" className="fill-zinc-400"
-            style={{ fontSize: 11, fontFamily: "inherit" }}>
+          <text x={cx} y={cy + 13} textAnchor="middle"
+            style={{ fontSize: 11, fontFamily: "inherit", fill: "#a1a1aa" }}>
             {hoveredSeg ? hoveredSeg.label : "magasins"}
           </text>
         </svg>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState, useEffect, useRef } from "react";
+import { useState, useTransition, useEffect, useRef } from "react";
 import { createFranchiseInline } from "./actions";
 import type { FranchiseAsssocie } from "@/lib/types";
 
@@ -12,18 +12,10 @@ type Props = {
 };
 
 export function FranchiseModal({ onCreated, onClose }: Props) {
-  const [state, formAction, pending] = useActionState(
-    async (_prev: { error?: string } | undefined, formData: FormData) => {
-      const result = await createFranchiseInline(formData);
-      if ("error" in result) return { error: result.error };
-      onCreated(result);
-      return undefined;
-    },
-    undefined
-  );
-
+  const [error, setError] = useState<string>();
+  const [pending, startTransition] = useTransition();
   const [associes, setAssocies] = useState<FranchiseAsssocie[]>([{ ...EMPTY }]);
-  const dialogRef = useRef<HTMLDivElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
 
   // Fermer sur Échap
   useEffect(() => {
@@ -33,6 +25,20 @@ export function FranchiseModal({ onCreated, onClose }: Props) {
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [onClose]);
+
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    setError(undefined);
+    startTransition(async () => {
+      const result = await createFranchiseInline(formData);
+      if ("error" in result) {
+        setError(result.error);
+      } else {
+        onCreated(result);
+      }
+    });
+  }
 
   function add() { setAssocies((p) => [...p, { ...EMPTY }]); }
   function remove(i: number) { setAssocies((p) => p.filter((_, idx) => idx !== i)); }
@@ -45,10 +51,7 @@ export function FranchiseModal({ onCreated, onClose }: Props) {
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div
-        ref={dialogRef}
-        className="w-full max-w-lg bg-white rounded-xl shadow-2xl overflow-hidden"
-      >
+      <div className="w-full max-w-lg bg-white rounded-xl shadow-2xl overflow-hidden">
         {/* En-tête */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-200">
           <h2 className="text-base font-semibold text-zinc-900">Nouveau franchisé</h2>
@@ -63,9 +66,8 @@ export function FranchiseModal({ onCreated, onClose }: Props) {
         </div>
 
         {/* Corps */}
-        <form action={formAction} className="max-h-[70vh] overflow-y-auto">
+        <form ref={formRef} onSubmit={handleSubmit} className="max-h-[70vh] overflow-y-auto">
           <div className="px-6 py-5 space-y-5">
-            {/* Nom du groupe */}
             <div className="space-y-1">
               <label className="text-sm font-medium text-zinc-700">
                 Nom du franchisé / groupe *
@@ -80,7 +82,6 @@ export function FranchiseModal({ onCreated, onClose }: Props) {
               />
             </div>
 
-            {/* Personnes */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-medium text-zinc-700">Personnes / Associés</p>
@@ -106,55 +107,32 @@ export function FranchiseModal({ onCreated, onClose }: Props) {
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1">
                       <label className="text-xs font-medium text-zinc-600">Prénom</label>
-                      <input
-                        name={`associes[${i}][prenom]`}
-                        type="text"
-                        value={a.prenom}
-                        onChange={(e) => update(i, "prenom", e.target.value)}
-                        className="input w-full"
-                      />
+                      <input name={`associes[${i}][prenom]`} type="text" value={a.prenom}
+                        onChange={(e) => update(i, "prenom", e.target.value)} className="input w-full" />
                     </div>
                     <div className="space-y-1">
                       <label className="text-xs font-medium text-zinc-600">Nom</label>
-                      <input
-                        name={`associes[${i}][nom]`}
-                        type="text"
-                        value={a.nom}
-                        onChange={(e) => update(i, "nom", e.target.value)}
-                        className="input w-full"
-                      />
+                      <input name={`associes[${i}][nom]`} type="text" value={a.nom}
+                        onChange={(e) => update(i, "nom", e.target.value)} className="input w-full" />
                     </div>
                     <div className="space-y-1">
                       <label className="text-xs font-medium text-zinc-600">Téléphone</label>
-                      <input
-                        name={`associes[${i}][telephone]`}
-                        type="tel"
-                        value={a.telephone}
-                        onChange={(e) => update(i, "telephone", e.target.value)}
-                        className="input w-full"
-                      />
+                      <input name={`associes[${i}][telephone]`} type="tel" value={a.telephone}
+                        onChange={(e) => update(i, "telephone", e.target.value)} className="input w-full" />
                     </div>
                     <div className="space-y-1">
                       <label className="text-xs font-medium text-zinc-600">Email</label>
-                      <input
-                        name={`associes[${i}][email]`}
-                        type="email"
-                        value={a.email}
-                        onChange={(e) => update(i, "email", e.target.value)}
-                        className="input w-full"
-                      />
+                      <input name={`associes[${i}][email]`} type="email" value={a.email}
+                        onChange={(e) => update(i, "email", e.target.value)} className="input w-full" />
                     </div>
                   </div>
                 </div>
               ))}
             </div>
 
-            {state?.error && (
-              <p className="text-sm text-red-600">{state.error}</p>
-            )}
+            {error && <p className="text-sm text-red-600">{error}</p>}
           </div>
 
-          {/* Pied */}
           <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-zinc-200 bg-zinc-50">
             <button type="button" onClick={onClose} className="btn-secondary">
               Annuler
