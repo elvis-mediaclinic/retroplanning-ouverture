@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { requireRole } from "@/lib/dal";
 import { createClient } from "@/lib/supabase/server";
-import type { Magasin } from "@/lib/types";
+import type { Magasin, Franchise } from "@/lib/types";
 import { MagasinForm } from "../MagasinForm";
 import { DeleteMagasinButton } from "./DeleteMagasinButton";
 
@@ -14,10 +14,15 @@ export default async function EditMagasinPage({
   const { id } = await params;
   const supabase = await createClient();
 
-  const { data } = await supabase.from("magasins").select("*").eq("id", id).single();
+  const [{ data }, { data: franchisesData }] = await Promise.all([
+    supabase.from("magasins").select("*").eq("id", id).single(),
+    supabase.from("franchises").select("*").order("nom"),
+  ]);
+
   if (!data) notFound();
 
   const magasin = data as Magasin;
+  const franchises = (franchisesData ?? []) as Franchise[];
 
   return (
     <div className="space-y-6 max-w-2xl">
@@ -28,7 +33,7 @@ export default async function EditMagasinPage({
         </div>
         <DeleteMagasinButton id={id} />
       </div>
-      <MagasinForm magasin={magasin} />
+      <MagasinForm magasin={magasin} franchises={franchises} />
     </div>
   );
 }

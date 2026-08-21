@@ -7,6 +7,65 @@ import { createClient } from "@/lib/supabase/server";
 import type { FranchiseAsssocie } from "@/lib/types";
 
 export type MagasinState = { error?: string } | undefined;
+export type FranchiseState = { error?: string } | undefined;
+
+// ─── Franchises ─────────────────────────────────────────────────────────────
+
+export async function saveFranchise(
+  id: string | null,
+  _state: FranchiseState,
+  formData: FormData
+): Promise<FranchiseState> {
+  await requireRole("admin");
+  const supabase = await createClient();
+
+  const nom = (formData.get("nom") as string).trim();
+  if (!nom) return { error: "Nom requis." };
+
+  const associes: FranchiseAsssocie[] = [];
+  let i = 0;
+  while (formData.has(`associes[${i}][prenom]`)) {
+    const prenom = (formData.get(`associes[${i}][prenom]`) as string).trim();
+    const assNom = (formData.get(`associes[${i}][nom]`) as string).trim();
+    if (prenom || assNom) {
+      associes.push({
+        prenom,
+        nom: assNom,
+        telephone: (formData.get(`associes[${i}][telephone]`) as string).trim(),
+        email: (formData.get(`associes[${i}][email]`) as string).trim(),
+      });
+    }
+    i++;
+  }
+
+  const payload = {
+    nom,
+    associes,
+    notes: (formData.get("notes") as string).trim() || null,
+    updated_at: new Date().toISOString(),
+  };
+
+  if (id) {
+    const { error } = await supabase.from("franchises").update(payload).eq("id", id);
+    if (error) return { error: error.message };
+  } else {
+    const { error } = await supabase.from("franchises").insert(payload);
+    if (error) return { error: error.message };
+  }
+
+  revalidatePath("/reseau");
+  redirect("/reseau/franchises");
+}
+
+export async function deleteFranchise(id: string) {
+  await requireRole("admin");
+  const supabase = await createClient();
+  await supabase.from("franchises").delete().eq("id", id);
+  revalidatePath("/reseau");
+  redirect("/reseau/franchises");
+}
+
+// ─── Magasins ────────────────────────────────────────────────────────────────
 
 export async function saveMagasin(
   id: string | null,
@@ -20,26 +79,9 @@ export async function saveMagasin(
   const nom = (formData.get("nom") as string).trim();
   if (!nom) return { error: "Nom requis." };
 
-  // Reconstruction des associés depuis les champs indexés
-  const franchises: FranchiseAsssocie[] = [];
-  let i = 0;
-  while (formData.has(`franchises[${i}][prenom]`)) {
-    const prenom = (formData.get(`franchises[${i}][prenom]`) as string).trim();
-    const assNom = (formData.get(`franchises[${i}][nom]`) as string).trim();
-    if (prenom || assNom) {
-      franchises.push({
-        prenom,
-        nom: assNom,
-        telephone: (formData.get(`franchises[${i}][telephone]`) as string).trim(),
-        email: (formData.get(`franchises[${i}][email]`) as string).trim(),
-      });
-    }
-    i++;
-  }
-
   const payload = {
     nom,
-    franchises,
+    franchise_id: (formData.get("franchise_id") as string) || null,
     adresse: (formData.get("adresse") as string).trim() || null,
     code_postal: (formData.get("code_postal") as string).trim() || null,
     ville: (formData.get("ville") as string).trim() || null,

@@ -1,37 +1,21 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState } from "react";
+import Link from "next/link";
 import { saveMagasin } from "./actions";
-import type { Magasin, FranchiseAsssocie } from "@/lib/types";
+import type { Magasin, Franchise } from "@/lib/types";
 import { FORMAT_LABELS } from "@/lib/types";
 
 type Props = {
   magasin?: Magasin;
   projetId?: string | null;
   projetNom?: string | null;
+  franchises: Franchise[];
 };
 
-const EMPTY_ASSOCIE: FranchiseAsssocie = { prenom: "", nom: "", telephone: "", email: "" };
-
-export function MagasinForm({ magasin, projetId = null, projetNom }: Props) {
+export function MagasinForm({ magasin, projetId = null, projetNom, franchises }: Props) {
   const action = saveMagasin.bind(null, magasin?.id ?? null, projetId);
   const [state, formAction, pending] = useActionState(action, undefined);
-
-  const [associes, setAssocies] = useState<FranchiseAsssocie[]>(
-    magasin?.franchises?.length ? magasin.franchises : [{ ...EMPTY_ASSOCIE }]
-  );
-
-  function addAssocie() {
-    setAssocies((prev) => [...prev, { ...EMPTY_ASSOCIE }]);
-  }
-
-  function removeAssocie(i: number) {
-    setAssocies((prev) => prev.filter((_, idx) => idx !== i));
-  }
-
-  function updateAssocie(i: number, field: keyof FranchiseAsssocie, value: string) {
-    setAssocies((prev) => prev.map((a, idx) => idx === i ? { ...a, [field]: value } : a));
-  }
 
   return (
     <form action={formAction} className="space-y-6">
@@ -108,73 +92,33 @@ export function MagasinForm({ magasin, projetId = null, projetNom }: Props) {
         </div>
       </div>
 
-      {/* Associés / franchisés */}
-      <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm space-y-4">
+      {/* Franchisé */}
+      <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-zinc-900">Franchisé(s) / Associé(s)</h2>
-          <button type="button" onClick={addAssocie} className="text-xs text-brand hover:underline">
-            + Ajouter un associé
-          </button>
+          <h2 className="text-sm font-semibold text-zinc-900">Franchisé</h2>
+          <Link href="/reseau/franchises/new" className="text-xs text-brand hover:underline">
+            + Créer un nouveau franchisé
+          </Link>
         </div>
 
-        {associes.map((a, i) => (
-          <div key={i} className="border border-zinc-100 rounded-lg p-4 space-y-3 relative">
-            {associes.length > 1 && (
-              <button
-                type="button"
-                onClick={() => removeAssocie(i)}
-                className="absolute top-3 right-3 text-xs text-red-400 hover:text-red-600"
-              >
-                Supprimer
-              </button>
-            )}
-            <p className="text-xs font-medium text-zinc-500">
-              {i === 0 ? "Franchisé principal" : `Associé ${i + 1}`}
-            </p>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-zinc-600">Prénom</label>
-                <input
-                  name={`franchises[${i}][prenom]`}
-                  type="text"
-                  value={a.prenom}
-                  onChange={(e) => updateAssocie(i, "prenom", e.target.value)}
-                  className="input w-full"
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-zinc-600">Nom</label>
-                <input
-                  name={`franchises[${i}][nom]`}
-                  type="text"
-                  value={a.nom}
-                  onChange={(e) => updateAssocie(i, "nom", e.target.value)}
-                  className="input w-full"
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-zinc-600">Téléphone</label>
-                <input
-                  name={`franchises[${i}][telephone]`}
-                  type="tel"
-                  value={a.telephone}
-                  onChange={(e) => updateAssocie(i, "telephone", e.target.value)}
-                  className="input w-full"
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-zinc-600">Email</label>
-                <input
-                  name={`franchises[${i}][email]`}
-                  type="email"
-                  value={a.email}
-                  onChange={(e) => updateAssocie(i, "email", e.target.value)}
-                  className="input w-full"
-                />
-              </div>
-            </div>
-          </div>
-        ))}
+        <div className="space-y-1">
+          <label className="text-sm font-medium text-zinc-700">Sélectionner un franchisé</label>
+          <select name="franchise_id" defaultValue={magasin?.franchise_id ?? ""} className="input w-full">
+            <option value="">— Aucun —</option>
+            {franchises.map((f) => (
+              <option key={f.id} value={f.id}>{f.nom}</option>
+            ))}
+          </select>
+        </div>
+
+        {franchises.length === 0 && (
+          <p className="text-xs text-zinc-400">
+            Aucun franchisé enregistré.{" "}
+            <Link href="/reseau/franchises/new" className="text-brand hover:underline">
+              Créez le premier
+            </Link>.
+          </p>
+        )}
       </div>
 
       {state?.error && <p className="text-sm text-red-600">{state.error}</p>}

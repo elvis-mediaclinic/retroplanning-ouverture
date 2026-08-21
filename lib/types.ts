@@ -109,10 +109,19 @@ export type FranchiseAsssocie = {
   email: string;
 };
 
+export type Franchise = {
+  id: string;
+  nom: string;
+  associes: FranchiseAsssocie[];
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 export type Magasin = {
   id: string;
   nom: string;
-  franchises: FranchiseAsssocie[];
+  franchise_id: string | null;
   adresse: string | null;
   code_postal: string | null;
   ville: string | null;

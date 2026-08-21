@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { logout } from "@/app/(auth)/login/actions";
 import type { UserRole } from "@/lib/types";
@@ -19,7 +20,10 @@ const NAV: Record<UserRole, NavGroup[]> = {
     },
     {
       title: "Réseau",
-      items: [{ href: "/reseau", label: "Magasins" }],
+      items: [
+        { href: "/reseau", label: "Magasins" },
+        { href: "/reseau/franchises", label: "Franchisés" },
+      ],
     },
     {
       title: "Prospection",
@@ -49,7 +53,10 @@ const NAV: Record<UserRole, NavGroup[]> = {
     },
     {
       title: "Réseau",
-      items: [{ href: "/reseau", label: "Magasins" }],
+      items: [
+        { href: "/reseau", label: "Magasins" },
+        { href: "/reseau/franchises", label: "Franchisés" },
+      ],
     },
     {
       title: "Prospection",
@@ -97,10 +104,15 @@ function NavContent({
   return (
     <div className="flex h-full flex-col">
       <div className="flex h-16 items-center border-b border-zinc-200 px-4 gap-2">
-        <span className="text-sm font-bold text-zinc-900 tracking-tight">
-          Mediaclinic
-        </span>
-        <span className="text-xs text-zinc-400 border border-zinc-200 rounded px-1.5 py-0.5">
+        <Image
+          src="/Logo-MediaClinic-Noir.png"
+          alt="Mediaclinic"
+          width={130}
+          height={36}
+          className="object-contain"
+          priority
+        />
+        <span className="text-xs text-zinc-400 border border-zinc-200 rounded px-1.5 py-0.5 shrink-0">
           Ouvertures
         </span>
       </div>
@@ -199,7 +211,7 @@ export function Sidebar({
 
       {/* Barre supérieure (mobile) */}
       <div className="flex items-center justify-between border-b border-zinc-200 bg-white px-4 py-3 md:hidden">
-        <span className="font-semibold text-zinc-900">Mediaclinic</span>
+        <Image src="/Logo-MediaClinic-Noir.png" alt="Mediaclinic" width={110} height={30} className="object-contain" />
         <button
           type="button"
           onClick={() => setOpen(true)}

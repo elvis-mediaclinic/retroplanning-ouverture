@@ -1,4 +1,6 @@
 import { requireRole } from "@/lib/dal";
+import { createClient } from "@/lib/supabase/server";
+import type { Franchise } from "@/lib/types";
 import { MagasinForm } from "../MagasinForm";
 
 export default async function NewMagasinPage({
@@ -8,6 +10,10 @@ export default async function NewMagasinPage({
 }) {
   await requireRole("admin");
   const { projet_id, projet_nom } = await searchParams;
+  const supabase = await createClient();
+
+  const { data } = await supabase.from("franchises").select("*").order("nom");
+  const franchises = (data ?? []) as Franchise[];
 
   return (
     <div className="space-y-6 max-w-2xl">
@@ -15,7 +21,11 @@ export default async function NewMagasinPage({
         <a href="/reseau" className="text-sm text-zinc-500 hover:text-zinc-900">← Réseau</a>
         <h1 className="mt-2 text-xl font-semibold text-zinc-900">Nouveau magasin</h1>
       </div>
-      <MagasinForm projetId={projet_id} projetNom={projet_nom ? decodeURIComponent(projet_nom) : null} />
+      <MagasinForm
+        projetId={projet_id}
+        projetNom={projet_nom ? decodeURIComponent(projet_nom) : null}
+        franchises={franchises}
+      />
     </div>
   );
 }

@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Retroplanning Ouverture",
+  title: "Mediaclinic - Suivi développement franchise",
   description: "Retroplanning ouverture",
 };
 

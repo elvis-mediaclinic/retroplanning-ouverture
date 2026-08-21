@@ -1,9 +1,8 @@
 import Link from "next/link";
-import { requireMC } from "@/lib/dal";
+import { requireMC, getProfile } from "@/lib/dal";
 import { createClient } from "@/lib/supabase/server";
 import { FORMAT_LABELS } from "@/lib/types";
-import type { Magasin } from "@/lib/types";
-import { getProfile } from "@/lib/dal";
+import type { Magasin, Franchise } from "@/lib/types";
 
 function formatDate(d: string | null) {
   if (!d) return "—";
@@ -12,17 +11,19 @@ function formatDate(d: string | null) {
   });
 }
 
+type MagasinWithFranchise = Magasin & { franchises: Franchise | null };
+
 export default async function ReseauPage() {
-  const [profile] = await Promise.all([getProfile()]);
   await requireMC();
+  const profile = await getProfile();
   const supabase = await createClient();
 
   const { data } = await supabase
     .from("magasins")
-    .select("*")
+    .select("*, franchises(*)")
     .order("date_ouverture", { ascending: false });
 
-  const magasins = (data ?? []) as Magasin[];
+  const magasins = (data ?? []) as MagasinWithFranchise[];
   const isAdmin = profile.role === "admin";
 
   return (
@@ -34,11 +35,18 @@ export default async function ReseauPage() {
             {magasins.length} magasin{magasins.length !== 1 ? "s" : ""} dans le réseau
           </p>
         </div>
-        {isAdmin && (
-          <Link href="/reseau/new" className="btn-primary text-sm">
-            + Ajouter un magasin
-          </Link>
-        )}
+        <div className="flex items-center gap-2">
+          {isAdmin && (
+            <Link href="/reseau/franchises" className="btn-secondary text-sm">
+              Franchisés
+            </Link>
+          )}
+          {isAdmin && (
+            <Link href="/reseau/new" className="btn-primary text-sm">
+              + Ajouter un magasin
+            </Link>
+          )}
+        </div>
       </div>
 
       {magasins.length === 0 ? (
@@ -97,19 +105,30 @@ export default async function ReseauPage() {
                 </div>
               </div>
 
-              {/* Franchisés / associés */}
-              {m.franchises?.length > 0 && (
+              {/* Franchisé lié */}
+              {m.franchises && (
                 <div className="px-5 py-3 border-t border-zinc-100 bg-zinc-50">
-                  <p className="text-xs font-medium text-zinc-400 mb-2">Franchisé(s)</p>
-                  <div className="flex flex-wrap gap-4">
-                    {m.franchises.map((f, i) => (
-                      <div key={i} className="text-sm">
-                        <span className="font-medium text-zinc-900">{f.prenom} {f.nom}</span>
-                        {f.telephone && <span className="text-zinc-500 ml-2">{f.telephone}</span>}
-                        {f.email && <span className="text-zinc-400 ml-2 text-xs">{f.email}</span>}
-                      </div>
-                    ))}
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs font-medium text-zinc-400">Franchisé</p>
+                    {isAdmin && (
+                      <Link href={`/reseau/franchises/${m.franchises.id}`}
+                        className="text-xs text-zinc-400 hover:text-zinc-700 hover:underline">
+                        Modifier le franchisé
+                      </Link>
+                    )}
                   </div>
+                  <p className="text-sm font-medium text-zinc-800 mb-1">{m.franchises.nom}</p>
+                  {m.franchises.associes.length > 0 && (
+                    <div className="flex flex-wrap gap-4">
+                      {m.franchises.associes.map((a, i) => (
+                        <div key={i} className="text-sm">
+                          <span className="font-medium text-zinc-700">{a.prenom} {a.nom}</span>
+                          {a.telephone && <span className="text-zinc-500 ml-2">{a.telephone}</span>}
+                          {a.email && <span className="text-zinc-400 ml-2 text-xs">{a.email}</span>}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 
