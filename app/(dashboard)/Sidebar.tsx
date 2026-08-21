@@ -107,14 +107,11 @@ function NavContent({
         <Image
           src="/Logo-MediaClinic-Noir.png"
           alt="Mediaclinic"
-          width={130}
+          width={140}
           height={36}
           className="object-contain"
           priority
         />
-        <span className="text-xs text-zinc-400 border border-zinc-200 rounded px-1.5 py-0.5 shrink-0">
-          Ouvertures
-        </span>
       </div>
 
       <nav className="flex-1 space-y-5 overflow-y-auto px-3 py-4">

@@ -121,6 +121,7 @@ export type Franchise = {
 export type Magasin = {
   id: string;
   nom: string;
+  type: "integre" | "franchise";
   franchise_id: string | null;
   adresse: string | null;
   code_postal: string | null;

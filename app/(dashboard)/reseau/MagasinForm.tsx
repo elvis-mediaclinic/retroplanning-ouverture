@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import Link from "next/link";
 import { saveMagasin } from "./actions";
 import type { Magasin, Franchise } from "@/lib/types";
@@ -17,8 +17,39 @@ export function MagasinForm({ magasin, projetId = null, projetNom, franchises }:
   const action = saveMagasin.bind(null, magasin?.id ?? null, projetId);
   const [state, formAction, pending] = useActionState(action, undefined);
 
+  const [type, setType] = useState<"integre" | "franchise">(magasin?.type ?? "franchise");
+
   return (
     <form action={formAction} className="space-y-6">
+      {/* Type de magasin */}
+      <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm space-y-3">
+        <h2 className="text-sm font-semibold text-zinc-900">Type de magasin</h2>
+        <div className="flex gap-4">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="radio"
+              name="type"
+              value="franchise"
+              checked={type === "franchise"}
+              onChange={() => setType("franchise")}
+              className="accent-brand"
+            />
+            <span className="text-sm text-zinc-700">Franchisé</span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="radio"
+              name="type"
+              value="integre"
+              checked={type === "integre"}
+              onChange={() => setType("integre")}
+              className="accent-brand"
+            />
+            <span className="text-sm text-zinc-700">Intégré (appartenant à Mediaclinic)</span>
+          </label>
+        </div>
+      </div>
+
       {/* Infos magasin */}
       <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm space-y-4">
         <h2 className="text-sm font-semibold text-zinc-900">Informations du magasin</h2>
@@ -92,34 +123,36 @@ export function MagasinForm({ magasin, projetId = null, projetNom, franchises }:
         </div>
       </div>
 
-      {/* Franchisé */}
-      <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-zinc-900">Franchisé</h2>
-          <Link href="/reseau/franchises/new" className="text-xs text-brand hover:underline">
-            + Créer un nouveau franchisé
-          </Link>
-        </div>
+      {/* Franchisé — masqué pour un magasin intégré */}
+      {type === "franchise" && (
+        <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-zinc-900">Franchisé</h2>
+            <Link href="/reseau/franchises/new" className="text-xs text-brand hover:underline">
+              + Créer un nouveau franchisé
+            </Link>
+          </div>
 
-        <div className="space-y-1">
-          <label className="text-sm font-medium text-zinc-700">Sélectionner un franchisé</label>
-          <select name="franchise_id" defaultValue={magasin?.franchise_id ?? ""} className="input w-full">
-            <option value="">— Aucun —</option>
-            {franchises.map((f) => (
-              <option key={f.id} value={f.id}>{f.nom}</option>
-            ))}
-          </select>
-        </div>
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-zinc-700">Sélectionner un franchisé</label>
+            <select name="franchise_id" defaultValue={magasin?.franchise_id ?? ""} className="input w-full">
+              <option value="">— Aucun —</option>
+              {franchises.map((f) => (
+                <option key={f.id} value={f.id}>{f.nom}</option>
+              ))}
+            </select>
+          </div>
 
-        {franchises.length === 0 && (
-          <p className="text-xs text-zinc-400">
-            Aucun franchisé enregistré.{" "}
-            <Link href="/reseau/franchises/new" className="text-brand hover:underline">
-              Créez le premier
-            </Link>.
-          </p>
-        )}
-      </div>
+          {franchises.length === 0 && (
+            <p className="text-xs text-zinc-400">
+              Aucun franchisé enregistré.{" "}
+              <Link href="/reseau/franchises/new" className="text-brand hover:underline">
+                Créez le premier
+              </Link>.
+            </p>
+          )}
+        </div>
+      )}
 
       {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
 

@@ -79,9 +79,12 @@ export async function saveMagasin(
   const nom = (formData.get("nom") as string).trim();
   if (!nom) return { error: "Nom requis." };
 
+  const type = (formData.get("type") as string) === "integre" ? "integre" : "franchise";
+
   const payload = {
     nom,
-    franchise_id: (formData.get("franchise_id") as string) || null,
+    type,
+    franchise_id: type === "franchise" ? (formData.get("franchise_id") as string) || null : null,
     adresse: (formData.get("adresse") as string).trim() || null,
     code_postal: (formData.get("code_postal") as string).trim() || null,
     ville: (formData.get("ville") as string).trim() || null,

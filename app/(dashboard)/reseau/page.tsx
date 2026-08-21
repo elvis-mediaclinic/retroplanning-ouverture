@@ -70,6 +70,13 @@ export default async function ReseauPage() {
                   </p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
+                  <span className={`text-xs border rounded px-2 py-0.5 ${
+                    m.type === "integre"
+                      ? "text-blue-700 border-blue-200 bg-blue-50"
+                      : "text-zinc-500 border-zinc-200"
+                  }`}>
+                    {m.type === "integre" ? "Intégré" : "Franchisé"}
+                  </span>
                   {m.format && (
                     <span className="text-xs text-zinc-500 border border-zinc-200 rounded px-2 py-0.5">
                       {FORMAT_LABELS[m.format]}
