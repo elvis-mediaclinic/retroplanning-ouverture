@@ -135,10 +135,12 @@ export default async function ReseauPage({
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-y sm:divide-y-0 divide-zinc-100">
-                <div className="px-5 py-3">
-                  <p className="text-xs text-zinc-400">Signature contrat</p>
-                  <p className="text-sm font-medium text-zinc-900 mt-0.5">{formatDate(m.date_signature_contrat)}</p>
-                </div>
+                {m.type === "franchise" && (
+                  <div className="px-5 py-3">
+                    <p className="text-xs text-zinc-400">Signature contrat</p>
+                    <p className="text-sm font-medium text-zinc-900 mt-0.5">{formatDate(m.date_signature_contrat)}</p>
+                  </div>
+                )}
                 <div className="px-5 py-3">
                   <p className="text-xs text-zinc-400">Ouverture</p>
                   <p className="text-sm font-medium text-zinc-900 mt-0.5">{formatDate(m.date_ouverture)}</p>

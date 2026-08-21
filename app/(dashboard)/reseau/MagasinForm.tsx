@@ -133,10 +133,12 @@ export function MagasinForm({ magasin, projetId = null, projetNom, franchises: i
               <input name="surface_m2" type="number" min={0} defaultValue={magasin?.surface_m2 ?? ""} className="input w-full" />
             </div>
 
-            <div className="space-y-1">
-              <label className="text-sm font-medium text-zinc-700">Date de signature du contrat</label>
-              <input name="date_signature_contrat" type="date" defaultValue={magasin?.date_signature_contrat ?? ""} className="input w-full" />
-            </div>
+            {type === "franchise" && (
+              <div className="space-y-1">
+                <label className="text-sm font-medium text-zinc-700">Date de signature du contrat</label>
+                <input name="date_signature_contrat" type="date" defaultValue={magasin?.date_signature_contrat ?? ""} className="input w-full" />
+              </div>
+            )}
 
             <div className="space-y-1">
               <label className="text-sm font-medium text-zinc-700">Date d'ouverture</label>
