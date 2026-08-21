@@ -33,6 +33,25 @@ export function FranchiseForm({ franchise }: Props) {
             placeholder="Ex : Famille Martin, SAS Dupont..." />
         </div>
 
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 pt-2">
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-zinc-700">Raison sociale</label>
+            <input name="raison_sociale" type="text" defaultValue={franchise?.raison_sociale ?? ""} className="input w-full" />
+          </div>
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-zinc-700">SIREN</label>
+            <input name="siren" type="text" defaultValue={franchise?.siren ?? ""} className="input w-full" placeholder="9 chiffres" maxLength={9} />
+          </div>
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-zinc-700">RCS</label>
+            <input name="rcs" type="text" defaultValue={franchise?.rcs ?? ""} className="input w-full" placeholder="Ex : RCS Paris B 123 456 789" />
+          </div>
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-zinc-700">TVA intracommunautaire</label>
+            <input name="tva_intracom" type="text" defaultValue={franchise?.tva_intracom ?? ""} className="input w-full" placeholder="Ex : FR12345678901" />
+          </div>
+        </div>
+
         <div className="space-y-1">
           <label className="text-sm font-medium text-zinc-700">Notes</label>
           <textarea name="notes" rows={2} defaultValue={franchise?.notes ?? ""} className="input w-full resize-none" />

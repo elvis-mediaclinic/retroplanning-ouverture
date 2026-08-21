@@ -61,9 +61,19 @@ export default async function FranchisesPage() {
                 <div className="flex items-start justify-between px-5 py-4">
                   <div>
                     <h2 className="font-semibold text-zinc-900">{f.nom}</h2>
+                    {f.raison_sociale && (
+                      <p className="text-sm text-zinc-500 mt-0.5">{f.raison_sociale}</p>
+                    )}
                     {f.associes.length > 0 && (
-                      <p className="text-sm text-zinc-500 mt-0.5">
+                      <p className="text-xs text-zinc-400 mt-0.5">
                         {f.associes.map((a) => `${a.prenom} ${a.nom}`).join(", ")}
+                      </p>
+                    )}
+                    {(f.siren || f.rcs || f.tva_intracom) && (
+                      <p className="text-xs text-zinc-400 mt-1 space-x-3">
+                        {f.siren && <span>SIREN : {f.siren}</span>}
+                        {f.rcs && <span>RCS : {f.rcs}</span>}
+                        {f.tva_intracom && <span>TVA : {f.tva_intracom}</span>}
                       </p>
                     )}
                   </div>

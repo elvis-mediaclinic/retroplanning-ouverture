@@ -112,6 +112,10 @@ export type FranchiseAsssocie = {
 export type Franchise = {
   id: string;
   nom: string;
+  raison_sociale: string | null;
+  siren: string | null;
+  rcs: string | null;
+  tva_intracom: string | null;
   associes: FranchiseAsssocie[];
   notes: string | null;
   created_at: string;
@@ -123,6 +127,7 @@ export type Magasin = {
   nom: string;
   type: "integre" | "franchise";
   franchise_id: string | null;
+  siret: string | null;
   adresse: string | null;
   code_postal: string | null;
   ville: string | null;

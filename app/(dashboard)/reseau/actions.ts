@@ -40,6 +40,10 @@ export async function saveFranchise(
 
   const payload = {
     nom,
+    raison_sociale: (formData.get("raison_sociale") as string).trim() || null,
+    siren: (formData.get("siren") as string).trim() || null,
+    rcs: (formData.get("rcs") as string).trim() || null,
+    tva_intracom: (formData.get("tva_intracom") as string).trim() || null,
     associes,
     notes: (formData.get("notes") as string).trim() || null,
     updated_at: new Date().toISOString(),
@@ -84,6 +88,7 @@ export async function saveMagasin(
   const payload = {
     nom,
     type,
+    siret: (formData.get("siret") as string).trim() || null,
     franchise_id: type === "franchise" ? (formData.get("franchise_id") as string) || null : null,
     adresse: (formData.get("adresse") as string).trim() || null,
     code_postal: (formData.get("code_postal") as string).trim() || null,

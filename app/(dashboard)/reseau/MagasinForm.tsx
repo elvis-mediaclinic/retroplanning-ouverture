@@ -66,6 +66,11 @@ export function MagasinForm({ magasin, projetId = null, projetNom, franchises }:
             <input name="nom" type="text" required defaultValue={magasin?.nom} className="input w-full" />
           </div>
 
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-zinc-700">SIRET</label>
+            <input name="siret" type="text" defaultValue={magasin?.siret ?? ""} className="input w-full" placeholder="14 chiffres" maxLength={14} />
+          </div>
+
           <div className="sm:col-span-2 space-y-1">
             <label className="text-sm font-medium text-zinc-700">Adresse</label>
             <input name="adresse" type="text" defaultValue={magasin?.adresse ?? ""} className="input w-full" />
