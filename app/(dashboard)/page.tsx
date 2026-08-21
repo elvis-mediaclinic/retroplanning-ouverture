@@ -2,8 +2,17 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getProfile } from "@/lib/dal";
 import { createClient } from "@/lib/supabase/server";
-import { STATUT_PROJET_LABELS, FORMAT_LABELS, type FormatMagasin } from "@/lib/types";
-import { STATUT_PROJET_COLORS as COLORS } from "@/lib/utils";
+import {
+  STATUT_PROJET_LABELS,
+  FORMAT_LABELS,
+  PHASE_LABELS,
+  STATUT_ETAPE_LABELS,
+  type FormatMagasin,
+  type StatutEtape,
+  type PhaseEtape,
+} from "@/lib/types";
+import { STATUT_PROJET_COLORS as COLORS, STATUT_ETAPE_COLORS } from "@/lib/utils";
+import { FormatDonut, getFormatColor, type FormatSegment } from "./FormatDonut";
 
 function formatDate(d: string | null) {
   if (!d) return "—";
@@ -12,20 +21,31 @@ function formatDate(d: string | null) {
   });
 }
 
+function isUrgent(dateCible: string | null, statut: string) {
+  if (statut === "en_retard") return true;
+  if (!dateCible) return false;
+  const target = new Date(dateCible + "T00:00:00");
+  const limit = new Date();
+  limit.setDate(limit.getDate() + 7);
+  return target <= limit;
+}
+
 export default async function DashboardPage() {
   const profile = await getProfile();
-
   if (profile.role === "franchise") redirect("/mon-projet");
 
   const supabase = await createClient();
+  const today = new Date().toISOString().split("T")[0];
+  const sevenDays = new Date(Date.now() + 7 * 86400000).toISOString().split("T")[0];
 
+  // Queries parallèles
   const [
     { data: projets },
     { data: villes },
     { data: candidats },
-    { data: magasinsRecents },
-    { data: franchises },
     { data: allMagasins },
+    { data: annonces },
+    { data: etapesRaw },
   ] = await Promise.all([
     supabase
       .from("projets")
@@ -33,26 +53,56 @@ export default async function DashboardPage() {
       .order("created_at", { ascending: false }),
     supabase.from("villes").select("id").eq("statut", "en_etude"),
     supabase.from("candidats").select("id").in("statut", ["prospect", "en_evaluation"]),
+    supabase.from("magasins").select("id, type, format, archive"),
+    supabase.from("annonces").select("id, actif"),
+    // Étapes urgentes : en retard ou échéance dans 7 jours
     supabase
-      .from("magasins")
-      .select("id, nom, ville, type, date_ouverture, franchises(nom)")
-      .order("date_ouverture", { ascending: false })
-      .limit(5),
-    supabase.from("franchises").select("id"),
-    supabase.from("magasins").select("id, type, format"),
+      .from("etapes_projet")
+      .select("id, nom, phase, statut, date_cible, resp_mc, projet_id, projets(id, nom)")
+      .in("statut", ["a_faire", "en_cours", "en_retard"])
+      .or(`statut.eq.en_retard,date_cible.lte.${sevenDays}`)
+      .order("date_cible", { ascending: true, nullsFirst: false }),
   ]);
 
-  const magasinList = allMagasins ?? [];
-  const magasinTotal = magasinList.length;
-  const integreCount = magasinList.filter((m) => m.type === "integre").length;
-  const franchiseCount = magasinList.filter((m) => m.type === "franchise").length;
+  // Filtre étapes selon le rôle
+  let etapes = (etapesRaw ?? []) as any[];
+  if (profile.role === "responsable_mc") {
+    etapes = etapes.filter(
+      (e) => Array.isArray(e.resp_mc) && e.resp_mc.includes(profile.id)
+    );
+  }
 
-  // Répartition par format
-  const formatCounts = Object.entries(FORMAT_LABELS).map(([key, label]) => ({
-    key: key as FormatMagasin,
-    label,
-    count: magasinList.filter((m) => m.format === key).length,
-  })).filter((f) => f.count > 0);
+  // Groupement des étapes par projet
+  const etapesParProjet = etapes.reduce<Record<string, { projetNom: string; etapes: typeof etapes }>>(
+    (acc, e) => {
+      const pid = e.projet_id;
+      if (!acc[pid]) acc[pid] = { projetNom: e.projets?.nom ?? "Projet inconnu", etapes: [] };
+      acc[pid].etapes.push(e);
+      return acc;
+    },
+    {}
+  );
+
+  // Stats réseau
+  const magasinList = allMagasins ?? [];
+  const actifs = magasinList.filter((m) => !m.archive);
+  const archives = magasinList.filter((m) => m.archive);
+  const integreCount = actifs.filter((m) => m.type === "integre").length;
+  const franchiseCount = actifs.filter((m) => m.type === "franchise").length;
+
+  // Répartition par format (magasins actifs uniquement)
+  const formatSegments: FormatSegment[] = Object.entries(FORMAT_LABELS)
+    .map(([key, label]) => ({
+      key,
+      label,
+      count: actifs.filter((m) => m.format === key).length,
+      color: getFormatColor(key),
+    }))
+    .filter((s) => s.count > 0);
+  const formatTotal = formatSegments.reduce((s, f) => s + f.count, 0);
+
+  // Annonces actives
+  const annoncesActives = (annonces ?? []).filter((a) => a.actif).length;
 
   return (
     <div className="space-y-8">
@@ -62,107 +112,137 @@ export default async function DashboardPage() {
         <p className="mt-1 text-sm text-zinc-500">Bonjour {profile.prenom} !</p>
       </div>
 
-      {/* Stats développement */}
-      <div>
-        <h2 className="mb-3 text-xs font-semibold text-zinc-400 uppercase tracking-wide">Développement</h2>
+      {/* ── Développement ─────────────────────────────────────────── */}
+      <section>
+        <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-zinc-400">
+          Développement
+        </h2>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           {[
-            { label: "Ouvertures en cours", value: (projets ?? []).filter((p) => ["prospection", "en_cours"].includes(p.statut)).length, href: "/projets" },
-            { label: "Magasins ouverts", value: (projets ?? []).filter((p) => p.statut === "ouvert").length, href: "/projets" },
+            {
+              label: "Ouvertures en cours",
+              value: (projets ?? []).filter((p) =>
+                ["prospection", "en_cours"].includes(p.statut)
+              ).length,
+              href: "/projets",
+            },
             { label: "Villes en étude", value: (villes ?? []).length, href: "/villes" },
             { label: "Candidats en cours", value: (candidats ?? []).length, href: "/candidats" },
+            { label: "Annonces publiées", value: annoncesActives, href: "/villes" },
           ].map(({ label, value, href }) => (
-            <Link key={label} href={href}
-              className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm hover:border-zinc-300 transition-colors">
+            <Link
+              key={label}
+              href={href}
+              className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm hover:border-zinc-300 transition-colors"
+            >
               <p className="text-2xl font-bold text-zinc-900">{value}</p>
               <p className="mt-0.5 text-xs text-zinc-500">{label}</p>
             </Link>
           ))}
         </div>
-      </div>
+      </section>
 
-      {/* Stats réseau */}
-      <div>
+      {/* ── Réseau ───────────────────────────────────────────────── */}
+      <section>
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-xs font-semibold text-zinc-400 uppercase tracking-wide">Réseau</h2>
-          <Link href="/reseau" className="text-xs text-zinc-500 hover:text-zinc-900">Voir le réseau →</Link>
+          <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Réseau</h2>
+          <Link href="/reseau" className="text-xs text-zinc-500 hover:text-zinc-900">
+            Voir le réseau →
+          </Link>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 mb-4">
-          {[
-            { label: "Magasins dans le réseau", value: magasinTotal },
-            { label: "Magasins intégrés", value: integreCount },
-            { label: "Magasins franchisés", value: franchiseCount },
-            { label: "Franchisés", value: (franchises ?? []).length },
-          ].map(({ label, value }) => (
-            <div key={label} className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm">
-              <p className="text-2xl font-bold text-zinc-900">{value}</p>
-              <p className="mt-0.5 text-xs text-zinc-500">{label}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* Répartition par format */}
-        {formatCounts.length > 0 && (
-          <div className="rounded-lg border border-zinc-200 bg-white shadow-sm overflow-hidden mb-4">
-            <div className="border-b border-zinc-100 bg-zinc-50 px-4 py-2.5">
-              <p className="text-xs font-semibold text-zinc-600">Répartition par format</p>
-            </div>
-            <div className="grid divide-x divide-zinc-100" style={{ gridTemplateColumns: `repeat(${formatCounts.length}, 1fr)` }}>
-              {formatCounts.map(({ key, label, count }) => (
-                <div key={key} className="px-4 py-3 text-center">
-                  <p className="text-xl font-bold text-zinc-900">{count}</p>
-                  <p className="mt-0.5 text-xs text-zinc-500">{label}</p>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {/* Carte totaux */}
+          <div className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
+            <p className="text-xs font-semibold text-zinc-500 mb-4">Magasins dans le réseau</p>
+            <div className="flex items-end gap-6">
+              <div>
+                <p className="text-4xl font-bold text-zinc-900">{actifs.length}</p>
+                <p className="text-xs text-zinc-400 mt-0.5">ouverts</p>
+              </div>
+              <div className="space-y-1 pb-1">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-blue-400 shrink-0" />
+                  <span className="text-sm text-zinc-600">{integreCount} intégré{integreCount > 1 ? "s" : ""}</span>
                 </div>
-              ))}
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-zinc-400 shrink-0" />
+                  <span className="text-sm text-zinc-600">{franchiseCount} franchisé{franchiseCount > 1 ? "s" : ""}</span>
+                </div>
+                {archives.length > 0 && (
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-zinc-200 shrink-0" />
+                    <span className="text-sm text-zinc-400">{archives.length} archivé{archives.length > 1 ? "s" : ""}</span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        )}
 
-        {/* Derniers magasins */}
-        {(magasinsRecents ?? []).length > 0 && (
-          <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm">
-            <div className="border-b border-zinc-100 bg-zinc-50 px-4 py-2.5">
-              <p className="text-xs font-semibold text-zinc-600">Derniers magasins ouverts</p>
-            </div>
-            <table className="w-full text-sm">
-              <tbody>
-                {(magasinsRecents as any[]).map((m) => (
-                  <tr key={m.id} className="border-b border-zinc-100 last:border-0">
-                    <td className="py-2 px-4">
-                      <Link href={`/reseau/${m.id}`} className="font-medium text-zinc-900 hover:underline">
-                        {m.nom}
-                      </Link>
-                      {m.ville && <span className="ml-1.5 text-zinc-400 text-xs">{m.ville}</span>}
-                    </td>
-                    <td className="py-2 px-4">
-                      <span className={`text-xs border rounded px-2 py-0.5 ${
-                        m.type === "integre"
-                          ? "text-blue-700 border-blue-200 bg-blue-50"
-                          : "text-zinc-500 border-zinc-200"
-                      }`}>
-                        {m.type === "integre" ? "Intégré" : "Franchisé"}
-                      </span>
-                    </td>
-                    <td className="py-2 px-4 text-zinc-500 text-xs">
-                      {m.franchises?.nom ?? (m.type === "integre" ? "Mediaclinic" : "—")}
-                    </td>
-                    <td className="py-2 px-4 text-zinc-400 text-xs text-right">
-                      {formatDate(m.date_ouverture)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          {/* Carte donut formats */}
+          <div className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
+            <p className="text-xs font-semibold text-zinc-500 mb-4">Répartition par format</p>
+            <FormatDonut segments={formatSegments} total={formatTotal} />
           </div>
-        )}
-      </div>
+        </div>
+      </section>
 
-      {/* Ouvertures en cours */}
-      <div>
+      {/* ── Étapes à traiter ─────────────────────────────────────── */}
+      {Object.keys(etapesParProjet).length > 0 && (
+        <section>
+          <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-zinc-400">
+            À traiter — échéances &lt; 7 jours ou en retard
+          </h2>
+          <div className="space-y-3">
+            {Object.entries(etapesParProjet).map(([pid, { projetNom, etapes: pe }]) => (
+              <div key={pid} className="rounded-lg border border-zinc-200 bg-white shadow-sm overflow-hidden">
+                <div className="flex items-center justify-between border-b border-zinc-100 bg-zinc-50 px-4 py-2.5">
+                  <Link href={`/projets/${pid}`} className="text-sm font-semibold text-zinc-900 hover:underline">
+                    {projetNom}
+                  </Link>
+                  <span className="text-xs text-zinc-400">{pe.length} étape{pe.length > 1 ? "s" : ""}</span>
+                </div>
+                <ul className="divide-y divide-zinc-100">
+                  {pe.map((e: any) => {
+                    const retard = e.statut === "en_retard";
+                    const aujourd = e.date_cible === today;
+                    return (
+                      <li key={e.id} className="flex items-center gap-3 px-4 py-2.5">
+                        {/* Indicateur urgence */}
+                        <span className={`w-1.5 h-5 rounded-full shrink-0 ${
+                          retard ? "bg-red-400" : aujourd ? "bg-amber-400" : "bg-zinc-300"
+                        }`} />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-zinc-900 truncate">{e.nom}</p>
+                          <p className="text-xs text-zinc-400">
+                            {PHASE_LABELS[e.phase as PhaseEtape]}
+                          </p>
+                        </div>
+                        <span className={`text-xs rounded-full px-2 py-0.5 font-medium shrink-0 ${
+                          STATUT_ETAPE_COLORS[e.statut as StatutEtape] ?? "bg-zinc-100 text-zinc-500"
+                        }`}>
+                          {STATUT_ETAPE_LABELS[e.statut as StatutEtape]}
+                        </span>
+                        <span className={`text-xs shrink-0 ${retard ? "text-red-500 font-medium" : aujourd ? "text-amber-600 font-medium" : "text-zinc-400"}`}>
+                          {e.date_cible ? formatDate(e.date_cible) : "—"}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ── Ouvertures en cours ──────────────────────────────────── */}
+      <section>
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-sm font-semibold text-zinc-900">Ouvertures en cours</h2>
-          <Link href="/projets" className="text-xs text-zinc-500 hover:text-zinc-900">Voir tous →</Link>
+          <Link href="/projets" className="text-xs text-zinc-500 hover:text-zinc-900">
+            Voir tous →
+          </Link>
         </div>
 
         <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm">
@@ -193,15 +273,13 @@ export default async function DashboardPage() {
                         {STATUT_PROJET_LABELS[p.statut as keyof typeof STATUT_PROJET_LABELS]}
                       </span>
                     </td>
-                    <td className="py-2 px-4 text-zinc-500">
-                      {formatDate(p.date_cible_ouverture)}
-                    </td>
+                    <td className="py-2 px-4 text-zinc-500">{formatDate(p.date_cible_ouverture)}</td>
                   </tr>
                 ))}
               {(projets ?? []).filter((p) => p.statut !== "abandonne").length === 0 && (
                 <tr>
                   <td colSpan={4} className="py-6 px-4 text-center text-zinc-400">
-                    Aucun projet pour l&apos;instant.{" "}
+                    Aucun projet.{" "}
                     <Link href="/projets/new" className="text-zinc-600 underline">Créer le premier</Link>
                   </td>
                 </tr>
@@ -209,7 +287,7 @@ export default async function DashboardPage() {
             </tbody>
           </table>
         </div>
-      </div>
+      </section>
     </div>
   );
 }
