@@ -8,9 +8,10 @@ import { transporter } from "@/lib/mailer";
 export async function recordView(annonceId: string, visitorId: string) {
   if (!annonceId || !visitorId) return;
   const service = createServiceClient();
+  const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD UTC
   const { error } = await service
     .from("annonce_views")
-    .insert({ annonce_id: annonceId, visitor_id: visitorId });
+    .insert({ annonce_id: annonceId, visitor_id: visitorId, viewed_date: today });
   if (error && error.code !== "23505") {
     console.error("[recordView] erreur:", error.message, "| code:", error.code);
   }
