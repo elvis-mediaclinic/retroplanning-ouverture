@@ -100,11 +100,6 @@ export default async function ReseauPage({
                 <div>
                   <div className="flex items-center gap-2">
                     <h2 className="font-semibold text-zinc-900">{m.nom}</h2>
-                    {m.archive && m.date_fermeture && (
-                      <span className="text-xs text-zinc-400 bg-zinc-100 rounded px-2 py-0.5">
-                        Fermé le {formatDate(m.date_fermeture)}
-                      </span>
-                    )}
                   </div>
                   <p className="text-sm text-zinc-500 mt-0.5">
                     {[m.adresse, m.code_postal, m.ville].filter(Boolean).join(", ") || "Adresse non renseignée"}
@@ -134,26 +129,45 @@ export default async function ReseauPage({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-y sm:divide-y-0 divide-zinc-100">
-                {m.type === "franchise" && (
+              {m.archive ? (
+                <div className="grid grid-cols-3 divide-x divide-zinc-100">
+                  {m.type === "franchise" && (
+                    <div className="px-5 py-3">
+                      <p className="text-xs text-zinc-400">Signature contrat</p>
+                      <p className="text-sm font-medium text-zinc-900 mt-0.5">{formatDate(m.date_signature_contrat)}</p>
+                    </div>
+                  )}
                   <div className="px-5 py-3">
-                    <p className="text-xs text-zinc-400">Signature contrat</p>
-                    <p className="text-sm font-medium text-zinc-900 mt-0.5">{formatDate(m.date_signature_contrat)}</p>
+                    <p className="text-xs text-zinc-400">Ouverture</p>
+                    <p className="text-sm font-medium text-zinc-900 mt-0.5">{formatDate(m.date_ouverture)}</p>
                   </div>
-                )}
-                <div className="px-5 py-3">
-                  <p className="text-xs text-zinc-400">Ouverture</p>
-                  <p className="text-sm font-medium text-zinc-900 mt-0.5">{formatDate(m.date_ouverture)}</p>
+                  <div className="px-5 py-3">
+                    <p className="text-xs text-red-400">Fermeture</p>
+                    <p className="text-sm font-semibold text-red-700 mt-0.5">{formatDate(m.date_fermeture)}</p>
+                  </div>
                 </div>
-                <div className="px-5 py-3">
-                  <p className="text-xs text-zinc-400">Téléphone</p>
-                  <p className="text-sm font-medium text-zinc-900 mt-0.5">{m.telephone ?? "—"}</p>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-y sm:divide-y-0 divide-zinc-100">
+                  {m.type === "franchise" && (
+                    <div className="px-5 py-3">
+                      <p className="text-xs text-zinc-400">Signature contrat</p>
+                      <p className="text-sm font-medium text-zinc-900 mt-0.5">{formatDate(m.date_signature_contrat)}</p>
+                    </div>
+                  )}
+                  <div className="px-5 py-3">
+                    <p className="text-xs text-zinc-400">Ouverture</p>
+                    <p className="text-sm font-medium text-zinc-900 mt-0.5">{formatDate(m.date_ouverture)}</p>
+                  </div>
+                  <div className="px-5 py-3">
+                    <p className="text-xs text-zinc-400">Téléphone</p>
+                    <p className="text-sm font-medium text-zinc-900 mt-0.5">{m.telephone ?? "—"}</p>
+                  </div>
+                  <div className="px-5 py-3">
+                    <p className="text-xs text-zinc-400">Email</p>
+                    <p className="text-sm font-medium text-zinc-900 mt-0.5 truncate">{m.email ?? "—"}</p>
+                  </div>
                 </div>
-                <div className="px-5 py-3">
-                  <p className="text-xs text-zinc-400">Email</p>
-                  <p className="text-sm font-medium text-zinc-900 mt-0.5 truncate">{m.email ?? "—"}</p>
-                </div>
-              </div>
+              )}
 
               {m.franchises && (
                 <div className="px-5 py-3 border-t border-zinc-100 bg-zinc-50">
