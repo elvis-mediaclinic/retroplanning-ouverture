@@ -82,6 +82,17 @@ const NAV: Record<UserRole, NavGroup[]> = {
         { href: "/projets", label: "Ouvertures" },
       ],
     },
+    {
+      title: "Réseau",
+      items: [
+        { href: "/reseau", label: "Magasins" },
+        { href: "/reseau/franchises", label: "Franchisés" },
+      ],
+    },
+    {
+      title: "Prospection",
+      items: [{ href: "/villes", label: "Villes" }],
+    },
   ],
 };
 

@@ -1,11 +1,12 @@
 import Link from "next/link";
-import { requireMC } from "@/lib/dal";
+import { requireMC, getProfile } from "@/lib/dal";
 import { createClient } from "@/lib/supabase/server";
 import { STATUT_VILLE_LABELS } from "@/lib/types";
 import { STATUT_VILLE_COLORS } from "@/lib/utils";
 
 export default async function VillesPage() {
   await requireMC();
+  const profile = await getProfile();
   const supabase = await createClient();
 
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://retroplanning-ouverture.vercel.app";
@@ -15,6 +16,11 @@ export default async function VillesPage() {
     .select("id, nom, departement, region, population, statut, annonces(id, actif), candidatures(id)")
     .order("nom");
 
+  const canEdit =
+    profile.role === "admin" ||
+    profile.role === "consultant" ||
+    (profile.role === "responsable_mc" && !!profile.fonction?.toLowerCase().includes("marketing"));
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -22,12 +28,11 @@ export default async function VillesPage() {
           <h1 className="text-lg font-semibold text-zinc-900">Villes</h1>
           <p className="text-sm text-zinc-500">Villes en cours de prospection</p>
         </div>
-        <Link
-          href="/villes/new"
-          className="btn-primary"
-        >
-          + Ajouter
-        </Link>
+        {canEdit && (
+          <Link href="/villes/new" className="btn-primary">
+            + Ajouter
+          </Link>
+        )}
       </div>
 
       <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm">
@@ -60,11 +65,9 @@ export default async function VillesPage() {
                     {v.population ? v.population.toLocaleString("fr-FR") : "—"}
                   </td>
                   <td className="py-2 px-4">
-                    <span
-                      className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                        STATUT_VILLE_COLORS[v.statut as keyof typeof STATUT_VILLE_COLORS]
-                      }`}
-                    >
+                    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                      STATUT_VILLE_COLORS[v.statut as keyof typeof STATUT_VILLE_COLORS]
+                    }`}>
                       {STATUT_VILLE_LABELS[v.statut as keyof typeof STATUT_VILLE_LABELS]}
                     </span>
                   </td>
@@ -77,12 +80,8 @@ export default async function VillesPage() {
                           {annonce.actif ? "Publiée" : "Brouillon"}
                         </span>
                         {annonce.actif && (
-                          <a
-                            href={`${baseUrl}/annonce/${annonce.id}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-xs text-brand hover:text-brand-dark"
-                          >
+                          <a href={`${baseUrl}/annonce/${annonce.id}`} target="_blank" rel="noopener noreferrer"
+                            className="text-xs text-brand hover:text-brand-dark">
                             Voir ↗
                           </a>
                         )}
@@ -101,11 +100,8 @@ export default async function VillesPage() {
                     )}
                   </td>
                   <td className="py-2 px-4 text-right">
-                    <Link
-                      href={`/villes/${v.id}`}
-                      className="text-xs text-zinc-500 hover:text-zinc-900"
-                    >
-                      Éditer
+                    <Link href={`/villes/${v.id}`} className="text-xs text-zinc-500 hover:text-zinc-900">
+                      {canEdit ? "Éditer" : "Voir"}
                     </Link>
                   </td>
                 </tr>

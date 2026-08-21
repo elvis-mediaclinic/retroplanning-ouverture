@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { requireMC } from "@/lib/dal";
+import { requireMarketing } from "@/lib/dal";
 import { createVille } from "../actions";
 import { VilleForm } from "../VilleForm";
 
 export default async function NewVillePage() {
-  await requireMC();
+  await requireMarketing();
   return (
     <div className="space-y-6">
       <div>

@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { requireMC } from "@/lib/dal";
+import { requireMC, getProfile } from "@/lib/dal";
 import { createClient } from "@/lib/supabase/server";
+import { STATUT_VILLE_LABELS } from "@/lib/types";
+import { STATUT_VILLE_COLORS } from "@/lib/utils";
 import { updateVille } from "../actions";
 import { VilleForm } from "../VilleForm";
 import { AnnonceEditor } from "./AnnonceEditor";
@@ -12,6 +14,7 @@ export default async function EditVillePage({
   params: Promise<{ id: string }>;
 }) {
   await requireMC();
+  const profile = await getProfile();
   const { id } = await params;
   const supabase = await createClient();
 
@@ -26,6 +29,11 @@ export default async function EditVillePage({
   ]);
 
   if (!ville) notFound();
+
+  const canEdit =
+    profile.role === "admin" ||
+    profile.role === "consultant" ||
+    (profile.role === "responsable_mc" && !!profile.fonction?.toLowerCase().includes("marketing"));
 
   const action = updateVille.bind(null, id);
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://retroplanning-ouverture.vercel.app";
@@ -43,18 +51,64 @@ export default async function EditVillePage({
       {/* Infos ville */}
       <section className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
         <h2 className="text-sm font-semibold text-zinc-900 mb-4">Informations</h2>
-        <VilleForm action={action} defaultValues={ville} />
+        {canEdit ? (
+          <VilleForm action={action} defaultValues={ville} />
+        ) : (
+          <dl className="grid grid-cols-2 gap-4 sm:grid-cols-3 text-sm">
+            {[
+              { label: "Ville", value: ville.nom },
+              { label: "Département", value: ville.departement ?? "—" },
+              { label: "Région", value: ville.region ?? "—" },
+              { label: "Population", value: ville.population ? ville.population.toLocaleString("fr-FR") : "—" },
+              { label: "Statut", value: STATUT_VILLE_LABELS[ville.statut as keyof typeof STATUT_VILLE_LABELS] },
+            ].map(({ label, value }) => (
+              <div key={label}>
+                <dt className="text-xs text-zinc-400 mb-0.5">{label}</dt>
+                <dd className="font-medium text-zinc-900">{value}</dd>
+              </div>
+            ))}
+            {ville.notes && (
+              <div className="col-span-full">
+                <dt className="text-xs text-zinc-400 mb-0.5">Notes</dt>
+                <dd className="text-zinc-600 whitespace-pre-line">{ville.notes}</dd>
+              </div>
+            )}
+          </dl>
+        )}
       </section>
 
       {/* Annonce publique */}
-      <section className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
-        <h2 className="text-sm font-semibold text-zinc-900 mb-4">Annonce franchisé</h2>
-        <AnnonceEditor villeId={id} annonce={annonce ?? null} publicUrl={publicUrl} />
-      </section>
+      {canEdit && (
+        <section className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
+          <h2 className="text-sm font-semibold text-zinc-900 mb-4">Annonce franchisé</h2>
+          <AnnonceEditor villeId={id} annonce={annonce ?? null} publicUrl={publicUrl} />
+        </section>
+      )}
 
-      {/* Candidatures reçues — regroupées par personne */}
+      {/* Annonce : lecture seule */}
+      {!canEdit && annonce && (
+        <section className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-semibold text-zinc-900">Annonce franchisé</h2>
+            <span className={`text-xs rounded-full px-2 py-0.5 font-medium ${
+              annonce.actif ? "bg-green-100 text-green-700" : "bg-zinc-100 text-zinc-500"
+            }`}>
+              {annonce.actif ? "Publiée" : "Brouillon"}
+            </span>
+          </div>
+          {annonce.titre && <p className="font-semibold text-zinc-900 mb-1">{annonce.titre}</p>}
+          {annonce.accroche && <p className="text-sm text-zinc-500 mb-3 italic">{annonce.accroche}</p>}
+          {annonce.actif && (
+            <a href={publicUrl} target="_blank" rel="noopener noreferrer"
+              className="text-sm text-brand hover:underline">
+              Voir l'annonce publique ↗
+            </a>
+          )}
+        </section>
+      )}
+
+      {/* Candidatures reçues */}
       {(candidatures ?? []).length > 0 && (() => {
-        // Group by email
         const groups = new Map<string, typeof candidatures>();
         for (const c of candidatures ?? []) {
           const key = c.email;
@@ -86,9 +140,7 @@ export default async function EditVillePage({
                   <div key={email} className="px-6 py-4 space-y-2">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <p className="font-medium text-zinc-900 text-sm">
-                          {first.prenom} {first.nom}
-                        </p>
+                        <p className="font-medium text-zinc-900 text-sm">{first.prenom} {first.nom}</p>
                         {isRepeat && (
                           <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
                             {msgs!.length} candidatures
@@ -108,7 +160,6 @@ export default async function EditVillePage({
                         <span>Apport : {Number(first.apport_personnel).toLocaleString("fr-FR")} €</span>
                       )}
                     </div>
-                    {/* Messages de chaque candidature */}
                     <div className="space-y-2">
                       {msgs!.map((m) => (
                         <div key={m.id} className="rounded-md bg-zinc-50 px-3 py-2 text-xs text-zinc-500">
