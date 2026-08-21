@@ -38,6 +38,7 @@ export function FranchiseList({
         placeholder="Rechercher un franchisé, associé, SIREN…"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
+        autoComplete="off"
         className="input w-full"
       />
 

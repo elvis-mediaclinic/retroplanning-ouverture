@@ -49,6 +49,7 @@ export function MagasinList({
           placeholder="Rechercher un magasin, ville…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
+          autoComplete="off"
           className="input flex-1 min-w-48"
         />
         <select value={filterType} onChange={(e) => setFilterType(e.target.value as typeof filterType)} className="input">
