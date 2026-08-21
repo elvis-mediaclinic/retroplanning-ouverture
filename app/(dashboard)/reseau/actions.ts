@@ -153,13 +153,18 @@ export async function saveMagasin(
     const { error } = await supabase.from("magasins").update(payload).eq("id", id);
     if (error) return { error: error.message };
 
-    // Insérer le premier SIRET si aucun n'existe encore
-    if (siret) {
-      const { count } = await supabase
+    // Mettre à jour le SIRET actuel (date_fin = null) ou en créer un si inexistant
+    if (siret !== null) {
+      const { data: current } = await supabase
         .from("magasin_sirets")
-        .select("id", { count: "exact", head: true })
-        .eq("magasin_id", id);
-      if ((count ?? 0) === 0) {
+        .select("id")
+        .eq("magasin_id", id)
+        .is("date_fin", null)
+        .maybeSingle();
+
+      if (current) {
+        await supabase.from("magasin_sirets").update({ siret }).eq("id", current.id);
+      } else if (siret) {
         await supabase.from("magasin_sirets").insert({
           magasin_id: id,
           siret,
