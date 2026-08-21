@@ -103,13 +103,13 @@ function NavContent({
 }) {
   return (
     <div className="flex h-full flex-col">
-      <div className="flex h-16 items-center border-b border-zinc-200 px-4 gap-2">
+      <div className="flex h-16 items-center border-b border-zinc-200 px-5">
         <Image
           src="/Logo-MediaClinic-Noir.png"
           alt="Mediaclinic"
-          width={140}
-          height={36}
-          className="object-contain"
+          width={160}
+          height={40}
+          className="w-full object-contain object-left"
           priority
         />
       </div>
