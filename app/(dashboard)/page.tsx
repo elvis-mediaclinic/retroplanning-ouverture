@@ -149,31 +149,32 @@ export default async function DashboardPage() {
           {/* Ligne 1 — totaux pleine largeur */}
           <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
             <p className="text-xs font-semibold text-zinc-500 mb-5">Magasins dans le réseau</p>
-            <div className="flex items-center gap-8">
-              <div className="flex items-baseline gap-2">
-                <p className="text-5xl font-bold text-zinc-900">{actifs.length}</p>
-                <p className="text-sm text-zinc-400">ouverts</p>
+            <div className="space-y-4">
+              {/* Ligne 1 — total */}
+              <div className="flex items-baseline gap-3">
+                <p className="text-7xl font-bold text-zinc-900">{actifs.length}</p>
+                <p className="text-xl text-zinc-400">ouverts</p>
               </div>
-              <div className="h-10 w-px bg-zinc-100" />
-              <div className="flex items-center gap-6">
+              {/* Ligne 2 — détail */}
+              <div className="flex flex-wrap items-center gap-6">
                 <div className="flex items-baseline gap-2">
-                  <p className="text-3xl font-bold text-blue-600">{integreCount}</p>
-                  <p className="text-sm text-zinc-400">intégré{integreCount > 1 ? "s" : ""}</p>
+                  <p className="text-4xl font-bold text-blue-600">{integreCount}</p>
+                  <p className="text-base text-zinc-400">intégré{integreCount > 1 ? "s" : ""}</p>
                 </div>
                 <div className="flex items-baseline gap-2">
-                  <p className="text-3xl font-bold text-zinc-700">{franchiseCount}</p>
-                  <p className="text-sm text-zinc-400">franchisé{franchiseCount > 1 ? "s" : ""}</p>
+                  <p className="text-4xl font-bold text-zinc-700">{franchiseCount}</p>
+                  <p className="text-base text-zinc-400">franchisé{franchiseCount > 1 ? "s" : ""}</p>
                 </div>
                 {ouverturesEnCours > 0 && (
                   <div className="flex items-baseline gap-2">
-                    <p className="text-3xl font-bold text-amber-500">{ouverturesEnCours}</p>
-                    <p className="text-sm text-zinc-400">ouverture{ouverturesEnCours > 1 ? "s" : ""} en cours</p>
+                    <p className="text-4xl font-bold text-amber-500">{ouverturesEnCours}</p>
+                    <p className="text-base text-zinc-400">ouverture{ouverturesEnCours > 1 ? "s" : ""} en cours</p>
                   </div>
                 )}
                 {archives.length > 0 && (
                   <div className="flex items-baseline gap-2">
-                    <p className="text-3xl font-bold text-zinc-300">{archives.length}</p>
-                    <p className="text-sm text-zinc-300">archivé{archives.length > 1 ? "s" : ""}</p>
+                    <p className="text-4xl font-bold text-zinc-300">{archives.length}</p>
+                    <p className="text-base text-zinc-300">archivé{archives.length > 1 ? "s" : ""}</p>
                   </div>
                 )}
               </div>
