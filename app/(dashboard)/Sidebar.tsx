@@ -15,12 +15,12 @@ const NAV: Record<UserRole, NavGroup[]> = {
     {
       items: [
         { href: "/", label: "Tableau de bord" },
-        { href: "/projets", label: "Ouvertures" },
       ],
     },
     {
       title: "Réseau",
       items: [
+        { href: "/projets", label: "Ouvertures" },
         { href: "/reseau", label: "Magasins" },
         { href: "/reseau/franchises", label: "Franchisés" },
       ],
@@ -49,12 +49,12 @@ const NAV: Record<UserRole, NavGroup[]> = {
     {
       items: [
         { href: "/", label: "Tableau de bord" },
-        { href: "/projets", label: "Ouvertures" },
       ],
     },
     {
       title: "Réseau",
       items: [
+        { href: "/projets", label: "Ouvertures" },
         { href: "/reseau", label: "Magasins" },
         { href: "/reseau/franchises", label: "Franchisés" },
       ],
@@ -81,12 +81,12 @@ const NAV: Record<UserRole, NavGroup[]> = {
     {
       items: [
         { href: "/", label: "Tableau de bord" },
-        { href: "/projets", label: "Ouvertures" },
       ],
     },
     {
       title: "Réseau",
       items: [
+        { href: "/projets", label: "Ouvertures" },
         { href: "/reseau", label: "Magasins" },
         { href: "/reseau/franchises", label: "Franchisés" },
       ],
@@ -192,8 +192,11 @@ export function Sidebar({
           {
             items: [
               { href: "/", label: "Tableau de bord" },
-              { href: "/projets", label: "Ouvertures" },
             ],
+          },
+          {
+            title: "Réseau",
+            items: [{ href: "/projets", label: "Ouvertures" }],
           },
           {
             title: "Prospection",
