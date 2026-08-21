@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 
 const VilleSchema = z.object({
   nom: z.string().min(1, { error: "Nom requis." }),
+  code_postal: z.string().optional(),
   departement: z.string().optional(),
   region: z.string().optional(),
   population: z.coerce.number().int().positive().optional(),
@@ -24,6 +25,7 @@ export async function createVille(
   const session = await requireMarketing();
   const parsed = VilleSchema.safeParse({
     nom: formData.get("nom"),
+    code_postal: formData.get("code_postal") || undefined,
     departement: formData.get("departement") || undefined,
     region: formData.get("region") || undefined,
     population: formData.get("population") || undefined,
@@ -38,6 +40,7 @@ export async function createVille(
   const supabase = await createClient();
   const { error } = await supabase.from("villes").insert({
     ...parsed.data,
+    code_postal: parsed.data.code_postal ?? null,
     population: parsed.data.population ?? null,
     departement: parsed.data.departement ?? null,
     region: parsed.data.region ?? null,
@@ -60,6 +63,7 @@ export async function updateVille(
   await requireMarketing();
   const parsed = VilleSchema.safeParse({
     nom: formData.get("nom"),
+    code_postal: formData.get("code_postal") || undefined,
     departement: formData.get("departement") || undefined,
     region: formData.get("region") || undefined,
     population: formData.get("population") || undefined,
@@ -76,6 +80,7 @@ export async function updateVille(
     .from("villes")
     .update({
       ...parsed.data,
+      code_postal: parsed.data.code_postal ?? null,
       population: parsed.data.population ?? null,
       departement: parsed.data.departement ?? null,
       region: parsed.data.region ?? null,

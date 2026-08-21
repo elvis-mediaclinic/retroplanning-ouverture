@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { CodePostalAutocomplete } from "@/components/CodePostalAutocomplete";
 import type { Ville } from "@/lib/types";
 
 type Props = {
@@ -15,37 +16,18 @@ export function VilleForm({ action, defaultValues, submitLabel = "Enregistrer" }
   return (
     <form action={formAction} className="space-y-5">
       <div className="grid grid-cols-2 gap-4">
-        <div className="col-span-2 space-y-1">
-          <label className="text-sm font-medium text-zinc-700">
-            Nom de la ville <span className="text-red-500">*</span>
-          </label>
-          <input
-            name="nom"
-            required
-            defaultValue={defaultValues?.nom ?? ""}
-            className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
-          />
-        </div>
-
-        <div className="space-y-1">
-          <label className="text-sm font-medium text-zinc-700">Département</label>
-          <input
-            name="departement"
-            defaultValue={defaultValues?.departement ?? ""}
-            placeholder="ex : 64"
-            className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
-          />
-        </div>
-
-        <div className="space-y-1">
-          <label className="text-sm font-medium text-zinc-700">Région</label>
-          <input
-            name="region"
-            defaultValue={defaultValues?.region ?? ""}
-            placeholder="ex : Nouvelle-Aquitaine"
-            className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
-          />
-        </div>
+        <CodePostalAutocomplete
+          cpName="code_postal"
+          cpDefaultValue={defaultValues?.code_postal ?? ""}
+          cpLabel="Code postal"
+          villeName="nom"
+          villeDefaultValue={defaultValues?.nom ?? ""}
+          villeLabel="Nom de la ville *"
+          departementName="departement"
+          departementDefaultValue={defaultValues?.departement ?? ""}
+          regionName="region"
+          regionDefaultValue={defaultValues?.region ?? ""}
+        />
 
         <div className="space-y-1">
           <label className="text-sm font-medium text-zinc-700">Population</label>

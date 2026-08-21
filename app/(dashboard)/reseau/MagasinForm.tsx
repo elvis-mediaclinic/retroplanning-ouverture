@@ -3,6 +3,7 @@
 import { useActionState, useState, useId, useRef } from "react";
 import { saveMagasin } from "./actions";
 import { FranchiseModal } from "./FranchiseModal";
+import { CodePostalAutocomplete } from "@/components/CodePostalAutocomplete";
 import type { Magasin, Franchise } from "@/lib/types";
 import { FORMAT_LABELS } from "@/lib/types";
 
@@ -102,15 +103,12 @@ export function MagasinForm({ magasin, projetId = null, projetNom, franchises: i
               <input name="adresse" type="text" defaultValue={magasin?.adresse ?? ""} className="input w-full" />
             </div>
 
-            <div className="space-y-1">
-              <label className="text-sm font-medium text-zinc-700">Code postal</label>
-              <input name="code_postal" type="text" defaultValue={magasin?.code_postal ?? ""} className="input w-full" />
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-sm font-medium text-zinc-700">Ville</label>
-              <input name="ville" type="text" defaultValue={magasin?.ville ?? ""} className="input w-full" />
-            </div>
+            <CodePostalAutocomplete
+              cpName="code_postal"
+              cpDefaultValue={magasin?.code_postal ?? ""}
+              villeName="ville"
+              villeDefaultValue={magasin?.ville ?? ""}
+            />
 
             <div className="space-y-1">
               <label className="text-sm font-medium text-zinc-700">Téléphone</label>
