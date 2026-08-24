@@ -113,7 +113,7 @@ export default async function NosMagasinsPage() {
           </div>
           {villesEnEtude.length > 0 && (
             <div className="flex items-center gap-2">
-              <span className="text-[#e60076] text-base leading-none">★</span>
+              <span className="inline-block w-3 h-3 rounded-full bg-amber-500 border-2 border-white shadow" />
               Ville en étude
             </div>
           )}
