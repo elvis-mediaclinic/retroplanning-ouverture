@@ -9,15 +9,15 @@ import { updateDateCible, updateStatutEtape } from "../actions";
 
 const STATUT_COLORS: Record<string, string> = {
   fait: "#22c55e",
-  en_cours: "#3b82f6",
-  a_faire: "#a1a1aa",
+  en_cours: "#f59e0b",
+  a_faire: "#e4e4e7",
   en_retard: "#ef4444",
-  na: "#d4d4d8",
+  na: "rgba(255,255,255,0.35)",
 };
 
 const STATUTS: { value: StatutEtape; label: string; color: string }[] = [
   { value: "a_faire", label: "À faire", color: "#a1a1aa" },
-  { value: "en_cours", label: "En cours", color: "#3b82f6" },
+  { value: "en_cours", label: "En cours", color: "#f59e0b" },
   { value: "fait", label: "Fait", color: "#22c55e" },
   { value: "en_retard", label: "En retard", color: "#ef4444" },
   { value: "na", label: "N/A", color: "#d4d4d8" },
@@ -206,10 +206,10 @@ function DraggableMilestone({
 
   return (
     <div ref={containerRef} className="flex-1 relative h-full flex items-center select-none">
-      <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-px bg-zinc-100" />
+      <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-px bg-white/15" />
 
       <div
-        className="absolute top-1/2 -translate-y-1/2 h-1 rounded-full opacity-20 transition-none"
+        className="absolute top-1/2 -translate-y-1/2 h-1 rounded-full opacity-35 transition-none"
         style={{ left: 0, width: `${pct}%`, backgroundColor: color }}
       />
 
@@ -260,8 +260,9 @@ function DraggableMilestone({
           className="absolute z-20 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
           style={{ left: `${pct}%`, top: "50%", transform: "translateX(-50%) translateY(-220%)" }}
         >
-          <div className="bg-zinc-800 text-white text-[10px] rounded px-1.5 py-0.5 whitespace-nowrap">
-            {formatDate(etape.date_cible)} · {STATUT_ETAPE_LABELS[etape.statut]}
+          <div className="bg-zinc-900 text-white text-[10px] rounded px-2 py-1 whitespace-nowrap shadow-lg">
+            <div className="font-semibold">{etape.nom}</div>
+            <div className="text-white/70">{formatDate(etape.date_cible)} · {STATUT_ETAPE_LABELS[etape.statut]}</div>
           </div>
         </div>
       )}
@@ -287,7 +288,7 @@ export function GanttChart({
 
   const withDate = etapes.filter((e) => e.date_cible);
   if (withDate.length === 0) {
-    return <p className="text-zinc-400 text-sm py-8 text-center">Aucune étape avec une date cible.</p>;
+    return <p className="text-white/60 text-sm py-8 text-center">Aucune étape avec une date cible.</p>;
   }
 
   const dates = withDate.map((e) => toDay(e.date_cible!));
@@ -326,7 +327,7 @@ export function GanttChart({
             {ticks.map((t) => (
               <span
                 key={t.label}
-                className="absolute -translate-x-1/2 text-[10px] text-zinc-400 whitespace-nowrap"
+                className="absolute -translate-x-1/2 text-[10px] text-white/60 whitespace-nowrap"
                 style={{ left: `${t.pct}%` }}
               >
                 {t.label}
@@ -337,20 +338,20 @@ export function GanttChart({
 
         <div className="relative">
           <div
-            className="absolute top-0 bottom-0 w-px bg-brand/50 z-10 pointer-events-none"
+            className="absolute top-0 bottom-0 w-px bg-white/70 z-10 pointer-events-none"
             style={{ left: `calc(13rem + (100% - 13rem) * ${todayPct} / 100)` }}
           >
-            <span className="absolute -top-5 -translate-x-1/2 text-[10px] text-brand font-semibold whitespace-nowrap bg-white px-1">
+            <span className="absolute -top-5 -translate-x-1/2 text-[10px] text-[#00729e] font-semibold whitespace-nowrap bg-white px-1 rounded">
               Aujourd&apos;hui
             </span>
           </div>
 
           {ouverturePct !== null && (
             <div
-              className="absolute top-0 bottom-0 w-px bg-green-500/50 z-10 pointer-events-none"
+              className="absolute top-0 bottom-0 w-px bg-green-300/70 z-10 pointer-events-none"
               style={{ left: `calc(13rem + (100% - 13rem) * ${ouverturePct} / 100)` }}
             >
-              <span className="absolute -top-5 -translate-x-1/2 text-[10px] text-green-600 font-semibold whitespace-nowrap bg-white px-1">
+              <span className="absolute -top-5 -translate-x-1/2 text-[10px] text-green-700 font-semibold whitespace-nowrap bg-white px-1 rounded">
                 Ouverture
               </span>
             </div>
@@ -362,10 +363,10 @@ export function GanttChart({
             return (
               <div key={phase} className="mb-4">
                 <div className="flex items-center mb-1">
-                  <div className="w-52 shrink-0 pr-3 text-xs font-semibold text-zinc-500 uppercase tracking-wide truncate">
+                  <div className="w-52 shrink-0 pr-3 text-xs font-semibold text-white/70 uppercase tracking-wide truncate">
                     {PHASE_LABELS[phase]}
                   </div>
-                  <div className="flex-1 h-px bg-zinc-100" />
+                  <div className="flex-1 h-px bg-white/20" />
                 </div>
 
                 {rows.map((etape) => {
@@ -376,7 +377,7 @@ export function GanttChart({
 
                   return (
                     <div key={etape.id} className="flex items-center h-8 group">
-                      <div className="w-52 shrink-0 pr-3 text-xs text-zinc-600 truncate" title={etape.nom}>
+                      <div className="w-52 shrink-0 pr-3 text-xs text-white/90 truncate" title={etape.nom}>
                         {etape.nom}
                       </div>
                       <DraggableMilestone
@@ -396,7 +397,7 @@ export function GanttChart({
           })}
         </div>
 
-        <div className="flex items-center gap-4 mt-6 flex-wrap text-xs text-zinc-500">
+        <div className="flex items-center gap-4 mt-6 flex-wrap text-xs text-white/70">
           {[
             { label: "Fait", color: STATUT_COLORS.fait },
             { label: "En cours", color: STATUT_COLORS.en_cours },
@@ -405,12 +406,12 @@ export function GanttChart({
             { label: "N/A", color: STATUT_COLORS.na },
           ].map(({ label, color }) => (
             <div key={label} className="flex items-center gap-1.5">
-              <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
+              <div className="w-2.5 h-2.5 rounded-full border border-white/30" style={{ backgroundColor: color }} />
               {label}
             </div>
           ))}
           {canEdit && (
-            <span className="ml-auto text-zinc-400">Cliquer sur un marqueur pour changer le statut · Glisser pour modifier la date</span>
+            <span className="ml-auto text-white/50">Cliquer sur un marqueur pour changer le statut · Glisser pour modifier la date</span>
           )}
         </div>
       </div>
