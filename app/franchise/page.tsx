@@ -11,7 +11,7 @@ export default function FranchisePage() {
 
       <PublicSidebar active="franchise" />
 
-      <main className="flex-1 mx-auto w-full max-w-6xl px-4 sm:px-8 py-8 sm:py-12">
+      <main className="flex-1 mx-auto w-full max-w-[1600px] px-6 pt-3 pb-8">
         <div className="rounded-2xl border border-zinc-200 bg-white p-10 text-center shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-widest text-brand mb-2">
             La franchise

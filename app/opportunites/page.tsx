@@ -21,7 +21,7 @@ export default async function AnnoncesPage() {
 
       <PublicSidebar active="opportunites" />
 
-      <main className="flex-1 mx-auto w-full max-w-6xl px-4 sm:px-8 py-8 sm:py-12 space-y-6">
+      <main className="flex-1 mx-auto w-full max-w-[1600px] px-6 pt-3 pb-8 space-y-6">
         <div>
           <p className="text-xs font-semibold uppercase tracking-widest text-brand mb-2">
             Opportunités de franchise
