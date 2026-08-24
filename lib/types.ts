@@ -38,7 +38,14 @@ export type StatutProjet =
 
 export type StatutEtape = "a_faire" | "en_cours" | "fait" | "en_retard" | "na";
 
-export type TypeInteraction = "appel" | "email" | "visio" | "visite_siege" | "autre";
+export type TypeInteraction =
+  | "appel"
+  | "email"
+  | "visio"
+  | "visite_siege"
+  | "immersion_magasin"
+  | "visite_ville_candidat"
+  | "autre";
 
 export type ResponsableEtape = "franchise" | "mc" | "externe" | "les_deux";
 
@@ -257,9 +264,11 @@ export const STATUT_CANDIDAT_LABELS: Record<StatutCandidat, string> = {
 
 export const TYPE_INTERACTION_LABELS: Record<TypeInteraction, string> = {
   appel: "Appel",
-  email: "Email",
+  email: "Envoi plaquette",
   visio: "Visio",
   visite_siege: "Visite au siège",
+  immersion_magasin: "Immersion magasin",
+  visite_ville_candidat: "Visite ville candidat",
   autre: "Autre",
 };
 

@@ -18,6 +18,8 @@ const TYPE_ICONS: Record<TypeInteraction, string> = {
   email: "✉️",
   visio: "🖥️",
   visite_siege: "🏢",
+  immersion_magasin: "🛍️",
+  visite_ville_candidat: "📍",
   autre: "•",
 };
 
@@ -116,9 +118,11 @@ export function InteractionTimeline({
 
   const quickActions: { type: TypeInteraction; label: string }[] = [
     { type: "appel", label: "📞 Appel" },
-    { type: "email", label: "✉️ Email (plaquette)" },
+    { type: "email", label: "✉️ Envoi plaquette" },
     { type: "visio", label: "🖥️ Visio" },
     { type: "visite_siege", label: "🏢 Visite siège" },
+    { type: "immersion_magasin", label: "🛍️ Immersion magasin" },
+    { type: "visite_ville_candidat", label: "📍 Visite ville candidat" },
   ];
 
   return (
