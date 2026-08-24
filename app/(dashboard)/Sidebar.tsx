@@ -23,6 +23,7 @@ const NAV: Record<UserRole, NavGroup[]> = {
         { href: "/projets", label: "Ouvertures" },
         { href: "/reseau", label: "Magasins" },
         { href: "/reseau/franchises", label: "Franchisés" },
+        { href: "/reseau/carte", label: "Sur la carte" },
       ],
     },
     {
@@ -57,6 +58,7 @@ const NAV: Record<UserRole, NavGroup[]> = {
         { href: "/projets", label: "Ouvertures" },
         { href: "/reseau", label: "Magasins" },
         { href: "/reseau/franchises", label: "Franchisés" },
+        { href: "/reseau/carte", label: "Sur la carte" },
       ],
     },
     {
@@ -89,6 +91,7 @@ const NAV: Record<UserRole, NavGroup[]> = {
         { href: "/projets", label: "Ouvertures" },
         { href: "/reseau", label: "Magasins" },
         { href: "/reseau/franchises", label: "Franchisés" },
+        { href: "/reseau/carte", label: "Sur la carte" },
       ],
     },
     {
@@ -101,7 +104,7 @@ const NAV: Record<UserRole, NavGroup[]> = {
 function isActive(pathname: string, href: string) {
   if (href === "/") return pathname === "/";
   if (href === "/reseau") {
-    return pathname === "/reseau" || (pathname.startsWith("/reseau/") && !pathname.startsWith("/reseau/franchises"));
+    return pathname === "/reseau" || (pathname.startsWith("/reseau/") && !pathname.startsWith("/reseau/franchises") && !pathname.startsWith("/reseau/carte"));
   }
   return pathname === href || pathname.startsWith(href + "/");
 }
