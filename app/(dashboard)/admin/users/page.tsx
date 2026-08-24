@@ -21,9 +21,9 @@ export default async function AdminUsersPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-lg font-semibold text-zinc-900">Utilisateurs</h1>
-        <p className="text-sm text-zinc-500">
+      <div className="rounded-xl bg-gradient-to-br from-[#00729e] to-[#0089bd] p-6 shadow-sm">
+        <h1 className="text-2xl font-bold uppercase text-white">Utilisateurs</h1>
+        <p className="mt-1 text-sm text-white/70">
           L&apos;auto-inscription est désactivée : seul un admin peut créer un compte.
         </p>
       </div>
@@ -33,12 +33,12 @@ export default async function AdminUsersPage() {
       <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-zinc-200 bg-zinc-50 text-left">
-              <th className="py-2 px-4 font-medium text-zinc-600">Nom</th>
-              <th className="py-2 px-4 font-medium text-zinc-600">Email</th>
-              <th className="py-2 px-4 font-medium text-zinc-600">Rôle</th>
-              <th className="py-2 px-4 font-medium text-zinc-600">Fonction</th>
-              <th className="py-2 px-4 font-medium text-zinc-600"></th>
+            <tr className="bg-gradient-to-br from-[#00729e] to-[#0089bd] text-left">
+              <th className="py-2 px-4 font-medium text-white">Nom</th>
+              <th className="py-2 px-4 font-medium text-white">Email</th>
+              <th className="py-2 px-4 font-medium text-white">Rôle</th>
+              <th className="py-2 px-4 font-medium text-white">Fonction</th>
+              <th className="py-2 px-4 font-medium text-white"></th>
             </tr>
           </thead>
           <tbody>

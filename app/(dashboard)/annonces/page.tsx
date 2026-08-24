@@ -62,10 +62,10 @@ export default async function AnnoncesAdminPage() {
   return (
     <div className="space-y-8">
       {/* En-tête */}
-      <div className="flex items-center justify-between">
+      <div className="rounded-xl bg-gradient-to-br from-[#00729e] to-[#0089bd] p-6 shadow-sm flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-zinc-900">Annonces</h1>
-          <p className="mt-1 text-sm text-zinc-500">
+          <h1 className="text-2xl font-bold uppercase text-white">Annonces</h1>
+          <p className="mt-1 text-sm text-white/70">
             {publiees.length} publiée{publiees.length !== 1 ? "s" : ""} · {brouillons.length} brouillon{brouillons.length !== 1 ? "s" : ""}
           </p>
         </div>
@@ -80,9 +80,9 @@ export default async function AnnoncesAdminPage() {
             { label: "Visiteurs uniques", value: totalUnique },
             { label: "Contacts reçus", value: totalContacts },
           ].map(({ label, value }) => (
-            <div key={label} className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm text-center">
-              <p className="text-2xl font-bold text-zinc-900">{value}</p>
-              <p className="text-xs text-zinc-500 mt-0.5">{label}</p>
+            <div key={label} className="rounded-xl bg-gradient-to-br from-[#00729e] to-[#0089bd] p-4 shadow-sm text-center">
+              <p className="text-2xl font-bold text-white">{value}</p>
+              <p className="text-xs text-white/70 mt-0.5">{label}</p>
             </div>
           ))}
         </div>
@@ -97,13 +97,13 @@ export default async function AnnoncesAdminPage() {
           <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-zinc-200 bg-zinc-50 text-left">
-                  <th className="py-2 px-4 font-medium text-zinc-600">Ville</th>
-                  <th className="py-2 px-4 font-medium text-zinc-600">Titre</th>
-                  <th className="py-2 px-4 font-medium text-zinc-600 text-right">Vues</th>
-                  <th className="py-2 px-4 font-medium text-zinc-600 text-right">Visiteurs</th>
-                  <th className="py-2 px-4 font-medium text-zinc-600 text-right">Contacts</th>
-                  <th className="py-2 px-4 font-medium text-zinc-600"></th>
+                <tr className="bg-gradient-to-br from-[#00729e] to-[#0089bd] text-left">
+                  <th className="py-2 px-4 font-medium text-white">Ville</th>
+                  <th className="py-2 px-4 font-medium text-white">Titre</th>
+                  <th className="py-2 px-4 font-medium text-white text-right">Vues</th>
+                  <th className="py-2 px-4 font-medium text-white text-right">Visiteurs</th>
+                  <th className="py-2 px-4 font-medium text-white text-right">Contacts</th>
+                  <th className="py-2 px-4 font-medium text-white"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100">
@@ -170,10 +170,10 @@ export default async function AnnoncesAdminPage() {
           <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-zinc-200 bg-zinc-50 text-left">
-                  <th className="py-2 px-4 font-medium text-zinc-600">Ville</th>
-                  <th className="py-2 px-4 font-medium text-zinc-600">Titre</th>
-                  <th className="py-2 px-4 font-medium text-zinc-600"></th>
+                <tr className="bg-gradient-to-br from-[#00729e] to-[#0089bd] text-left">
+                  <th className="py-2 px-4 font-medium text-white">Ville</th>
+                  <th className="py-2 px-4 font-medium text-white">Titre</th>
+                  <th className="py-2 px-4 font-medium text-white"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100">

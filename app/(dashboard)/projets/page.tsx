@@ -46,25 +46,25 @@ export default async function ProjetsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="rounded-xl bg-gradient-to-br from-[#00729e] to-[#0089bd] p-6 shadow-sm flex items-center justify-between">
         <div>
-          <h1 className="text-lg font-semibold text-zinc-900">Ouvertures</h1>
-          <p className="text-sm text-zinc-500">Tous les dossiers d&apos;ouverture</p>
+          <h1 className="text-2xl font-bold uppercase text-white">Ouvertures</h1>
+          <p className="mt-1 text-sm text-white/70">Tous les dossiers d&apos;ouverture</p>
         </div>
-        <Link href="/projets/new" className="btn-primary">+ Nouveau projet</Link>
+        <Link href="/projets/new" className="rounded-md bg-white px-3 py-2 text-sm font-medium text-[#00729e] hover:bg-white/90 transition-colors">+ Nouveau projet</Link>
       </div>
 
       <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-zinc-200 bg-zinc-50 text-left">
-              <th className="py-2 px-4 font-medium text-zinc-600">Projet</th>
-              <th className="py-2 px-4 font-medium text-zinc-600">Ville</th>
-              <th className="py-2 px-4 font-medium text-zinc-600">Franchisé</th>
-              <th className="py-2 px-4 font-medium text-zinc-600">Statut</th>
-              <th className="py-2 px-4 font-medium text-zinc-600">Ouverture</th>
-              <th className="py-2 px-4 font-medium text-zinc-600">Progression</th>
-              <th className="py-2 px-4 font-medium text-zinc-600">À faire</th>
+            <tr className="bg-gradient-to-br from-[#00729e] to-[#0089bd] text-left">
+              <th className="py-2 px-4 font-medium text-white">Projet</th>
+              <th className="py-2 px-4 font-medium text-white">Ville</th>
+              <th className="py-2 px-4 font-medium text-white">Franchisé</th>
+              <th className="py-2 px-4 font-medium text-white">Statut</th>
+              <th className="py-2 px-4 font-medium text-white">Ouverture</th>
+              <th className="py-2 px-4 font-medium text-white">Progression</th>
+              <th className="py-2 px-4 font-medium text-white">À faire</th>
             </tr>
           </thead>
           <tbody>

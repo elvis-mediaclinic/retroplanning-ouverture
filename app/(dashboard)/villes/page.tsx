@@ -93,13 +93,13 @@ function VilleTable({ villes, canEdit, empty }: { villes: Ville[]; canEdit: bool
     <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-zinc-200 bg-zinc-50 text-left">
-            <th className="py-2 px-4 font-medium text-zinc-600">Ville</th>
-            <th className="py-2 px-4 font-medium text-zinc-600">Dép. / Région</th>
-            <th className="py-2 px-4 font-medium text-zinc-600">Zone de chalandise</th>
-            <th className="py-2 px-4 font-medium text-zinc-600">Projet</th>
-            <th className="py-2 px-4 font-medium text-zinc-600">Annonce</th>
-            <th className="py-2 px-4 font-medium text-zinc-600">Candidatures</th>
+          <tr className="bg-gradient-to-br from-[#00729e] to-[#0089bd] text-left">
+            <th className="py-2 px-4 font-medium text-white">Ville</th>
+            <th className="py-2 px-4 font-medium text-white">Dép. / Région</th>
+            <th className="py-2 px-4 font-medium text-white">Zone de chalandise</th>
+            <th className="py-2 px-4 font-medium text-white">Projet</th>
+            <th className="py-2 px-4 font-medium text-white">Annonce</th>
+            <th className="py-2 px-4 font-medium text-white">Candidatures</th>
             <th className="py-2 px-4" />
           </tr>
         </thead>
@@ -134,15 +134,15 @@ export default async function VillesPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="rounded-xl bg-gradient-to-br from-[#00729e] to-[#0089bd] p-6 shadow-sm flex items-center justify-between">
         <div>
-          <h1 className="text-lg font-semibold text-zinc-900">Villes</h1>
-          <p className="text-sm text-zinc-500">
+          <h1 className="text-2xl font-bold uppercase text-white">Villes</h1>
+          <p className="mt-1 text-sm text-white/70">
             {enEtude.length} en étude · {validees.length} validée{validees.length !== 1 ? "s" : ""}
           </p>
         </div>
         {canEdit && (
-          <Link href="/villes/new" className="btn-primary">
+          <Link href="/villes/new" className="rounded-md bg-white px-3 py-2 text-sm font-medium text-[#00729e] hover:bg-white/90 transition-colors">
             + Ajouter
           </Link>
         )}
