@@ -76,11 +76,12 @@ export function MagasinList({
         <p className="text-sm text-zinc-400 text-center py-10">Aucun résultat.</p>
       )}
 
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
       {filtered.map((m) => (
         <div key={m.id} className={`rounded-lg border bg-white shadow-sm overflow-hidden ${isArchive ? "opacity-80" : ""} border-zinc-200`}>
           <Link
             href={`/reseau/${m.id}`}
-            className="flex items-start justify-between px-5 py-4 bg-brand text-white hover:bg-brand-dark transition-colors"
+            className="flex items-start justify-between px-5 py-4 bg-[#0089bd] text-white hover:bg-[#00729e] transition-colors"
           >
             <div>
               <h2 className="font-semibold">{m.nom}</h2>
@@ -106,7 +107,7 @@ export function MagasinList({
           </Link>
 
           {isArchive ? (
-            <div className="grid grid-cols-3 divide-x divide-zinc-100">
+            <div className="grid grid-cols-2 divide-x divide-y divide-zinc-100">
               {m.type === "franchise" && (
                 <div className="px-5 py-3">
                   <p className="text-xs text-zinc-400">Signature contrat</p>
@@ -123,7 +124,7 @@ export function MagasinList({
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-y sm:divide-y-0 divide-zinc-100">
+            <div className="grid grid-cols-2 divide-x divide-y divide-zinc-100">
               {m.type === "franchise" && (
                 <div className="px-5 py-3">
                   <p className="text-xs text-zinc-400">Signature contrat</p>
@@ -184,6 +185,7 @@ export function MagasinList({
           )}
         </div>
       ))}
+      </div>
     </div>
   );
 }

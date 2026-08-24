@@ -58,7 +58,7 @@ export function FranchiseList({
           <div key={f.id} className="rounded-lg border border-zinc-200 bg-white shadow-sm overflow-hidden">
             <Link
               href={`/reseau/franchises/${f.id}`}
-              className="flex items-start justify-between px-5 py-4 bg-brand text-white hover:bg-brand-dark transition-colors"
+              className="flex items-start justify-between px-5 py-4 bg-[#0089bd] text-white hover:bg-[#00729e] transition-colors"
             >
               <div>
                 <h2 className="font-semibold">{f.nom}</h2>
