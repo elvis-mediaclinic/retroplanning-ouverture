@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { PublicSidebar } from "@/components/PublicSidebar";
 import { CandidatureForm } from "./CandidatureForm";
 import { ViewTracker } from "./ViewTracker";
 
@@ -324,7 +325,7 @@ export default async function AnnoncePage({
   }
 
   return (
-    <div className="min-h-screen bg-zinc-100">
+    <div className="flex min-h-screen flex-col bg-zinc-100 md:flex-row">
       <style>{`
         [data-text-color="gray"]   { color: #9b9a97 !important; }
         [data-text-color="brown"]  { color: #64473a !important; }
@@ -340,25 +341,9 @@ export default async function AnnoncePage({
         .col-card { background: #fff; border: 1px solid #e4e4e7; border-left: 2px solid #0ea5e9; border-radius: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
       `}</style>
 
-      {/* Header */}
-      <header className="border-b border-zinc-200 bg-white">
-        <div className="mx-auto w-full max-w-6xl px-4 sm:px-8 py-4 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-zinc-900 text-sm">Mediaclinic</span>
-            {ville && (
-              <>
-                <span className="text-zinc-300">·</span>
-                <span className="text-sm text-zinc-500">{ville.nom}</span>
-              </>
-            )}
-          </div>
-          <a href="/opportunites" className="text-sm text-zinc-500 hover:text-brand transition-colors">
-            ← Toutes les opportunités
-          </a>
-        </div>
-      </header>
+      <PublicSidebar villeNom={ville?.nom} />
 
-      <main className="mx-auto w-full max-w-6xl px-4 sm:px-8 py-8 sm:py-12 space-y-6">
+      <main className="flex-1 mx-auto w-full max-w-6xl px-4 sm:px-8 py-8 sm:py-12 space-y-6">
 
         {!annonce.actif && (
           <div className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
