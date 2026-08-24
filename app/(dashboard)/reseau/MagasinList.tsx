@@ -107,13 +107,13 @@ export function MagasinList({
       {filtered.map((m) => {
         const siret = currentSiret(m);
         return (
-        <div key={m.id} className={`rounded-lg border bg-white shadow-sm overflow-hidden ${isArchive ? "opacity-80" : ""} border-zinc-200`}>
+        <div key={m.id} className={`rounded-xl border bg-white shadow-sm overflow-hidden ${isArchive ? "opacity-80" : ""} border-zinc-200`}>
           <div
             role="link"
             tabIndex={0}
             onClick={() => router.push(`/reseau/${m.id}`)}
             onKeyDown={(e) => { if (e.key === "Enter") router.push(`/reseau/${m.id}`); }}
-            className="flex items-center justify-between gap-4 min-h-[64px] px-5 py-4 bg-[#0089bd] text-white hover:bg-[#00729e] transition-colors cursor-pointer"
+            className="flex items-center justify-between gap-4 min-h-[64px] px-5 py-4 bg-gradient-to-br from-[#00729e] to-[#0089bd] text-white hover:brightness-110 transition-all cursor-pointer"
           >
             <h2 className="font-semibold">{m.nom}</h2>
             <div className="flex items-center gap-2 shrink-0">

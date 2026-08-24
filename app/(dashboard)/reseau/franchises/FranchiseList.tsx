@@ -56,10 +56,10 @@ export function FranchiseList({
         const actifs = leurs.filter((m) => !m.archive);
         const fermes = leurs.filter((m) => m.archive);
         return (
-          <div key={f.id} className="rounded-lg border border-zinc-200 bg-white shadow-sm overflow-hidden">
+          <div key={f.id} className="rounded-xl border border-zinc-200 bg-white shadow-sm overflow-hidden">
             <Link
               href={`/reseau/franchises/${f.id}`}
-              className="flex items-center justify-between gap-4 min-h-[64px] px-5 py-4 bg-[#0089bd] text-white hover:bg-[#00729e] transition-colors"
+              className="flex items-center justify-between gap-4 min-h-[64px] px-5 py-4 bg-gradient-to-br from-[#00729e] to-[#0089bd] text-white hover:brightness-110 transition-all"
             >
               <h2 className="font-semibold">{f.nom}</h2>
               <div className="flex items-center gap-2 shrink-0">
