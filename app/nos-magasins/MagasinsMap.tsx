@@ -2,11 +2,8 @@
 
 import { useEffect, useRef } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
-import MarkerClusterGroup from "react-leaflet-cluster";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import "leaflet.markercluster/dist/MarkerCluster.css";
-import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 
 // Bornes approximatives de la France métropolitaine
 const FRANCE_BOUNDS: L.LatLngBoundsExpression = [
@@ -21,16 +18,12 @@ function FitFranceBounds() {
   return null;
 }
 
-type MarkerClusterGroupInstance = L.MarkerClusterGroup;
-
 function SelectionHandler({
   selectedId,
   markersRef,
-  clusterRef,
 }: {
   selectedId: string | null;
   markersRef: React.RefObject<Record<string, L.Marker>>;
-  clusterRef: React.RefObject<MarkerClusterGroupInstance | null>;
 }) {
   const map = useMap();
 
@@ -38,15 +31,9 @@ function SelectionHandler({
     if (!selectedId) return;
     const marker = markersRef.current[selectedId];
     if (!marker) return;
-
-    const cluster = clusterRef.current;
-    if (cluster && typeof (cluster as { zoomToShowLayer?: unknown }).zoomToShowLayer === "function") {
-      cluster.zoomToShowLayer(marker, () => marker.openPopup());
-    } else {
-      map.flyTo(marker.getLatLng(), 14);
-      marker.openPopup();
-    }
-  }, [selectedId, map, markersRef, clusterRef]);
+    map.flyTo(marker.getLatLng(), 14);
+    marker.openPopup();
+  }, [selectedId, map, markersRef]);
 
   return null;
 }
@@ -93,7 +80,6 @@ export function MagasinsMap({
   selectedId?: string | null;
 }) {
   const markersRef = useRef<Record<string, L.Marker>>({});
-  const clusterRef = useRef<MarkerClusterGroupInstance | null>(null);
 
   const all = [...points, ...villesEnEtude];
   if (all.length === 0) return null;
@@ -102,43 +88,37 @@ export function MagasinsMap({
     <div className="h-full w-full overflow-hidden rounded-2xl border border-zinc-200 shadow-sm">
       <MapContainer center={[46.6, 2.2]} zoom={6} style={{ height: "100%", width: "100%" }} scrollWheelZoom>
         <FitFranceBounds />
-        <SelectionHandler selectedId={selectedId} markersRef={markersRef} clusterRef={clusterRef} />
+        <SelectionHandler selectedId={selectedId} markersRef={markersRef} />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
           url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
         />
-        <MarkerClusterGroup
-          chunkedLoading
-          maxClusterRadius={50}
-          ref={(instance: MarkerClusterGroupInstance | null) => { clusterRef.current = instance; }}
-        >
-          {points.map((p) => (
-            <Marker
-              key={p.id}
-              position={[p.lat, p.lng]}
-              icon={p.type === "integre" ? ICON_INTEGRE : ICON_FRANCHISE}
-              ref={(m) => { if (m) markersRef.current[p.id] = m; }}
-            >
-              <Popup>
-                <span className="font-semibold">{p.nom}</span>
-                <br />
-                {[p.adresse, p.codePostal, p.ville].filter(Boolean).join(", ")}
-                <br />
-                <span className="text-xs text-zinc-500">{p.type === "integre" ? "Magasin intégré" : "Magasin franchisé"}</span>
-              </Popup>
-            </Marker>
-          ))}
-          {villesEnEtude.map((v) => (
-            <Marker key={v.id} position={[v.lat, v.lng]} icon={ICON_EN_ETUDE}>
-              <Popup>
-                <span className="font-semibold">{v.nom}</span>
-                {v.departement && <span className="text-xs text-zinc-500"> ({v.departement})</span>}
-                <br />
-                <span className="text-xs text-amber-600">Ville en étude</span>
-              </Popup>
-            </Marker>
-          ))}
-        </MarkerClusterGroup>
+        {points.map((p) => (
+          <Marker
+            key={p.id}
+            position={[p.lat, p.lng]}
+            icon={p.type === "integre" ? ICON_INTEGRE : ICON_FRANCHISE}
+            ref={(m) => { if (m) markersRef.current[p.id] = m; }}
+          >
+            <Popup>
+              <span className="font-semibold">{p.nom}</span>
+              <br />
+              {[p.adresse, p.codePostal, p.ville].filter(Boolean).join(", ")}
+              <br />
+              <span className="text-xs text-zinc-500">{p.type === "integre" ? "Magasin intégré" : "Magasin franchisé"}</span>
+            </Popup>
+          </Marker>
+        ))}
+        {villesEnEtude.map((v) => (
+          <Marker key={v.id} position={[v.lat, v.lng]} icon={ICON_EN_ETUDE}>
+            <Popup>
+              <span className="font-semibold">{v.nom}</span>
+              {v.departement && <span className="text-xs text-zinc-500"> ({v.departement})</span>}
+              <br />
+              <span className="text-xs text-amber-600">Ville en étude</span>
+            </Popup>
+          </Marker>
+        ))}
       </MapContainer>
     </div>
   );
