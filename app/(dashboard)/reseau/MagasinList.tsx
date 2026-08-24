@@ -78,34 +78,32 @@ export function MagasinList({
 
       {filtered.map((m) => (
         <div key={m.id} className={`rounded-lg border bg-white shadow-sm overflow-hidden ${isArchive ? "opacity-80" : ""} border-zinc-200`}>
-          <div className="flex items-start justify-between px-5 py-4 border-b border-zinc-100">
+          <Link
+            href={`/reseau/${m.id}`}
+            className="flex items-start justify-between px-5 py-4 bg-brand text-white hover:bg-brand-dark transition-colors"
+          >
             <div>
-              <h2 className="font-semibold text-zinc-900">{m.nom}</h2>
-              <p className="text-sm text-zinc-500 mt-0.5">
+              <h2 className="font-semibold">{m.nom}</h2>
+              <p className="text-sm text-white/80 mt-0.5">
                 {[m.adresse, m.code_postal, m.ville].filter(Boolean).join(", ") || "Adresse non renseignée"}
               </p>
             </div>
             <div className="flex items-center gap-2 shrink-0">
               <span className={`text-xs border rounded px-2 py-0.5 ${
                 m.type === "integre"
-                  ? "text-blue-700 border-blue-200 bg-blue-50"
-                  : "text-zinc-500 border-zinc-200"
+                  ? "text-white border-white/40 bg-white/10"
+                  : "text-white/80 border-white/30"
               }`}>
                 {m.type === "integre" ? "Intégré" : "Franchisé"}
               </span>
               {m.format && (
-                <span className="text-xs text-zinc-500 border border-zinc-200 rounded px-2 py-0.5">
+                <span className="text-xs text-white/80 border border-white/30 rounded px-2 py-0.5">
                   {FORMAT_LABELS[m.format]}
                 </span>
               )}
-              {m.surface_m2 && <span className="text-xs text-zinc-500">{m.surface_m2} m²</span>}
-              {isAdmin && (
-                <Link href={`/reseau/${m.id}`} className="text-xs text-zinc-400 hover:text-zinc-700 hover:underline ml-2">
-                  Modifier
-                </Link>
-              )}
+              {m.surface_m2 && <span className="text-xs text-white/80">{m.surface_m2} m²</span>}
             </div>
-          </div>
+          </Link>
 
           {isArchive ? (
             <div className="grid grid-cols-3 divide-x divide-zinc-100">
