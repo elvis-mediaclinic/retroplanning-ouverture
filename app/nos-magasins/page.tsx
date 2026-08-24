@@ -1,27 +1,35 @@
 import { createServiceClient } from "@/lib/supabase/service";
 import { geocodeAddress } from "@/lib/geocode";
 import { PublicSidebar } from "@/components/PublicSidebar";
-import { FORMAT_LABELS } from "@/lib/types";
 import { MagasinsMapLoader } from "./MagasinsMapLoader";
-import type { MagasinPoint } from "./MagasinsMap";
+import type { MagasinPoint, VilleEnEtudePoint } from "./MagasinsMap";
 
 export const metadata = { title: "Nos magasins — Mediaclinic" };
+export const dynamic = "force-dynamic";
 
 export default async function NosMagasinsPage() {
-  // Client de service : la table magasins n'a pas de policy RLS publique
-  // (contacts, franchisé, notes…) — on sélectionne nous-mêmes les seules
-  // colonnes destinées à un annuaire public.
+  // Client de service : magasins et villes n'ont pas de policy RLS publique
+  // couvrant ces lignes (contacts, franchisé, notes…) — on sélectionne
+  // nous-mêmes les seules colonnes destinées à un annuaire public.
   const service = createServiceClient();
 
-  const { data } = await service
-    .from("magasins")
-    .select("id, nom, adresse, code_postal, ville, format, latitude, longitude")
-    .eq("archive", false)
-    .order("nom");
+  const [{ data: magasinsData }, { data: villesData }] = await Promise.all([
+    service
+      .from("magasins")
+      .select("id, nom, adresse, code_postal, ville, type, latitude, longitude")
+      .eq("archive", false)
+      .order("nom"),
+    service
+      .from("villes")
+      .select("id, nom, departement, latitude, longitude")
+      .eq("statut", "en_etude")
+      .order("nom"),
+  ]);
 
-  const magasins = data ?? [];
+  const magasins = magasinsData ?? [];
+  const villesEnEtudeData = villesData ?? [];
 
-  // Géocode les magasins qui n'ont pas encore de coordonnées, et les met en cache
+  // Géocode les magasins qui n'ont pas encore de coordonnées, et met en cache
   const points: MagasinPoint[] = [];
   for (const m of magasins) {
     let lat = m.latitude;
@@ -44,9 +52,30 @@ export default async function NosMagasinsPage() {
         adresse: m.adresse,
         codePostal: m.code_postal,
         ville: m.ville,
+        type: m.type === "integre" ? "integre" : "franchise",
         lat,
         lng,
       });
+    }
+  }
+
+  // Géocode les villes en étude (par nom de commune)
+  const villesEnEtude: VilleEnEtudePoint[] = [];
+  for (const v of villesEnEtudeData) {
+    let lat = v.latitude;
+    let lng = v.longitude;
+
+    if (lat === null || lng === null) {
+      const coords = await geocodeAddress(v.nom, { type: "municipality" });
+      if (coords) {
+        lat = coords.lat;
+        lng = coords.lng;
+        await service.from("villes").update({ latitude: lat, longitude: lng }).eq("id", v.id);
+      }
+    }
+
+    if (lat !== null && lng !== null) {
+      villesEnEtude.push({ id: v.id, nom: v.nom, departement: v.departement, lat, lng });
     }
   }
 
@@ -72,25 +101,52 @@ export default async function NosMagasinsPage() {
           </p>
         </div>
 
-        {points.length > 0 && <MagasinsMapLoader points={points} />}
+        {/* Légende */}
+        <div className="flex flex-wrap items-center justify-center gap-5 text-sm text-zinc-600">
+          <div className="flex items-center gap-2">
+            <span className="inline-block w-3 h-3 rounded-full bg-[#0089bd] border-2 border-white shadow" />
+            Magasin intégré
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="inline-block w-3 h-3 rounded-full bg-green-500 border-2 border-white shadow" />
+            Magasin franchisé
+          </div>
+          {villesEnEtude.length > 0 && (
+            <div className="flex items-center gap-2">
+              <span className="text-amber-500 text-base leading-none">★</span>
+              Ville en étude
+            </div>
+          )}
+        </div>
 
-        {magasins.length === 0 ? (
-          <p className="text-zinc-400 text-center py-8">Aucun magasin ouvert pour le moment.</p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {magasins.map((m) => (
-              <div key={m.id} className="rounded-2xl bg-gradient-to-br from-[#00729e] to-[#0089bd] p-6 shadow-sm">
-                <h3 className="text-lg font-bold text-white leading-snug mb-1">{m.nom}</h3>
-                <p className="text-sm text-white/80">
-                  {[m.adresse, m.code_postal, m.ville].filter(Boolean).join(", ") || "Adresse à venir"}
-                </p>
-                {m.format && (
-                  <span className="mt-3 inline-block rounded-full bg-white/20 px-2.5 py-1 text-xs font-semibold text-white">
-                    {FORMAT_LABELS[m.format as keyof typeof FORMAT_LABELS]}
-                  </span>
-                )}
-              </div>
-            ))}
+        {(points.length > 0 || villesEnEtude.length > 0) && (
+          <div className="flex flex-col lg:flex-row gap-4 h-[600px]">
+            {/* Liste */}
+            <div className="lg:w-72 shrink-0 overflow-y-auto rounded-2xl border border-zinc-200 bg-white shadow-sm divide-y divide-zinc-100">
+              {magasins.map((m) => (
+                <div key={m.id} className="px-4 py-3">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`inline-block w-2 h-2 rounded-full shrink-0 ${
+                        m.type === "integre" ? "bg-[#0089bd]" : "bg-green-500"
+                      }`}
+                    />
+                    <p className="text-sm font-semibold text-zinc-900 truncate">{m.nom}</p>
+                  </div>
+                  <p className="mt-0.5 text-xs text-zinc-500 pl-4">
+                    {[m.code_postal, m.ville].filter(Boolean).join(" ") || "—"}
+                  </p>
+                </div>
+              ))}
+              {magasins.length === 0 && (
+                <p className="px-4 py-3 text-sm text-zinc-400">Aucun magasin ouvert pour le moment.</p>
+              )}
+            </div>
+
+            {/* Carte */}
+            <div className="flex-1 min-h-[400px]">
+              <MagasinsMapLoader points={points} villesEnEtude={villesEnEtude} />
+            </div>
           </div>
         )}
       </main>

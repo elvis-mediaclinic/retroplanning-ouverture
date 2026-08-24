@@ -1,13 +1,19 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import type { MagasinPoint } from "./MagasinsMap";
+import type { MagasinPoint, VilleEnEtudePoint } from "./MagasinsMap";
 
 const MagasinsMap = dynamic(() => import("./MagasinsMap").then((m) => m.MagasinsMap), {
   ssr: false,
-  loading: () => <div className="h-[500px] w-full rounded-2xl border border-zinc-200 bg-zinc-100 animate-pulse" />,
+  loading: () => <div className="h-full w-full rounded-2xl border border-zinc-200 bg-zinc-100 animate-pulse" />,
 });
 
-export function MagasinsMapLoader({ points }: { points: MagasinPoint[] }) {
-  return <MagasinsMap points={points} />;
+export function MagasinsMapLoader({
+  points,
+  villesEnEtude,
+}: {
+  points: MagasinPoint[];
+  villesEnEtude?: VilleEnEtudePoint[];
+}) {
+  return <MagasinsMap points={points} villesEnEtude={villesEnEtude} />;
 }
