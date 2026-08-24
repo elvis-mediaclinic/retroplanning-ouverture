@@ -1,4 +1,4 @@
-import type { StatutEtape, StatutProjet, StatutVille, StatutCandidat, ResponsableEtape } from "@/lib/types";
+import type { StatutEtape, StatutProjet, StatutVille, StatutCandidat, ResponsableEtape, StatutInteraction } from "@/lib/types";
 
 export function calcDateCible(dateOuverture: string, delaiSemaines: number): string {
   const d = new Date(dateOuverture + "T00:00:00");
@@ -43,6 +43,12 @@ export const STATUT_CANDIDAT_COLORS: Record<StatutCandidat, string> = {
   valide: "bg-blue-100 text-blue-700",
   signe: "bg-green-100 text-green-700",
   refuse: "bg-red-100 text-red-700",
+};
+
+export const STATUT_INTERACTION_COLORS: Record<StatutInteraction, string> = {
+  planifie: "bg-amber-100 text-amber-700",
+  fait: "bg-green-100 text-green-700",
+  annule: "bg-zinc-100 text-zinc-400",
 };
 
 export const RESP_COLORS: Record<ResponsableEtape, string> = {

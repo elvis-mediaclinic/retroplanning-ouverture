@@ -5,6 +5,8 @@ import { createClient } from "@/lib/supabase/server";
 import { updateCandidat, inviteCandidat } from "../actions";
 import { CandidatForm } from "../CandidatForm";
 import { InviteButton } from "./InviteButton";
+import { InteractionTimeline } from "./InteractionTimeline";
+import type { CandidatInteraction } from "@/lib/types";
 
 export default async function EditCandidatPage({
   params,
@@ -15,10 +17,11 @@ export default async function EditCandidatPage({
   const { id } = await params;
   const supabase = await createClient();
 
-  const [{ data: candidat }, { data: villes }, { data: candidatVilles }] = await Promise.all([
+  const [{ data: candidat }, { data: villes }, { data: candidatVilles }, { data: interactions }] = await Promise.all([
     supabase.from("candidats").select("*").eq("id", id).single(),
     supabase.from("villes").select("id, nom").order("nom"),
     supabase.from("candidat_villes").select("ville_id").eq("candidat_id", id),
+    supabase.from("candidat_interactions").select("*").eq("candidat_id", id).order("created_at", { ascending: false }),
   ]);
 
   if (!candidat) notFound();
@@ -50,6 +53,11 @@ export default async function EditCandidatPage({
       </div>
       <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
         <CandidatForm action={action} defaultValues={candidat} villes={villes ?? []} selectedVilleIds={selectedVilleIds} />
+      </div>
+
+      <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
+        <h2 className="text-sm font-semibold text-zinc-900 mb-4">Suivi des échanges</h2>
+        <InteractionTimeline candidatId={id} interactions={(interactions ?? []) as CandidatInteraction[]} />
       </div>
     </div>
   );
