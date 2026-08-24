@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { upsertAnnonce } from "./annonce-actions";
 import type { Section } from "./SectionsEditor";
@@ -33,6 +33,8 @@ export function AnnonceEditor({
   const action = upsertAnnonce.bind(null, villeId, annonce?.id ?? null);
   const [state, formAction, pending] = useActionState(action, undefined);
   const [actif, setActif] = useState(annonce?.actif ?? false);
+  const [accroche, setAccroche] = useState(annonce?.accroche ?? "");
+  const accrocheRef = useRef<HTMLInputElement>(null);
   const [heroBleu, setHeroBleu] = useState(annonce?.hero_bleu ?? true);
   const [copied, setCopied] = useState(false);
   const [open, setOpen] = useState(true);
@@ -46,6 +48,26 @@ export function AnnonceEditor({
       return undefined;
     } catch { return undefined; }
   })();
+
+  function toggleBoldAccroche() {
+    const el = accrocheRef.current;
+    if (!el) return;
+    const start = el.selectionStart ?? 0;
+    const end = el.selectionEnd ?? 0;
+    const selected = accroche.slice(start, end);
+    if (!selected) return;
+
+    const isBold = selected.startsWith("**") && selected.endsWith("**") && selected.length >= 4;
+    const inner = isBold ? selected.slice(2, -2) : selected;
+    const replacement = isBold ? inner : `**${inner}**`;
+    const next = accroche.slice(0, start) + replacement + accroche.slice(end);
+    setAccroche(next);
+
+    requestAnimationFrame(() => {
+      el.focus();
+      el.setSelectionRange(start, start + replacement.length);
+    });
+  }
 
   function copy() {
     navigator.clipboard.writeText(publicUrl);
@@ -123,12 +145,27 @@ export function AnnonceEditor({
               Accroche
               <span className="ml-1 text-xs text-zinc-400">(sous-titre)</span>
             </label>
-            <input
-              name="accroche"
-              defaultValue={annonce?.accroche ?? ""}
-              placeholder="Rejoignez le réseau Mediaclinic dans votre ville"
-              className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
-            />
+            <div className="flex items-center gap-2">
+              <input
+                ref={accrocheRef}
+                name="accroche"
+                value={accroche}
+                onChange={(e) => setAccroche(e.target.value)}
+                placeholder="Rejoignez le réseau Mediaclinic dans votre ville"
+                className="flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm"
+              />
+              <button
+                type="button"
+                onClick={toggleBoldAccroche}
+                title="Mettre le texte sélectionné en gras"
+                className="shrink-0 rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm font-bold text-zinc-700 hover:bg-zinc-50"
+              >
+                G
+              </button>
+            </div>
+            <p className="text-xs text-zinc-400">
+              Sélectionnez du texte puis cliquez sur « G » pour le mettre en gras.
+            </p>
           </div>
 
           <div className="flex items-center gap-2">

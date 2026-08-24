@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { updateVille } from "../actions";
 import { VilleInfoPanel } from "./VilleInfoPanel";
 import { AnnonceEditor } from "./AnnonceEditor";
+import { BoldText } from "@/components/BoldText";
 
 export default async function EditVillePage({
   params,
@@ -101,7 +102,7 @@ export default async function EditVillePage({
             </span>
           </div>
           {annonce.titre && <p className="font-semibold text-zinc-900 mb-1">{annonce.titre}</p>}
-          {annonce.accroche && <p className="text-sm text-zinc-500 mb-3 italic">{annonce.accroche}</p>}
+          {annonce.accroche && <p className="text-sm text-zinc-500 mb-3 italic"><BoldText text={annonce.accroche} /></p>}
           {annonce.actif && (
             <a href={publicUrl} target="_blank" rel="noopener noreferrer"
               className="text-sm text-brand hover:underline">

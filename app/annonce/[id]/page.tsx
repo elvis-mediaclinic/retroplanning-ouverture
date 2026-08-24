@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { svgUseCurrentColor } from "@/lib/utils";
 import { PublicSidebar } from "@/components/PublicSidebar";
+import { BoldText } from "@/components/BoldText";
 import { CandidatureForm } from "./CandidatureForm";
 import { ViewTracker } from "./ViewTracker";
 
@@ -411,7 +412,7 @@ export default async function AnnoncePage({
           </h1>
           {annonce.accroche && (
             <p className={`mt-4 text-lg sm:text-xl leading-relaxed ${annonce.hero_bleu ? "text-white/80" : "text-zinc-500"}`}>
-              {annonce.accroche}
+              <BoldText text={annonce.accroche} />
             </p>
           )}
         </div>

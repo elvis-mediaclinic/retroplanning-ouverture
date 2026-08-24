@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { PublicSidebar } from "@/components/PublicSidebar";
+import { BoldText } from "@/components/BoldText";
 
 export const metadata = { title: "Opportunités de franchise — Mediaclinic" };
 
@@ -57,7 +58,7 @@ export default async function AnnoncesPage() {
                   )}
                   <h2 className="text-lg font-bold text-white leading-snug mb-2">{a.titre}</h2>
                   {a.accroche && (
-                    <p className="text-sm text-white/80 leading-relaxed line-clamp-3">{a.accroche}</p>
+                    <p className="text-sm text-white/80 leading-relaxed line-clamp-3"><BoldText text={a.accroche} /></p>
                   )}
                   <span className="mt-4 inline-block text-sm font-medium text-white">
                     En savoir plus →
