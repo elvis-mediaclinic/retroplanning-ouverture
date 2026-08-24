@@ -103,16 +103,18 @@ export default async function ProjetPage({
   return (
     <div className="space-y-6">
       {/* En-tête */}
-      <div className="flex items-start justify-between">
+      <div>
+        <Link
+          href={isMC ? "/projets" : "/mon-projet"}
+          className="text-sm text-zinc-500 hover:text-zinc-900"
+        >
+          ← {isMC ? "Ouvertures" : "Mon projet"}
+        </Link>
+      </div>
+      <div className="rounded-xl bg-gradient-to-br from-[#00729e] to-[#0089bd] p-6 shadow-sm flex items-start justify-between">
         <div>
-          <Link
-            href={isMC ? "/projets" : "/mon-projet"}
-            className="text-sm text-zinc-500 hover:text-zinc-900"
-          >
-            ← {isMC ? "Ouvertures" : "Mon projet"}
-          </Link>
-          <div className="mt-2 flex items-center gap-3">
-            <h1 className="text-xl font-semibold text-zinc-900">{projet.nom}</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold uppercase text-white">{projet.nom}</h1>
             <span
               className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                 STATUT_PROJET_COLORS[projet.statut as keyof typeof STATUT_PROJET_COLORS]
@@ -121,7 +123,7 @@ export default async function ProjetPage({
               {STATUT_PROJET_LABELS[projet.statut as keyof typeof STATUT_PROJET_LABELS]}
             </span>
           </div>
-          <p className="mt-1 text-sm text-zinc-500">
+          <p className="mt-1 text-sm text-white/70">
             {TYPE_LABELS[projet.type_magasin as keyof typeof TYPE_LABELS]} ·{" "}
             {FORMAT_LABELS[projet.format_magasin as keyof typeof FORMAT_LABELS]}
             {projet.surface_m2 && ` · ${projet.surface_m2} m²`}
@@ -139,7 +141,7 @@ export default async function ProjetPage({
           <ExportButtons etapes={etapes ?? []} projetNom={projet.nom} mcUsers={mcUsers} />
           <Link
             href={`/projets/${id}/gantt`}
-            className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm text-zinc-600 hover:bg-zinc-50"
+            className="rounded-md border border-white/40 px-3 py-1.5 text-sm text-white hover:bg-white/10"
           >
             Vue Gantt
           </Link>
@@ -149,7 +151,7 @@ export default async function ProjetPage({
           {profile.role === "admin" && (
             <Link
               href={`/projets/${id}/edit`}
-              className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm text-zinc-600 hover:bg-zinc-50"
+              className="rounded-md border border-white/40 px-3 py-1.5 text-sm text-white hover:bg-white/10"
             >
               Modifier
             </Link>
@@ -159,27 +161,27 @@ export default async function ProjetPage({
 
       {/* Infos & progression */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <div className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm">
-          <p className="text-xs text-zinc-500">Ouverture cible</p>
-          <p className="mt-1 text-sm font-semibold text-zinc-900">
+        <div className="rounded-xl bg-gradient-to-br from-[#00729e] to-[#0089bd] p-4 shadow-sm">
+          <p className="text-xs text-white/70">Ouverture cible</p>
+          <p className="mt-1 text-sm font-semibold text-white">
             {formatDate(projet.date_cible_ouverture)}
           </p>
         </div>
-        <div className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm">
-          <p className="text-xs text-zinc-500">Ville</p>
-          <p className="mt-1 text-sm font-semibold text-zinc-900">
+        <div className="rounded-xl bg-gradient-to-br from-[#00729e] to-[#0089bd] p-4 shadow-sm">
+          <p className="text-xs text-white/70">Ville</p>
+          <p className="mt-1 text-sm font-semibold text-white">
             {ville ? `${ville.nom}${ville.departement ? ` (${ville.departement})` : ""}` : "—"}
           </p>
         </div>
-        <div className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm">
-          <p className="text-xs text-zinc-500">Franchisé</p>
-          <p className="mt-1 text-sm font-semibold text-zinc-900">
+        <div className="rounded-xl bg-gradient-to-br from-[#00729e] to-[#0089bd] p-4 shadow-sm">
+          <p className="text-xs text-white/70">Franchisé</p>
+          <p className="mt-1 text-sm font-semibold text-white">
             {candidat ? `${candidat.prenom} ${candidat.nom}` : franchisee ? `${franchisee.prenom} ${franchisee.nom}` : "—"}
           </p>
         </div>
-        <div className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm">
-          <p className="text-xs text-zinc-500">Progression</p>
-          <p className="mt-1 text-sm font-semibold text-zinc-900">
+        <div className="rounded-xl bg-gradient-to-br from-[#00729e] to-[#0089bd] p-4 shadow-sm">
+          <p className="text-xs text-white/70">Progression</p>
+          <p className="mt-1 text-sm font-semibold text-white">
             {etapesFaites} / {totalEtapes} étapes ({progression}%)
           </p>
         </div>

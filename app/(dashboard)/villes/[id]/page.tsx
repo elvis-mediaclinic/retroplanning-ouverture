@@ -60,7 +60,9 @@ export default async function EditVillePage({
         <Link href="/villes" className="text-sm text-zinc-500 hover:text-zinc-900">
           ← Villes
         </Link>
-        <h1 className="mt-2 text-lg font-semibold text-zinc-900">{ville.nom}</h1>
+      </div>
+      <div className="rounded-xl bg-gradient-to-br from-[#00729e] to-[#0089bd] p-6 shadow-sm">
+        <h1 className="text-2xl font-bold uppercase text-white">{ville.nom}</h1>
       </div>
 
       {/* Infos ville */}
