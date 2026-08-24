@@ -131,9 +131,9 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-8">
       {/* En-tête */}
-      <div>
-        <h1 className="text-2xl font-bold text-zinc-900">Suivi développement franchise</h1>
-        <p className="mt-1 text-sm text-zinc-500">Bonjour {profile.prenom} !</p>
+      <div className="rounded-lg bg-gradient-to-br from-[#00729e] to-[#0089bd] p-6 shadow-sm">
+        <h1 className="text-2xl font-bold text-white">Suivi développement franchise</h1>
+        <p className="mt-1 text-sm text-white/70">Bonjour {profile.prenom} !</p>
       </div>
 
       {/* ── Réseau ───────────────────────────────────────────────── */}
@@ -188,7 +188,7 @@ export default async function DashboardPage() {
               <FormatDonut segments={formatSegments} total={formatTotal} light />
             </div>
             {formatTotalArchives > 0 && (
-              <div className="rounded-lg bg-gradient-to-br from-[#00729e] to-[#0089bd] p-5 shadow-sm opacity-70">
+              <div className="rounded-lg bg-gradient-to-br from-[#00729e] to-[#0089bd] p-5 shadow-sm">
                 <p className="text-sm font-bold uppercase tracking-wide text-white mb-4">Répartition par format — archivés</p>
                 <FormatDonut segments={formatSegmentsArchives} total={formatTotalArchives} light />
               </div>
@@ -218,10 +218,10 @@ export default async function DashboardPage() {
             <Link
               key={label}
               href={href}
-              className="rounded-lg border border-zinc-200 border-l-4 border-l-[#0089bd] bg-white p-4 shadow-sm hover:bg-[#0089bd]/5 hover:border-zinc-300 transition-colors"
+              className="rounded-lg bg-gradient-to-br from-[#00729e] to-[#0089bd] p-4 shadow-sm hover:brightness-110 transition-all"
             >
-              <p className="text-2xl font-bold text-zinc-900">{value}</p>
-              <p className="mt-0.5 text-xs text-zinc-500">{label}</p>
+              <p className="text-2xl font-bold text-white">{value}</p>
+              <p className="mt-0.5 text-xs text-white/70">{label}</p>
             </Link>
           ))}
         </div>
