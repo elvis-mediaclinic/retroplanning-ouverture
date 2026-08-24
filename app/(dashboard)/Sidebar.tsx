@@ -100,6 +100,9 @@ const NAV: Record<UserRole, NavGroup[]> = {
 
 function isActive(pathname: string, href: string) {
   if (href === "/") return pathname === "/";
+  if (href === "/reseau") {
+    return pathname === "/reseau" || (pathname.startsWith("/reseau/") && !pathname.startsWith("/reseau/franchises"));
+  }
   return pathname === href || pathname.startsWith(href + "/");
 }
 
