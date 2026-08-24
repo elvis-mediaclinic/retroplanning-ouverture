@@ -11,9 +11,9 @@ const BlockEditor = dynamic(() => import("./BlockEditor").then((m) => m.BlockEdi
 export type Stat = { id: string; valeur: string; label: string };
 
 export type Section =
-  | { id: string; type?: "texte"; titre: string; contenu_json: string; disposition?: "pleine" | "moitie" | "tiers"; bleu?: boolean }
-  | { id: string; type: "stats"; titre: string; stats: Stat[]; colonnes: 2 | 3 | 4; alignement?: "gauche" | "centre"; bleu?: boolean }
-  | { id: string; type: "titre"; titre: string };
+  | { id: string; type?: "texte"; titre: string; contenu_json: string; disposition?: "pleine" | "moitie" | "tiers"; bleu?: boolean; icone?: string }
+  | { id: string; type: "stats"; titre: string; stats: Stat[]; colonnes: 2 | 3 | 4; alignement?: "gauche" | "centre"; bleu?: boolean; icone?: string }
+  | { id: string; type: "titre"; titre: string; icone?: string };
 
 function uid() { return Math.random().toString(36).slice(2); }
 
@@ -95,6 +95,15 @@ export function SectionsEditor({ defaultSections }: { defaultSections?: Section[
   const [sections, setSections] = useState<Section[]>(
     defaultSections ?? [{ id: uid(), type: "texte", titre: "", contenu_json: "" }]
   );
+  const [iconOpenIds, setIconOpenIds] = useState<Set<string>>(new Set());
+
+  function toggleIconEditor(id: string) {
+    setIconOpenIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }
 
   function update(id: string, patch: Partial<Section>) {
     setSections((prev) => prev.map((s) => (s.id === id ? { ...s, ...patch } as Section : s)));
@@ -158,6 +167,24 @@ export function SectionsEditor({ defaultSections }: { defaultSections?: Section[
                 className="flex-1 rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm font-medium"
               />
               <div className="flex items-center gap-1 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => toggleIconEditor(section.id)}
+                  title="Icône SVG (optionnelle)"
+                  className={`flex items-center gap-1 rounded border px-2 py-1 text-xs font-medium ${
+                    iconOpenIds.has(section.id) || (section as { icone?: string }).icone
+                      ? "border-brand bg-brand/10 text-brand"
+                      : "border-zinc-300 bg-white text-zinc-400 hover:text-zinc-600"
+                  }`}
+                >
+                  {(section as { icone?: string }).icone ? (
+                    <span
+                      className="w-3.5 h-3.5 [&_svg]:w-full [&_svg]:h-full"
+                      dangerouslySetInnerHTML={{ __html: (section as { icone?: string }).icone! }}
+                    />
+                  ) : null}
+                  Icône
+                </button>
                 {!isTitre && (
                   <label className="flex items-center gap-1 rounded border border-zinc-300 bg-white px-2 py-1 text-xs font-medium text-zinc-500 cursor-pointer">
                     <input
@@ -201,6 +228,33 @@ export function SectionsEditor({ defaultSections }: { defaultSections?: Section[
             )}
             {!isStats && disposition === "tiers" && (
               <p className="text-xs text-brand/70">⅓ largeur — se regroupe avec les sections adjacentes en ⅓ (max 3)</p>
+            )}
+
+            {iconOpenIds.has(section.id) && (
+              <div className="space-y-1 rounded-md border border-brand/30 bg-brand/5 p-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-medium text-zinc-700">Code SVG de l&apos;icône</label>
+                  {(section as { icone?: string }).icone && (
+                    <button
+                      type="button"
+                      onClick={() => update(section.id, { icone: undefined } as Partial<Section>)}
+                      className="text-xs text-red-500 hover:text-red-700"
+                    >
+                      Retirer l&apos;icône
+                    </button>
+                  )}
+                </div>
+                <textarea
+                  value={(section as { icone?: string }).icone ?? ""}
+                  onChange={(e) => update(section.id, { icone: e.target.value || undefined } as Partial<Section>)}
+                  placeholder='<svg viewBox="0 0 24 24" fill="currentColor">...</svg>'
+                  rows={3}
+                  className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-xs font-mono"
+                />
+                <p className="text-xs text-zinc-400">
+                  Collez le code d&apos;un pictogramme SVG. Utilisez <code>fill=&quot;currentColor&quot;</code> pour qu&apos;il s&apos;adapte automatiquement à la couleur du titre.
+                </p>
+              </div>
             )}
 
             {/* Contenu */}

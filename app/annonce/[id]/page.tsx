@@ -205,9 +205,19 @@ export default async function AnnoncePage({
   // Sections structurées (nouveau format) ou fallback sur l'ancien contenu_json
   type StatItem = { id: string; valeur: string; label: string };
   type StoredSection =
-    | { id: string; type?: "texte"; titre: string; contenu_json: string; disposition?: "pleine" | "moitie" | "tiers"; bleu?: boolean }
-    | { id: string; type: "stats"; titre: string; stats: StatItem[]; colonnes: 2 | 3 | 4; alignement?: "gauche" | "centre"; bleu?: boolean }
-    | { id: string; type: "titre"; titre: string };
+    | { id: string; type?: "texte"; titre: string; contenu_json: string; disposition?: "pleine" | "moitie" | "tiers"; bleu?: boolean; icone?: string }
+    | { id: string; type: "stats"; titre: string; stats: StatItem[]; colonnes: 2 | 3 | 4; alignement?: "gauche" | "centre"; bleu?: boolean; icone?: string }
+    | { id: string; type: "titre"; titre: string; icone?: string };
+
+  function SectionIcon({ svg, className }: { svg?: string; className?: string }) {
+    if (!svg) return null;
+    return (
+      <span
+        className={`inline-flex shrink-0 [&_svg]:w-full [&_svg]:h-full ${className ?? "w-6 h-6"}`}
+        dangerouslySetInnerHTML={{ __html: svg }}
+      />
+    );
+  }
   let storedSections: StoredSection[] | null = null;
   if (annonce.sections) {
     try {
@@ -280,7 +290,10 @@ export default async function AnnoncePage({
       if (row.kind === "full" && row.s.type === "titre") {
         return (
           <div key={`${keyPrefix}-${ri}`} className="text-center py-2">
-            <h2 className="text-2xl font-bold text-brand">{row.s.titre}</h2>
+            <h2 className="flex items-center justify-center gap-2 text-2xl font-bold text-brand">
+              <SectionIcon svg={row.s.icone} />
+              {row.s.titre}
+            </h2>
           </div>
         );
       }
@@ -292,7 +305,12 @@ export default async function AnnoncePage({
         const bleu = s.bleu ?? false;
         return (
           <div key={`${keyPrefix}-${ri}`} className={bleu ? bleuCardCls : "py-2"}>
-            {s.titre && <h2 className={`text-2xl font-bold mb-6 ${bleu ? "text-white" : "text-brand"} ${centré ? "text-center" : ""}`}>{s.titre}</h2>}
+            {s.titre && (
+              <h2 className={`flex items-center gap-2 text-2xl font-bold mb-6 ${bleu ? "text-white" : "text-brand"} ${centré ? "justify-center text-center" : ""}`}>
+                <SectionIcon svg={s.icone} />
+                {s.titre}
+              </h2>
+            )}
             <div className={STATS_GRID[cols] ?? STATS_GRID[3]}>
               {s.stats.map((stat) => (
                 <div key={stat.id} className={`flex flex-col gap-1 px-4 sm:px-6 ${centré ? "items-center text-center" : ""}`}>
@@ -312,7 +330,12 @@ export default async function AnnoncePage({
               const { titre, bodyHtml } = renderTextSection(s as Extract<StoredSection, { type?: "texte" }>);
               return (
                 <div key={s.id} className={bleu ? bleuCardCls : "col-card px-4 py-4 sm:px-6 sm:py-6"}>
-                  {titre && <h2 className={`text-2xl font-bold mb-4 ${bleu ? "text-white" : "text-brand"}`}>{titre}</h2>}
+                  {titre && (
+                    <h2 className={`flex items-center gap-2 text-2xl font-bold mb-4 ${bleu ? "text-white" : "text-brand"}`}>
+                      <SectionIcon svg={(s as { icone?: string }).icone} />
+                      {titre}
+                    </h2>
+                  )}
                   {bodyHtml.trim() && <div className={bleu ? contentClsDark : contentCls} dangerouslySetInnerHTML={{ __html: bodyHtml }} />}
                 </div>
               );
@@ -325,7 +348,12 @@ export default async function AnnoncePage({
         const { titre, bodyHtml } = renderTextSection(row.s as Extract<StoredSection, { type?: "texte" }>);
         return (
           <div key={`${keyPrefix}-${ri}`} className={bleu ? bleuCardCls : cardCls}>
-            {titre && <h2 className={`text-2xl font-bold mb-4 ${bleu ? "text-white" : "text-brand"}`}>{titre}</h2>}
+            {titre && (
+              <h2 className={`flex items-center gap-2 text-2xl font-bold mb-4 ${bleu ? "text-white" : "text-brand"}`}>
+                <SectionIcon svg={(row.s as { icone?: string }).icone} />
+                {titre}
+              </h2>
+            )}
             {bodyHtml.trim() && <div className={bleu ? contentClsDark : contentCls} dangerouslySetInnerHTML={{ __html: bodyHtml }} />}
           </div>
         );
