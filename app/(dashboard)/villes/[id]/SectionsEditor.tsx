@@ -2,6 +2,7 @@
 
 import { useId, useState } from "react";
 import dynamic from "next/dynamic";
+import { svgUseCurrentColor } from "@/lib/utils";
 
 const BlockEditor = dynamic(() => import("./BlockEditor").then((m) => m.BlockEditor), {
   ssr: false,
@@ -180,7 +181,7 @@ export function SectionsEditor({ defaultSections }: { defaultSections?: Section[
                   {(section as { icone?: string }).icone ? (
                     <span
                       className="w-3.5 h-3.5 [&_svg]:w-full [&_svg]:h-full"
-                      dangerouslySetInnerHTML={{ __html: (section as { icone?: string }).icone! }}
+                      dangerouslySetInnerHTML={{ __html: svgUseCurrentColor((section as { icone?: string }).icone!) }}
                     />
                   ) : null}
                   Icône
@@ -247,12 +248,13 @@ export function SectionsEditor({ defaultSections }: { defaultSections?: Section[
                 <textarea
                   value={(section as { icone?: string }).icone ?? ""}
                   onChange={(e) => update(section.id, { icone: e.target.value || undefined } as Partial<Section>)}
-                  placeholder='<svg viewBox="0 0 24 24" fill="currentColor">...</svg>'
+                  placeholder='<svg viewBox="0 0 24 24" fill="black">...</svg>'
                   rows={3}
                   className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-xs font-mono"
                 />
                 <p className="text-xs text-zinc-400">
-                  Collez le code d&apos;un pictogramme SVG. Utilisez <code>fill=&quot;currentColor&quot;</code> pour qu&apos;il s&apos;adapte automatiquement à la couleur du titre.
+                  Collez le code d&apos;un pictogramme SVG, quelle que soit sa couleur d&apos;origine :
+                  elle est automatiquement adaptée (blanc sur fond bleu, bleu sur fond clair).
                 </p>
               </div>
             )}

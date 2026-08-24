@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { svgUseCurrentColor } from "@/lib/utils";
 import { PublicSidebar } from "@/components/PublicSidebar";
 import { CandidatureForm } from "./CandidatureForm";
 import { ViewTracker } from "./ViewTracker";
@@ -214,7 +215,7 @@ export default async function AnnoncePage({
     return (
       <span
         className={`inline-flex shrink-0 [&_svg]:w-full [&_svg]:h-full ${className ?? "w-6 h-6"}`}
-        dangerouslySetInnerHTML={{ __html: svg }}
+        dangerouslySetInnerHTML={{ __html: svgUseCurrentColor(svg) }}
       />
     );
   }

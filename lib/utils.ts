@@ -58,3 +58,19 @@ export const RESP_LABELS: Record<ResponsableEtape, string> = {
   externe: "Externe",
   les_deux: "Les deux",
 };
+
+// Force un SVG collé (fill/stroke codés en dur) à hériter de la couleur de son
+// conteneur via currentColor, pour qu'une icône reste lisible sur fond clair ou bleu.
+export function svgUseCurrentColor(svg: string): string {
+  return svg
+    .replace(/fill\s*=\s*"(?!none)[^"]*"/gi, 'fill="currentColor"')
+    .replace(/fill\s*=\s*'(?!none)[^']*'/gi, "fill='currentColor'")
+    .replace(/stroke\s*=\s*"(?!none)[^"]*"/gi, 'stroke="currentColor"')
+    .replace(/stroke\s*=\s*'(?!none)[^']*'/gi, "stroke='currentColor'")
+    .replace(/style\s*=\s*"([^"]*)"/gi, (_m, styleContent: string) => {
+      const cleaned = styleContent
+        .replace(/fill\s*:\s*(?!none)[^;]+;?/gi, "fill:currentColor;")
+        .replace(/stroke\s*:\s*(?!none)[^;]+;?/gi, "stroke:currentColor;");
+      return `style="${cleaned}"`;
+    });
+}
