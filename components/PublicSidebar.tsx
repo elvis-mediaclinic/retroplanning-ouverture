@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 const NAV = [
-  { href: "/opportunites", label: "Opportunités", key: "opportunites" },
+  { href: "/opportunites", label: "Toutes nos opportunités", key: "opportunites" },
   { href: "/franchise", label: "La franchise", key: "franchise" },
   { href: "/nos-magasins", label: "Nos magasins", key: "magasins" },
 ] as const;
