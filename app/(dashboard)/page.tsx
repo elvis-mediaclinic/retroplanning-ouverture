@@ -140,7 +140,7 @@ export default async function DashboardPage() {
       <section>
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Réseau</h2>
-          <Link href="/reseau" className="text-xs text-zinc-500 hover:text-zinc-900">
+          <Link href="/reseau" className="text-xs font-medium text-[#0089bd] hover:text-[#00729e]">
             Voir le réseau →
           </Link>
         </div>
@@ -218,7 +218,7 @@ export default async function DashboardPage() {
             <Link
               key={label}
               href={href}
-              className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm hover:border-zinc-300 transition-colors"
+              className="rounded-lg border border-zinc-200 border-l-4 border-l-[#0089bd] bg-white p-4 shadow-sm hover:bg-[#0089bd]/5 hover:border-zinc-300 transition-colors"
             >
               <p className="text-2xl font-bold text-zinc-900">{value}</p>
               <p className="mt-0.5 text-xs text-zinc-500">{label}</p>
@@ -236,11 +236,11 @@ export default async function DashboardPage() {
           <div className="space-y-3">
             {Object.entries(etapesParProjet).map(([pid, { projetNom, etapes: pe }]) => (
               <div key={pid} className="rounded-lg border border-zinc-200 bg-white shadow-sm overflow-hidden">
-                <div className="flex items-center justify-between border-b border-zinc-100 bg-zinc-50 px-4 py-2.5">
+                <div className="flex items-center justify-between border-b border-zinc-100 bg-[#0089bd]/5 px-4 py-2.5">
                   <Link href={`/projets/${pid}`} className="text-sm font-semibold text-zinc-900 hover:underline">
                     {projetNom}
                   </Link>
-                  <span className="text-xs text-zinc-400">{pe.length} étape{pe.length > 1 ? "s" : ""}</span>
+                  <span className="text-xs text-[#00729e] font-medium">{pe.length} étape{pe.length > 1 ? "s" : ""}</span>
                 </div>
                 <ul className="divide-y divide-zinc-100">
                   {pe.map((e: any) => {
@@ -288,7 +288,7 @@ export default async function DashboardPage() {
       <section>
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-sm font-semibold text-zinc-900">Ouvertures en cours</h2>
-          <Link href="/projets" className="text-xs text-zinc-500 hover:text-zinc-900">
+          <Link href="/projets" className="text-xs font-medium text-[#0089bd] hover:text-[#00729e]">
             Voir tous →
           </Link>
         </div>
@@ -296,11 +296,11 @@ export default async function DashboardPage() {
         <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-zinc-200 bg-zinc-50 text-left">
-                <th className="py-2 px-4 font-medium text-zinc-600">Projet</th>
-                <th className="py-2 px-4 font-medium text-zinc-600">Format</th>
-                <th className="py-2 px-4 font-medium text-zinc-600">Statut</th>
-                <th className="py-2 px-4 font-medium text-zinc-600">Ouverture cible</th>
+              <tr className="border-b border-zinc-200 bg-[#0089bd]/5 text-left">
+                <th className="py-2 px-4 font-medium text-[#00729e]">Projet</th>
+                <th className="py-2 px-4 font-medium text-[#00729e]">Format</th>
+                <th className="py-2 px-4 font-medium text-[#00729e]">Statut</th>
+                <th className="py-2 px-4 font-medium text-[#00729e]">Ouverture cible</th>
               </tr>
             </thead>
             <tbody>
