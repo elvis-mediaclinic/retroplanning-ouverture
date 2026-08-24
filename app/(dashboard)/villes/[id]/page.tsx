@@ -19,7 +19,7 @@ export default async function EditVillePage({
 
   const [{ data: ville }, { data: annonce }, { data: candidatures }] = await Promise.all([
     supabase.from("villes").select("*").eq("id", id).single(),
-    supabase.from("annonces").select("id, titre, accroche, contenu, contenu_json, sections, actif").eq("ville_id", id).maybeSingle(),
+    supabase.from("annonces").select("id, titre, accroche, contenu, contenu_json, sections, actif, hero_bleu").eq("ville_id", id).maybeSingle(),
     supabase
       .from("candidatures")
       .select("id, prenom, nom, email, telephone, apport_personnel, message, traite, created_at")

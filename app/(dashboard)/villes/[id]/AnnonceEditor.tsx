@@ -3,6 +3,7 @@
 import { useActionState, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { upsertAnnonce } from "./annonce-actions";
+import { BoldText } from "@/components/BoldText";
 import type { Section } from "./SectionsEditor";
 
 const SectionsEditor = dynamic(() => import("./SectionsEditor").then((m) => m.SectionsEditor), {
@@ -34,7 +35,7 @@ export function AnnonceEditor({
   const [state, formAction, pending] = useActionState(action, undefined);
   const [actif, setActif] = useState(annonce?.actif ?? false);
   const [accroche, setAccroche] = useState(annonce?.accroche ?? "");
-  const accrocheRef = useRef<HTMLInputElement>(null);
+  const accrocheRef = useRef<HTMLTextAreaElement>(null);
   const [heroBleu, setHeroBleu] = useState(annonce?.hero_bleu ?? true);
   const [copied, setCopied] = useState(false);
   const [open, setOpen] = useState(true);
@@ -145,23 +146,32 @@ export function AnnonceEditor({
               Accroche
               <span className="ml-1 text-xs text-zinc-400">(sous-titre)</span>
             </label>
-            <div className="flex items-center gap-2">
-              <input
+            <div className="rounded-md border border-zinc-300 overflow-hidden focus-within:ring-1 focus-within:ring-brand focus-within:border-brand">
+              <div className="flex items-center gap-1 border-b border-zinc-200 bg-zinc-50 px-2 py-1">
+                <button
+                  type="button"
+                  onClick={toggleBoldAccroche}
+                  title="Mettre le texte sélectionné en gras"
+                  className="rounded px-2 py-1 text-sm font-bold text-zinc-600 hover:bg-zinc-200"
+                >
+                  G
+                </button>
+              </div>
+              <textarea
                 ref={accrocheRef}
                 name="accroche"
                 value={accroche}
                 onChange={(e) => setAccroche(e.target.value)}
                 placeholder="Rejoignez le réseau Mediaclinic dans votre ville"
-                className="flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm"
+                rows={3}
+                className="w-full resize-y px-3 py-2 text-sm outline-none"
               />
-              <button
-                type="button"
-                onClick={toggleBoldAccroche}
-                title="Mettre le texte sélectionné en gras"
-                className="shrink-0 rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm font-bold text-zinc-700 hover:bg-zinc-50"
-              >
-                G
-              </button>
+              {accroche.trim() && (
+                <div className="border-t border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-600">
+                  <span className="text-xs text-zinc-400 mr-2">Aperçu :</span>
+                  <BoldText text={accroche} />
+                </div>
+              )}
             </div>
             <p className="text-xs text-zinc-400">
               Sélectionnez du texte puis cliquez sur « G » pour le mettre en gras.
