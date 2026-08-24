@@ -1,8 +1,20 @@
 "use client";
 
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+
+// Bornes approximatives de la France métropolitaine
+const FRANCE_BOUNDS: L.LatLngBoundsExpression = [
+  [41.2, -5.3],
+  [51.2, 9.7],
+];
+
+function FitFranceBounds() {
+  const map = useMap();
+  map.fitBounds(FRANCE_BOUNDS, { animate: false });
+  return null;
+}
 
 export type MagasinPoint = {
   id: string;
@@ -57,17 +69,13 @@ export function MagasinsMap({
   const all = [...points, ...villesEnEtude];
   if (all.length === 0) return null;
 
-  const center: [number, number] = [
-    all.reduce((s, p) => s + p.lat, 0) / all.length,
-    all.reduce((s, p) => s + p.lng, 0) / all.length,
-  ];
-
   return (
     <div className="h-full w-full overflow-hidden rounded-2xl border border-zinc-200 shadow-sm">
-      <MapContainer center={center} zoom={6} style={{ height: "100%", width: "100%" }} scrollWheelZoom={false}>
+      <MapContainer center={[46.6, 2.2]} zoom={6} style={{ height: "100%", width: "100%" }} scrollWheelZoom>
+        <FitFranceBounds />
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
         />
         {points.map((p) => (
           <Marker key={p.id} position={[p.lat, p.lng]} icon={p.type === "integre" ? ICON_INTEGRE : ICON_FRANCHISE}>
