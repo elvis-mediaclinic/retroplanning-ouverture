@@ -151,22 +151,6 @@ export function MagasinList({
                 {[m.adresse, m.code_postal, m.ville].filter(Boolean).join(", ") || "—"}
               </p>
             </div>
-            {m.type === "franchise" && (
-              <div className="px-5 py-3">
-                <p className="text-xs text-zinc-400">Signature contrat</p>
-                <p className="text-sm font-medium text-zinc-900 mt-0.5">{formatDate(m.date_signature_contrat)}</p>
-              </div>
-            )}
-            <div className="px-5 py-3">
-              <p className="text-xs text-zinc-400">Ouverture</p>
-              <p className="text-sm font-medium text-zinc-900 mt-0.5">{formatDate(m.date_ouverture)}</p>
-            </div>
-            {isArchive && (
-              <div className="px-5 py-3">
-                <p className="text-xs text-red-400">Fermeture</p>
-                <p className="text-sm font-semibold text-red-700 mt-0.5">{formatDate(m.date_fermeture)}</p>
-              </div>
-            )}
             <div className="px-5 py-3">
               <p className="text-xs text-zinc-400">Téléphone</p>
               <p className="text-sm font-medium text-zinc-900 mt-0.5">{m.telephone ?? "—"}</p>
@@ -183,6 +167,22 @@ export function MagasinList({
               <p className="text-xs text-zinc-400">SIRET</p>
               <p className="text-sm font-medium text-zinc-900 mt-0.5">{siret ?? "—"}</p>
             </div>
+            {m.type === "franchise" && (
+              <div className="px-5 py-3">
+                <p className="text-xs text-zinc-400">Signature contrat</p>
+                <p className="text-sm font-medium text-zinc-900 mt-0.5">{formatDate(m.date_signature_contrat)}</p>
+              </div>
+            )}
+            <div className="px-5 py-3">
+              <p className="text-xs text-zinc-400">Ouverture</p>
+              <p className="text-sm font-medium text-zinc-900 mt-0.5">{formatDate(m.date_ouverture)}</p>
+            </div>
+            {isArchive && (
+              <div className="px-5 py-3">
+                <p className="text-xs text-red-400">Fermeture</p>
+                <p className="text-sm font-semibold text-red-700 mt-0.5">{formatDate(m.date_fermeture)}</p>
+              </div>
+            )}
           </div>
 
           {m.franchises && (
