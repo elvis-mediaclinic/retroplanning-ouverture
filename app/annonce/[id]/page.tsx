@@ -360,7 +360,7 @@ export default async function AnnoncePage({
             {annonce.titre}
           </h1>
           {annonce.accroche && (
-            <p className="mt-4 text-lg sm:text-xl text-zinc-500 leading-relaxed max-w-3xl">
+            <p className="mt-4 text-lg sm:text-xl text-zinc-500 leading-relaxed">
               {annonce.accroche}
             </p>
           )}
