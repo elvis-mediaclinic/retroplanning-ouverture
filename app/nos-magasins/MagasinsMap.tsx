@@ -16,6 +16,7 @@ const FRANCE_BOUNDS: L.LatLngBoundsExpression = [
 function FitFranceBounds() {
   const map = useMap();
   map.fitBounds(FRANCE_BOUNDS, { animate: false });
+  map.setZoom(map.getZoom() + 1, { animate: false });
   return null;
 }
 
