@@ -115,14 +115,14 @@ function NavContent({
   onNavigate?: () => void;
 }) {
   return (
-    <div className="flex h-full flex-col">
-      <div className="flex h-16 items-center border-b border-zinc-200 px-5">
+    <div className="flex h-full flex-col bg-[#0089bd]">
+      <div className="flex h-16 items-center border-b border-white/20 px-5">
         <Image
           src="/Logo-MediaClinic-Noir.png"
           alt="Mediaclinic"
           width={160}
           height={40}
-          className="w-full object-contain object-left"
+          className="w-full object-contain object-left brightness-0 invert"
           priority
         />
       </div>
@@ -131,7 +131,7 @@ function NavContent({
         {groups.map((group, gi) => (
           <div key={gi} className="space-y-1">
             {group.title && (
-              <p className="px-2 pb-1 text-xs font-semibold uppercase tracking-wide text-zinc-400">
+              <p className="px-2 pb-1 text-xs font-semibold uppercase tracking-wide text-white/50">
                 {group.title}
               </p>
             )}
@@ -142,8 +142,8 @@ function NavContent({
                 onClick={onNavigate}
                 className={`block rounded-md px-2 py-1.5 text-sm ${
                   isActive(pathname, item.href)
-                    ? "bg-brand/10 font-medium text-brand"
-                    : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+                    ? "bg-white font-medium text-[#00729e]"
+                    : "text-white/80 hover:bg-white/10 hover:text-white"
                 }`}
               >
                 {item.label}
@@ -153,14 +153,14 @@ function NavContent({
         ))}
       </nav>
 
-      <div className="border-t border-zinc-200 p-3">
-        <p className="px-2 pb-1 text-sm font-medium text-zinc-700 truncate">
+      <div className="border-t border-white/20 p-3">
+        <p className="px-2 pb-1 text-sm font-medium text-white truncate">
           {userName}
         </p>
         <form action={logout}>
           <button
             type="submit"
-            className="w-full rounded-md px-2 py-1.5 text-left text-sm text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900"
+            className="w-full rounded-md px-2 py-1.5 text-left text-sm text-white/70 hover:bg-white/10 hover:text-white"
           >
             Déconnexion
           </button>
@@ -212,7 +212,7 @@ export function Sidebar({
   return (
     <>
       {/* Colonne fixe (desktop) */}
-      <aside className="hidden w-60 shrink-0 border-r border-zinc-200 bg-white md:block">
+      <aside className="hidden w-60 shrink-0 md:block">
         <div className="sticky top-0 h-screen">
           <NavContent
             groups={groups}
@@ -243,7 +243,7 @@ export function Sidebar({
         >
           <div className="absolute inset-0 bg-black/40" />
           <div
-            className="absolute left-0 top-0 h-full w-64 bg-white shadow-xl"
+            className="absolute left-0 top-0 h-full w-64 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
             <NavContent
