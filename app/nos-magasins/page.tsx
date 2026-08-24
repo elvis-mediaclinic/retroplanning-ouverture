@@ -104,16 +104,16 @@ export default async function NosMagasinsPage() {
         {/* Légende */}
         <div className="flex flex-wrap items-center justify-center gap-5 text-sm text-zinc-600">
           <div className="flex items-center gap-2">
-            <span className="inline-block w-3 h-3 rounded-full bg-[#0089bd] border-2 border-white shadow" />
+            <span className="inline-block w-3 h-3 rounded-full bg-[#7c3aed] border-2 border-white shadow" />
             Magasin intégré
           </div>
           <div className="flex items-center gap-2">
-            <span className="inline-block w-3 h-3 rounded-full bg-green-500 border-2 border-white shadow" />
+            <span className="inline-block w-3 h-3 rounded-full bg-[#0089bd] border-2 border-white shadow" />
             Magasin franchisé
           </div>
           {villesEnEtude.length > 0 && (
             <div className="flex items-center gap-2">
-              <span className="text-amber-500 text-base leading-none">★</span>
+              <span className="text-[#e60076] text-base leading-none">★</span>
               Ville en étude
             </div>
           )}
@@ -128,7 +128,7 @@ export default async function NosMagasinsPage() {
                   <div className="flex items-center gap-2">
                     <span
                       className={`inline-block w-2 h-2 rounded-full shrink-0 ${
-                        m.type === "integre" ? "bg-[#0089bd]" : "bg-green-500"
+                        m.type === "integre" ? "bg-[#7c3aed]" : "bg-[#0089bd]"
                       }`}
                     />
                     <p className="text-sm font-semibold text-zinc-900 truncate">{m.nom}</p>

@@ -23,7 +23,7 @@ export type VilleEnEtudePoint = {
   lng: number;
 };
 
-function dotIcon(color: string, size = 16) {
+function dotIcon(color: string, size = 22) {
   return L.divIcon({
     className: "",
     html: `<div style="width:${size}px;height:${size}px;border-radius:9999px;background:${color};border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.4)"></div>`,
@@ -32,20 +32,20 @@ function dotIcon(color: string, size = 16) {
   });
 }
 
-function starIcon(color: string) {
+function starIcon(color: string, size = 28) {
   return L.divIcon({
     className: "",
-    html: `<svg width="20" height="20" viewBox="0 0 24 24" style="filter:drop-shadow(0 1px 3px rgba(0,0,0,0.5))">
+    html: `<svg width="${size}" height="${size}" viewBox="0 0 24 24" style="filter:drop-shadow(0 1px 3px rgba(0,0,0,0.5))">
       <path fill="${color}" stroke="white" stroke-width="1.5" d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-4-6.3 4 1.7-7L2 9.2l7.1-.6z"/>
     </svg>`,
-    iconSize: [20, 20],
-    iconAnchor: [10, 10],
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
   });
 }
 
-const ICON_INTEGRE = dotIcon("#0089bd");
-const ICON_FRANCHISE = dotIcon("#22c55e");
-const ICON_EN_ETUDE = starIcon("#f59e0b");
+const ICON_INTEGRE = dotIcon("#7c3aed");
+const ICON_FRANCHISE = dotIcon("#0089bd");
+const ICON_EN_ETUDE = starIcon("#e60076");
 
 export function MagasinsMap({
   points,
