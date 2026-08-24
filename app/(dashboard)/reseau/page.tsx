@@ -45,7 +45,7 @@ export default async function ReseauPage({
     .from("magasins")
     .select("*, franchises(*), magasin_sirets(siret, date_fin)")
     .eq("archive", showArchives)
-    .order("date_ouverture", { ascending: false });
+    .order("nom");
 
   const magasins = (data ?? []) as MagasinWithFranchise[];
   const isAdmin = profile.role === "admin";
