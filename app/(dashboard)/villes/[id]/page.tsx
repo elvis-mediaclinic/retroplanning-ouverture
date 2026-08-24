@@ -2,10 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireMC, getProfile } from "@/lib/dal";
 import { createClient } from "@/lib/supabase/server";
-import { STATUT_VILLE_LABELS } from "@/lib/types";
-import { STATUT_VILLE_COLORS } from "@/lib/utils";
 import { updateVille } from "../actions";
-import { VilleForm } from "../VilleForm";
+import { VilleInfoPanel } from "./VilleInfoPanel";
 import { AnnonceEditor } from "./AnnonceEditor";
 
 export default async function EditVillePage({
@@ -68,30 +66,7 @@ export default async function EditVillePage({
       {/* Infos ville */}
       <section className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
         <h2 className="text-sm font-semibold text-zinc-900 mb-4">Informations</h2>
-        {canEdit ? (
-          <VilleForm action={action} defaultValues={ville} />
-        ) : (
-          <dl className="grid grid-cols-2 gap-4 sm:grid-cols-3 text-sm">
-            {[
-              { label: "Ville", value: ville.nom },
-              { label: "Département", value: ville.departement ?? "—" },
-              { label: "Région", value: ville.region ?? "—" },
-              { label: "Zone de chalandise", value: ville.zone_chalandise ?? "—" },
-              { label: "Statut", value: STATUT_VILLE_LABELS[ville.statut as keyof typeof STATUT_VILLE_LABELS] },
-            ].map(({ label, value }) => (
-              <div key={label}>
-                <dt className="text-xs text-zinc-400 mb-0.5">{label}</dt>
-                <dd className="font-medium text-zinc-900">{value}</dd>
-              </div>
-            ))}
-            {ville.notes && (
-              <div className="col-span-full">
-                <dt className="text-xs text-zinc-400 mb-0.5">Notes</dt>
-                <dd className="text-zinc-600 whitespace-pre-line">{ville.notes}</dd>
-              </div>
-            )}
-          </dl>
-        )}
+        <VilleInfoPanel ville={ville} action={action} canEdit={canEdit} />
       </section>
 
       {/* Annonce publique */}

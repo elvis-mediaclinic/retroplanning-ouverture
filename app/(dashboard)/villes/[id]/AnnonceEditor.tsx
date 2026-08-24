@@ -35,7 +35,7 @@ export function AnnonceEditor({
   const [actif, setActif] = useState(annonce?.actif ?? false);
   const [heroBleu, setHeroBleu] = useState(annonce?.hero_bleu ?? true);
   const [copied, setCopied] = useState(false);
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
 
   const defaultSections: Section[] | undefined = (() => {
     if (!annonce?.sections) return undefined;
