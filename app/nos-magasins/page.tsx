@@ -1,7 +1,7 @@
 import { createServiceClient } from "@/lib/supabase/service";
 import { geocodeAddress } from "@/lib/geocode";
 import { PublicSidebar } from "@/components/PublicSidebar";
-import { MagasinsMapLoader } from "./MagasinsMapLoader";
+import { MagasinsExplorer } from "./MagasinsExplorer";
 import type { MagasinPoint, VilleEnEtudePoint } from "./MagasinsMap";
 
 export const metadata = { title: "Nos magasins — Mediaclinic" };
@@ -120,34 +120,7 @@ export default async function NosMagasinsPage() {
         </div>
 
         {(points.length > 0 || villesEnEtude.length > 0) && (
-          <div className="flex flex-col lg:flex-row gap-4 h-[600px]">
-            {/* Liste */}
-            <div className="lg:w-72 shrink-0 overflow-y-auto rounded-2xl border border-zinc-200 bg-white shadow-sm divide-y divide-zinc-100">
-              {magasins.map((m) => (
-                <div key={m.id} className="px-4 py-3">
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={`inline-block w-2 h-2 rounded-full shrink-0 ${
-                        m.type === "integre" ? "bg-[#7c3aed]" : "bg-[#0089bd]"
-                      }`}
-                    />
-                    <p className="text-sm font-semibold text-zinc-900 truncate">{m.nom}</p>
-                  </div>
-                  <p className="mt-0.5 text-xs text-zinc-500 pl-4">
-                    {[m.code_postal, m.ville].filter(Boolean).join(" ") || "—"}
-                  </p>
-                </div>
-              ))}
-              {magasins.length === 0 && (
-                <p className="px-4 py-3 text-sm text-zinc-400">Aucun magasin ouvert pour le moment.</p>
-              )}
-            </div>
-
-            {/* Carte */}
-            <div className="flex-1 min-h-[400px]">
-              <MagasinsMapLoader points={points} villesEnEtude={villesEnEtude} />
-            </div>
-          </div>
+          <MagasinsExplorer points={points} villesEnEtude={villesEnEtude} />
         )}
       </main>
     </div>

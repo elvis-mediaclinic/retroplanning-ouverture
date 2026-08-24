@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import MarkerClusterGroup from "react-leaflet-cluster";
 import L from "leaflet";
@@ -17,6 +18,36 @@ function FitFranceBounds() {
   const map = useMap();
   map.fitBounds(FRANCE_BOUNDS, { animate: false });
   map.setZoom(map.getZoom() + 1, { animate: false });
+  return null;
+}
+
+type MarkerClusterGroupInstance = L.MarkerClusterGroup;
+
+function SelectionHandler({
+  selectedId,
+  markersRef,
+  clusterRef,
+}: {
+  selectedId: string | null;
+  markersRef: React.RefObject<Record<string, L.Marker>>;
+  clusterRef: React.RefObject<MarkerClusterGroupInstance | null>;
+}) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!selectedId) return;
+    const marker = markersRef.current[selectedId];
+    if (!marker) return;
+
+    const cluster = clusterRef.current;
+    if (cluster && typeof (cluster as { zoomToShowLayer?: unknown }).zoomToShowLayer === "function") {
+      cluster.zoomToShowLayer(marker, () => marker.openPopup());
+    } else {
+      map.flyTo(marker.getLatLng(), 14);
+      marker.openPopup();
+    }
+  }, [selectedId, map, markersRef, clusterRef]);
+
   return null;
 }
 
@@ -55,10 +86,15 @@ const ICON_EN_ETUDE = dotIcon("#f59e0b");
 export function MagasinsMap({
   points,
   villesEnEtude = [],
+  selectedId = null,
 }: {
   points: MagasinPoint[];
   villesEnEtude?: VilleEnEtudePoint[];
+  selectedId?: string | null;
 }) {
+  const markersRef = useRef<Record<string, L.Marker>>({});
+  const clusterRef = useRef<MarkerClusterGroupInstance | null>(null);
+
   const all = [...points, ...villesEnEtude];
   if (all.length === 0) return null;
 
@@ -66,13 +102,23 @@ export function MagasinsMap({
     <div className="h-full w-full overflow-hidden rounded-2xl border border-zinc-200 shadow-sm">
       <MapContainer center={[46.6, 2.2]} zoom={6} style={{ height: "100%", width: "100%" }} scrollWheelZoom>
         <FitFranceBounds />
+        <SelectionHandler selectedId={selectedId} markersRef={markersRef} clusterRef={clusterRef} />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
           url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
         />
-        <MarkerClusterGroup chunkedLoading maxClusterRadius={50}>
+        <MarkerClusterGroup
+          chunkedLoading
+          maxClusterRadius={50}
+          ref={(instance: MarkerClusterGroupInstance | null) => { clusterRef.current = instance; }}
+        >
           {points.map((p) => (
-            <Marker key={p.id} position={[p.lat, p.lng]} icon={p.type === "integre" ? ICON_INTEGRE : ICON_FRANCHISE}>
+            <Marker
+              key={p.id}
+              position={[p.lat, p.lng]}
+              icon={p.type === "integre" ? ICON_INTEGRE : ICON_FRANCHISE}
+              ref={(m) => { if (m) markersRef.current[p.id] = m; }}
+            >
               <Popup>
                 <span className="font-semibold">{p.nom}</span>
                 <br />
