@@ -212,8 +212,8 @@ export function Sidebar({
   return (
     <>
       {/* Colonne fixe (desktop) */}
-      <aside className="hidden w-60 shrink-0 md:block">
-        <div className="sticky top-0 h-screen">
+      <aside className="hidden w-60 shrink-0 p-3 md:block">
+        <div className="sticky top-3 h-[calc(100vh-1.5rem)] overflow-hidden rounded-xl">
           <NavContent
             groups={groups}
             userName={userName}
