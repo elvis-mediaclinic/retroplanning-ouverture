@@ -118,11 +118,11 @@ function NavContent({
     <div className="flex h-full flex-col bg-gradient-to-br from-[#00729e] to-[#0089bd]">
       <div className="flex h-16 items-center border-b border-white/20 px-5">
         <Image
-          src="/Logo-MediaClinic-Noir.png"
+          src="/Logo_Media_Clinic_monochrome-blanc_rvb.png"
           alt="Mediaclinic"
           width={160}
           height={40}
-          className="w-full object-contain object-left brightness-0 invert"
+          className="w-full object-contain object-left"
           priority
         />
       </div>
