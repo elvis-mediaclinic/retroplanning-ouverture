@@ -4,7 +4,10 @@ import { createClient } from "@/lib/supabase/server";
 import type { Magasin, Franchise } from "@/lib/types";
 import { MagasinList } from "./MagasinList";
 
-export type MagasinWithFranchise = Magasin & { franchises: Franchise | null };
+export type MagasinWithFranchise = Magasin & {
+  franchises: Franchise | null;
+  magasin_sirets: { siret: string; date_fin: string | null }[] | null;
+};
 
 function Tabs({ active }: { active: "actifs" | "archives" }) {
   return (
@@ -40,7 +43,7 @@ export default async function ReseauPage({
 
   const { data } = await supabase
     .from("magasins")
-    .select("*, franchises(*)")
+    .select("*, franchises(*), magasin_sirets(siret, date_fin)")
     .eq("archive", showArchives)
     .order("date_ouverture", { ascending: false });
 

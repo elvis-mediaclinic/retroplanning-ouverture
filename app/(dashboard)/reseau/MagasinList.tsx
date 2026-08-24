@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import type { MagasinWithFranchise } from "./page";
 import { FORMAT_LABELS, type FormatMagasin } from "@/lib/types";
@@ -8,6 +9,11 @@ import { FORMAT_LABELS, type FormatMagasin } from "@/lib/types";
 function formatDate(d: string | null) {
   if (!d) return "—";
   return new Date(d).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" });
+}
+
+function currentSiret(m: MagasinWithFranchise) {
+  const sirets = m.magasin_sirets ?? [];
+  return sirets.find((s) => !s.date_fin)?.siret ?? sirets[0]?.siret ?? null;
 }
 
 const FORMATS = Object.entries(FORMAT_LABELS) as [FormatMagasin, string][];
@@ -21,6 +27,7 @@ export function MagasinList({
   isAdmin: boolean;
   isArchive: boolean;
 }) {
+  const router = useRouter();
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState<"" | "integre" | "franchise">("");
   const [filterFormat, setFilterFormat] = useState<string>("");
@@ -39,6 +46,21 @@ export function MagasinList({
   }, [magasins, search, filterType, filterFormat]);
 
   const formats = [...new Set(magasins.map((m) => m.format).filter(Boolean))] as FormatMagasin[];
+  const hasActiveFilters = !!search || !!filterType || !!filterFormat;
+
+  function resetFilters() {
+    setSearch("");
+    setFilterType("");
+    setFilterFormat("");
+  }
+
+  function toggleType(type: "integre" | "franchise") {
+    setFilterType((prev) => (prev === type ? "" : type));
+  }
+
+  function toggleFormat(format: string) {
+    setFilterFormat((prev) => (prev === format ? "" : format));
+  }
 
   return (
     <div className="space-y-4">
@@ -70,6 +92,11 @@ export function MagasinList({
             ))}
           </select>
         )}
+        {hasActiveFilters && (
+          <button type="button" onClick={resetFilters} className="btn-secondary text-sm">
+            Réinitialiser les filtres
+          </button>
+        )}
       </div>
 
       {filtered.length === 0 && (
@@ -77,74 +104,86 @@ export function MagasinList({
       )}
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-      {filtered.map((m) => (
+      {filtered.map((m) => {
+        const siret = currentSiret(m);
+        return (
         <div key={m.id} className={`rounded-lg border bg-white shadow-sm overflow-hidden ${isArchive ? "opacity-80" : ""} border-zinc-200`}>
-          <Link
-            href={`/reseau/${m.id}`}
-            className="flex items-start justify-between gap-4 min-h-[96px] px-5 py-4 bg-[#0089bd] text-white hover:bg-[#00729e] transition-colors"
+          <div
+            role="link"
+            tabIndex={0}
+            onClick={() => router.push(`/reseau/${m.id}`)}
+            onKeyDown={(e) => { if (e.key === "Enter") router.push(`/reseau/${m.id}`); }}
+            className="flex items-center justify-between gap-4 min-h-[64px] px-5 py-4 bg-[#0089bd] text-white hover:bg-[#00729e] transition-colors cursor-pointer"
           >
-            <div>
-              <h2 className="font-semibold">{m.nom}</h2>
-              <p className="text-sm text-white/80 mt-0.5 line-clamp-2">
-                {[m.adresse, m.code_postal, m.ville].filter(Boolean).join(", ") || "Adresse non renseignée"}
+            <h2 className="font-semibold">{m.nom}</h2>
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); toggleType(m.type); }}
+                className={`text-xs font-semibold rounded-full px-2.5 py-1 transition-colors ${
+                  filterType === m.type
+                    ? "bg-white text-[#00729e]"
+                    : "bg-white/20 text-white hover:bg-white/30"
+                }`}
+              >
+                {m.type === "integre" ? "Intégré" : "Franchisé"}
+              </button>
+              {m.format && (
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); toggleFormat(m.format!); }}
+                  className={`text-xs font-semibold rounded-full px-2.5 py-1 transition-colors ${
+                    filterFormat === m.format
+                      ? "bg-white text-[#00729e]"
+                      : "bg-white/20 text-white hover:bg-white/30"
+                  }`}
+                >
+                  {FORMAT_LABELS[m.format]}
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 divide-x divide-y divide-zinc-100">
+            <div className="px-5 py-3 col-span-2">
+              <p className="text-xs text-zinc-400">Adresse</p>
+              <p className="text-sm font-medium text-zinc-900 mt-0.5">
+                {[m.adresse, m.code_postal, m.ville].filter(Boolean).join(", ") || "—"}
               </p>
             </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <span className={`text-xs border rounded px-2 py-0.5 ${
-                m.type === "integre"
-                  ? "text-white border-white/40 bg-white/10"
-                  : "text-white/80 border-white/30"
-              }`}>
-                {m.type === "integre" ? "Intégré" : "Franchisé"}
-              </span>
-              {m.format && (
-                <span className="text-xs text-white/80 border border-white/30 rounded px-2 py-0.5">
-                  {FORMAT_LABELS[m.format]}
-                </span>
-              )}
-              {m.surface_m2 && <span className="text-xs text-white/80">{m.surface_m2} m²</span>}
-            </div>
-          </Link>
-
-          {isArchive ? (
-            <div className="grid grid-cols-2 divide-x divide-y divide-zinc-100">
-              {m.type === "franchise" && (
-                <div className="px-5 py-3">
-                  <p className="text-xs text-zinc-400">Signature contrat</p>
-                  <p className="text-sm font-medium text-zinc-900 mt-0.5">{formatDate(m.date_signature_contrat)}</p>
-                </div>
-              )}
+            {m.type === "franchise" && (
               <div className="px-5 py-3">
-                <p className="text-xs text-zinc-400">Ouverture</p>
-                <p className="text-sm font-medium text-zinc-900 mt-0.5">{formatDate(m.date_ouverture)}</p>
+                <p className="text-xs text-zinc-400">Signature contrat</p>
+                <p className="text-sm font-medium text-zinc-900 mt-0.5">{formatDate(m.date_signature_contrat)}</p>
               </div>
+            )}
+            <div className="px-5 py-3">
+              <p className="text-xs text-zinc-400">Ouverture</p>
+              <p className="text-sm font-medium text-zinc-900 mt-0.5">{formatDate(m.date_ouverture)}</p>
+            </div>
+            {isArchive && (
               <div className="px-5 py-3">
                 <p className="text-xs text-red-400">Fermeture</p>
                 <p className="text-sm font-semibold text-red-700 mt-0.5">{formatDate(m.date_fermeture)}</p>
               </div>
+            )}
+            <div className="px-5 py-3">
+              <p className="text-xs text-zinc-400">Téléphone</p>
+              <p className="text-sm font-medium text-zinc-900 mt-0.5">{m.telephone ?? "—"}</p>
             </div>
-          ) : (
-            <div className="grid grid-cols-2 divide-x divide-y divide-zinc-100">
-              {m.type === "franchise" && (
-                <div className="px-5 py-3">
-                  <p className="text-xs text-zinc-400">Signature contrat</p>
-                  <p className="text-sm font-medium text-zinc-900 mt-0.5">{formatDate(m.date_signature_contrat)}</p>
-                </div>
-              )}
-              <div className="px-5 py-3">
-                <p className="text-xs text-zinc-400">Ouverture</p>
-                <p className="text-sm font-medium text-zinc-900 mt-0.5">{formatDate(m.date_ouverture)}</p>
-              </div>
-              <div className="px-5 py-3">
-                <p className="text-xs text-zinc-400">Téléphone</p>
-                <p className="text-sm font-medium text-zinc-900 mt-0.5">{m.telephone ?? "—"}</p>
-              </div>
-              <div className="px-5 py-3">
-                <p className="text-xs text-zinc-400">Email</p>
-                <p className="text-sm font-medium text-zinc-900 mt-0.5 truncate">{m.email ?? "—"}</p>
-              </div>
+            <div className="px-5 py-3">
+              <p className="text-xs text-zinc-400">Email</p>
+              <p className="text-sm font-medium text-zinc-900 mt-0.5 truncate">{m.email ?? "—"}</p>
             </div>
-          )}
+            <div className="px-5 py-3">
+              <p className="text-xs text-zinc-400">Surface</p>
+              <p className="text-sm font-medium text-zinc-900 mt-0.5">{m.surface_m2 ? `${m.surface_m2} m²` : "—"}</p>
+            </div>
+            <div className="px-5 py-3">
+              <p className="text-xs text-zinc-400">SIRET</p>
+              <p className="text-sm font-medium text-zinc-900 mt-0.5">{siret ?? "—"}</p>
+            </div>
+          </div>
 
           {m.franchises && (
             <div className="px-5 py-3 border-t border-zinc-100 bg-zinc-50">
@@ -184,7 +223,8 @@ export function MagasinList({
             </div>
           )}
         </div>
-      ))}
+        );
+      })}
       </div>
     </div>
   );
