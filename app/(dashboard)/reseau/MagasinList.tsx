@@ -81,11 +81,11 @@ export function MagasinList({
         <div key={m.id} className={`rounded-lg border bg-white shadow-sm overflow-hidden ${isArchive ? "opacity-80" : ""} border-zinc-200`}>
           <Link
             href={`/reseau/${m.id}`}
-            className="flex items-start justify-between px-5 py-4 bg-[#0089bd] text-white hover:bg-[#00729e] transition-colors"
+            className="flex items-start justify-between gap-4 min-h-[96px] px-5 py-4 bg-[#0089bd] text-white hover:bg-[#00729e] transition-colors"
           >
             <div>
               <h2 className="font-semibold">{m.nom}</h2>
-              <p className="text-sm text-white/80 mt-0.5">
+              <p className="text-sm text-white/80 mt-0.5 line-clamp-2">
                 {[m.adresse, m.code_postal, m.ville].filter(Boolean).join(", ") || "Adresse non renseignée"}
               </p>
             </div>
