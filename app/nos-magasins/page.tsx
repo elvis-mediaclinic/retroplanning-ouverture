@@ -1,16 +1,11 @@
-import dynamic from "next/dynamic";
 import { createServiceClient } from "@/lib/supabase/service";
 import { geocodeAddress } from "@/lib/geocode";
 import { PublicSidebar } from "@/components/PublicSidebar";
 import { FORMAT_LABELS } from "@/lib/types";
+import { MagasinsMapLoader } from "./MagasinsMapLoader";
 import type { MagasinPoint } from "./MagasinsMap";
 
 export const metadata = { title: "Nos magasins — Mediaclinic" };
-
-const MagasinsMap = dynamic(() => import("./MagasinsMap").then((m) => m.MagasinsMap), {
-  ssr: false,
-  loading: () => <div className="h-[500px] w-full rounded-2xl border border-zinc-200 bg-zinc-100 animate-pulse" />,
-});
 
 export default async function NosMagasinsPage() {
   // Client de service : la table magasins n'a pas de policy RLS publique
@@ -77,7 +72,7 @@ export default async function NosMagasinsPage() {
           </p>
         </div>
 
-        {points.length > 0 && <MagasinsMap points={points} />}
+        {points.length > 0 && <MagasinsMapLoader points={points} />}
 
         {magasins.length === 0 ? (
           <p className="text-zinc-400 text-center py-8">Aucun magasin ouvert pour le moment.</p>
