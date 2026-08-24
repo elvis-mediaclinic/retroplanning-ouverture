@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import type { EtapeProjet, PhaseEtape, StatutEtape } from "@/lib/types";
 import { PHASE_LABELS, STATUT_ETAPE_LABELS } from "@/lib/types";
 import { formatDate } from "@/lib/utils";
@@ -43,16 +44,18 @@ function msToIso(ms: number) {
 function StatusPopover({
   etape,
   projetId,
+  anchorRect,
   onClose,
   onUpdate,
 }: {
   etape: EtapeProjet;
   projetId: string;
+  anchorRect: DOMRect;
   onClose: () => void;
   onUpdate: (statut: StatutEtape) => void;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const [above, setAbove] = useState(true);
+  const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
 
   useEffect(() => {
     function handle(e: MouseEvent) {
@@ -62,20 +65,22 @@ function StatusPopover({
     return () => document.removeEventListener("mousedown", handle);
   }, [onClose]);
 
-  // Bascule en dessous si le popover dépasse le haut du viewport
+  // Positionne le popover en coordonnées fixes, au-dessus ou en dessous selon la place disponible
   useEffect(() => {
-    if (ref.current) {
-      const rect = ref.current.getBoundingClientRect();
-      if (rect.top < 8) setAbove(false);
-    }
-  }, []);
+    if (!ref.current) return;
+    const rect = ref.current.getBoundingClientRect();
+    const above = anchorRect.top > rect.height + 16;
+    const top = above ? anchorRect.top - rect.height - 8 : anchorRect.bottom + 8;
+    let left = anchorRect.left + anchorRect.width / 2 - rect.width / 2;
+    left = Math.max(8, Math.min(left, window.innerWidth - rect.width - 8));
+    setPos({ top, left });
+  }, [anchorRect]);
 
-  return (
+  return createPortal(
     <div
       ref={ref}
-      className={`absolute z-30 left-1/2 -translate-x-1/2 bg-white border border-zinc-200 rounded-lg shadow-lg py-1 min-w-[140px] ${
-        above ? "bottom-full mb-2" : "top-full mt-2"
-      }`}
+      className="fixed z-50 bg-white border border-zinc-200 rounded-lg shadow-lg py-1 min-w-[140px]"
+      style={pos ?? { top: anchorRect.top, left: anchorRect.left, visibility: "hidden" }}
     >
       <p className="px-3 py-1 text-[10px] font-semibold text-zinc-400 uppercase tracking-wide border-b border-zinc-100 mb-1 truncate max-w-[200px]">
         {etape.nom}
@@ -98,7 +103,8 @@ function StatusPopover({
           {etape.statut === s.value && <span className="ml-auto text-zinc-400">✓</span>}
         </button>
       ))}
-    </div>
+    </div>,
+    document.body
   );
 }
 
@@ -120,12 +126,14 @@ function DraggableMilestone({
   canEdit: boolean;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const markerRef = useRef<HTMLDivElement>(null);
   const [etape, setEtape] = useState(initialEtape);
   const [pct, setPct] = useState(initialPct);
   const [dragging, setDragging] = useState(false);
   const [dragDate, setDragDate] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [showPopover, setShowPopover] = useState(false);
+  const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
 
   // Sync when server re-renders
   useEffect(() => { setEtape(initialEtape); setPct(initialPct); }, [initialEtape, initialPct]);
@@ -174,7 +182,11 @@ function DraggableMilestone({
 
         if (!moved) {
           // Clic simple → popover statut
-          setShowPopover((v) => !v);
+          setShowPopover((v) => {
+            const next = !v;
+            if (next && markerRef.current) setAnchorRect(markerRef.current.getBoundingClientRect());
+            return next;
+          });
           return;
         }
 
@@ -203,6 +215,7 @@ function DraggableMilestone({
 
       {/* Marker */}
       <div
+        ref={markerRef}
         className={`absolute top-1/2 z-10 w-3 h-3 rounded-full border-2 border-white shadow-sm transition-none ${
           canEdit
             ? dragging
@@ -218,15 +231,14 @@ function DraggableMilestone({
       />
 
       {/* Popover statut */}
-      {showPopover && (
-        <div className="absolute z-30" style={{ left: `${pct}%`, top: "50%" }}>
-          <StatusPopover
-            etape={etape}
-            projetId={projetId}
-            onClose={() => setShowPopover(false)}
-            onUpdate={(statut) => setEtape((prev) => ({ ...prev, statut }))}
-          />
-        </div>
+      {showPopover && anchorRect && (
+        <StatusPopover
+          etape={etape}
+          projetId={projetId}
+          anchorRect={anchorRect}
+          onClose={() => setShowPopover(false)}
+          onUpdate={(statut) => setEtape((prev) => ({ ...prev, statut }))}
+        />
       )}
 
       {/* Drag date tooltip */}
