@@ -15,7 +15,7 @@ export function ConceptEditor({ defaultSections }: { defaultSections?: Section[]
 
   return (
     <form action={formAction} className="space-y-6">
-      <SectionsEditor defaultSections={defaultSections} />
+      <SectionsEditor defaultSections={defaultSections} annonceToggle />
 
       {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
       {state?.ok && <p className="text-sm text-green-600">Enregistré.</p>}

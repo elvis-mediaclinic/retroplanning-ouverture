@@ -24,7 +24,9 @@ export default async function ConceptPage() {
       <div className="rounded-xl bg-gradient-to-br from-[#00729e] to-[#0089bd] p-6 shadow-sm">
         <h1 className="text-2xl font-bold uppercase text-white">Concept Mediaclinic</h1>
         <p className="mt-1 text-sm text-white/70">
-          Ces sections apparaissent automatiquement sur toutes les pages d&apos;annonce publiques.
+          Toutes ces sections apparaissent sur la page publique « La franchise ».
+          Cochez « Dans les annonces » pour celles à reprendre aussi dans la
+          rubrique « Découvrir le concept Mediaclinic » de chaque annonce.
         </p>
       </div>
 
