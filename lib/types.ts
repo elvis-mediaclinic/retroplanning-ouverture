@@ -40,8 +40,6 @@ export type StatutEtape = "a_faire" | "en_cours" | "fait" | "en_retard" | "na";
 
 export type TypeInteraction = "appel" | "email" | "visio" | "visite_siege" | "autre";
 
-export type StatutInteraction = "planifie" | "fait" | "annule";
-
 export type ResponsableEtape = "franchise" | "mc" | "externe" | "les_deux";
 
 export type PhaseEtape =
@@ -82,9 +80,7 @@ export type CandidatInteraction = {
   id: string;
   candidat_id: string;
   type: TypeInteraction;
-  statut: StatutInteraction;
-  date_prevue: string | null;
-  date_realisee: string | null;
+  date_realisee: string;
   notes: string | null;
   created_by: string | null;
   created_at: string;
@@ -265,12 +261,6 @@ export const TYPE_INTERACTION_LABELS: Record<TypeInteraction, string> = {
   visio: "Visio",
   visite_siege: "Visite au siège",
   autre: "Autre",
-};
-
-export const STATUT_INTERACTION_LABELS: Record<StatutInteraction, string> = {
-  planifie: "Planifié",
-  fait: "Fait",
-  annule: "Annulé",
 };
 
 export const STATUT_ETAPE_LABELS: Record<StatutEtape, string> = {

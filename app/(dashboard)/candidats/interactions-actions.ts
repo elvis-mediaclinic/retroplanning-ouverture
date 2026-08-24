@@ -7,9 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 
 const InteractionSchema = z.object({
   type: z.enum(["appel", "email", "visio", "visite_siege", "autre"]),
-  statut: z.enum(["planifie", "fait", "annule"]),
-  date_prevue: z.string().optional(),
-  date_realisee: z.string().optional(),
+  date_realisee: z.string().min(1, { error: "Date requise." }),
   notes: z.string().optional(),
 });
 
@@ -23,9 +21,7 @@ export async function createInteraction(
   const session = await requireMC();
   const parsed = InteractionSchema.safeParse({
     type: formData.get("type"),
-    statut: formData.get("statut"),
-    date_prevue: formData.get("date_prevue") || undefined,
-    date_realisee: formData.get("date_realisee") || undefined,
+    date_realisee: formData.get("date_realisee"),
     notes: formData.get("notes") || undefined,
   });
 
@@ -37,9 +33,7 @@ export async function createInteraction(
   const { error } = await supabase.from("candidat_interactions").insert({
     candidat_id: candidatId,
     type: parsed.data.type,
-    statut: parsed.data.statut,
-    date_prevue: parsed.data.date_prevue || null,
-    date_realisee: parsed.data.date_realisee || null,
+    date_realisee: parsed.data.date_realisee,
     notes: parsed.data.notes ?? null,
     created_by: session.id,
   });
@@ -59,9 +53,7 @@ export async function updateInteraction(
   await requireMC();
   const parsed = InteractionSchema.safeParse({
     type: formData.get("type"),
-    statut: formData.get("statut"),
-    date_prevue: formData.get("date_prevue") || undefined,
-    date_realisee: formData.get("date_realisee") || undefined,
+    date_realisee: formData.get("date_realisee"),
     notes: formData.get("notes") || undefined,
   });
 
@@ -74,9 +66,7 @@ export async function updateInteraction(
     .from("candidat_interactions")
     .update({
       type: parsed.data.type,
-      statut: parsed.data.statut,
-      date_prevue: parsed.data.date_prevue || null,
-      date_realisee: parsed.data.date_realisee || null,
+      date_realisee: parsed.data.date_realisee,
       notes: parsed.data.notes ?? null,
       updated_at: new Date().toISOString(),
     })
