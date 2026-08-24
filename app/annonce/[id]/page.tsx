@@ -176,7 +176,6 @@ export default async function AnnoncePage({
       .from("annonces")
       .select("id, titre, accroche, contenu, contenu_json, sections, actif, villes(id, nom)")
       .eq("id", id)
-      .eq("actif", true)
       .single(),
     supabase.from("pages").select("sections").eq("key", "concept").maybeSingle(),
     supabase.auth.getUser(),
@@ -360,6 +359,12 @@ export default async function AnnoncePage({
       </header>
 
       <main className="mx-auto w-full max-w-6xl px-4 sm:px-8 py-8 sm:py-12 space-y-6">
+
+        {!annonce.actif && (
+          <div className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            ⚠️ Brouillon — cette annonce n&apos;est pas publiée et n&apos;est visible que par vous.
+          </div>
+        )}
 
         {/* Hero — titre + accroche */}
         <div className={cardCls}>
