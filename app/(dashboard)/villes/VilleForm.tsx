@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { CodePostalAutocomplete } from "@/components/CodePostalAutocomplete";
+import { VilleAutocomplete } from "@/components/VilleAutocomplete";
 import type { Ville } from "@/lib/types";
 
 type Props = {
@@ -16,10 +16,7 @@ export function VilleForm({ action, defaultValues, submitLabel = "Enregistrer" }
   return (
     <form action={formAction} className="space-y-5">
       <div className="grid grid-cols-2 gap-4">
-        <CodePostalAutocomplete
-          cpName="code_postal"
-          cpDefaultValue={defaultValues?.code_postal ?? ""}
-          cpLabel="Code postal"
+        <VilleAutocomplete
           villeName="nom"
           villeDefaultValue={defaultValues?.nom ?? ""}
           villeLabel="Nom de la ville *"
@@ -30,11 +27,11 @@ export function VilleForm({ action, defaultValues, submitLabel = "Enregistrer" }
         />
 
         <div className="space-y-1">
-          <label className="text-sm font-medium text-zinc-700">Population</label>
+          <label className="text-sm font-medium text-zinc-700">Zone de chalandise</label>
           <input
-            name="population"
-            type="number"
-            defaultValue={defaultValues?.population ?? ""}
+            name="zone_chalandise"
+            type="text"
+            defaultValue={defaultValues?.zone_chalandise ?? ""}
             className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
           />
         </div>

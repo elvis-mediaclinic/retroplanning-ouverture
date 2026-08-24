@@ -74,7 +74,7 @@ export default async function EditVillePage({
               { label: "Ville", value: ville.nom },
               { label: "Département", value: ville.departement ?? "—" },
               { label: "Région", value: ville.region ?? "—" },
-              { label: "Population", value: ville.population ? ville.population.toLocaleString("fr-FR") : "—" },
+              { label: "Zone de chalandise", value: ville.zone_chalandise ?? "—" },
               { label: "Statut", value: STATUT_VILLE_LABELS[ville.statut as keyof typeof STATUT_VILLE_LABELS] },
             ].map(({ label, value }) => (
               <div key={label}>

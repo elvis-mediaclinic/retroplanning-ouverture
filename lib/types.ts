@@ -52,10 +52,9 @@ export type PhaseEtape =
 export type Ville = {
   id: string;
   nom: string;
-  code_postal: string | null;
   departement: string | null;
   region: string | null;
-  population: number | null;
+  zone_chalandise: string | null;
   statut: StatutVille;
   notes: string | null;
   created_at: string;

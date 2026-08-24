@@ -11,7 +11,7 @@ type Ville = {
   nom: string;
   departement: string | null;
   region: string | null;
-  population: number | null;
+  zone_chalandise: string | null;
   statut: string;
   annonces: Array<{ id: string; actif: boolean }> | null;
   candidatures: Array<{ id: string }> | null;
@@ -32,7 +32,7 @@ function VilleRow({ v, canEdit }: { v: Ville; canEdit: boolean }) {
         {[v.departement, v.region].filter(Boolean).join(" · ") || "—"}
       </td>
       <td className="py-2 px-4 text-zinc-500">
-        {v.population ? v.population.toLocaleString("fr-FR") : "—"}
+        {v.zone_chalandise ?? "—"}
       </td>
       <td className="py-2 px-4">
         {projetsActifs.length > 0 ? (
@@ -96,7 +96,7 @@ function VilleTable({ villes, canEdit, empty }: { villes: Ville[]; canEdit: bool
           <tr className="border-b border-zinc-200 bg-zinc-50 text-left">
             <th className="py-2 px-4 font-medium text-zinc-600">Ville</th>
             <th className="py-2 px-4 font-medium text-zinc-600">Dép. / Région</th>
-            <th className="py-2 px-4 font-medium text-zinc-600">Population</th>
+            <th className="py-2 px-4 font-medium text-zinc-600">Zone de chalandise</th>
             <th className="py-2 px-4 font-medium text-zinc-600">Projet</th>
             <th className="py-2 px-4 font-medium text-zinc-600">Annonce</th>
             <th className="py-2 px-4 font-medium text-zinc-600">Candidatures</th>
@@ -118,7 +118,7 @@ export default async function VillesPage() {
 
   const { data } = await supabase
     .from("villes")
-    .select("id, nom, departement, region, population, statut, annonces(id, actif), candidatures(id), projets(id, statut)")
+    .select("id, nom, departement, region, zone_chalandise, statut, annonces(id, actif), candidatures(id), projets(id, statut)")
     .neq("statut", "abandonnee")
     .order("nom");
 
