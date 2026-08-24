@@ -287,7 +287,7 @@ export default async function DashboardPage() {
       {/* ── Ouvertures en cours ──────────────────────────────────── */}
       <section>
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-zinc-900">Ouvertures en cours</h2>
+          <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Ouvertures en cours</h2>
           <Link href="/projets" className="text-xs font-medium text-[#0089bd] hover:text-[#00729e]">
             Voir tous →
           </Link>
@@ -296,11 +296,11 @@ export default async function DashboardPage() {
         <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-zinc-200 bg-[#0089bd]/5 text-left">
-                <th className="py-2 px-4 font-medium text-[#00729e]">Projet</th>
-                <th className="py-2 px-4 font-medium text-[#00729e]">Format</th>
-                <th className="py-2 px-4 font-medium text-[#00729e]">Statut</th>
-                <th className="py-2 px-4 font-medium text-[#00729e]">Ouverture cible</th>
+              <tr className="bg-gradient-to-br from-[#00729e] to-[#0089bd] text-left">
+                <th className="py-2 px-4 font-medium text-white">Projet</th>
+                <th className="py-2 px-4 font-medium text-white">Format</th>
+                <th className="py-2 px-4 font-medium text-white">Statut</th>
+                <th className="py-2 px-4 font-medium text-white">Ouverture cible</th>
               </tr>
             </thead>
             <tbody>
