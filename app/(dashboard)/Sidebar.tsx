@@ -131,7 +131,7 @@ function NavContent({
         {groups.map((group, gi) => (
           <div key={gi} className="space-y-1">
             {group.title && (
-              <p className="px-2 pb-1 text-xs font-semibold uppercase tracking-wide text-white/50">
+              <p className="px-2 pb-1 text-xs font-bold uppercase tracking-wide text-white">
                 {group.title}
               </p>
             )}
@@ -142,7 +142,7 @@ function NavContent({
                 onClick={onNavigate}
                 className={`block rounded-md px-2 py-1.5 text-sm ${
                   isActive(pathname, item.href)
-                    ? "bg-white font-medium text-[#00729e]"
+                    ? "bg-[#00729e] font-medium text-white"
                     : "text-white/80 hover:bg-white/10 hover:text-white"
                 }`}
               >
