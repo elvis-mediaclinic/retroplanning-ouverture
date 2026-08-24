@@ -162,6 +162,19 @@ const contentCls =
   "[&_a]:text-brand [&_a]:underline " +
   "[&_strong]:font-semibold";
 
+const contentClsDark =
+  "text-white/85 text-base leading-relaxed " +
+  "[&_h2]:text-xl [&_h2]:font-semibold [&_h2]:text-white [&_h2]:mb-3 " +
+  "[&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-white [&_h3]:mb-2 " +
+  "[&_p]:mb-3 " +
+  "[&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1.5 [&_ul]:mb-3 " +
+  "[&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:space-y-1.5 [&_ol]:mb-3 " +
+  "[&_blockquote]:border-l-4 [&_blockquote]:border-white/40 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-white/70 [&_blockquote]:my-4 " +
+  "[&_a]:text-white [&_a]:underline " +
+  "[&_strong]:font-semibold [&_strong]:text-white";
+
+const bleuCardCls = "rounded-2xl bg-gradient-to-br from-[#00729e] to-[#0089bd] shadow-sm px-4 py-4 sm:px-6 sm:py-6";
+
 // ── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function AnnoncePage({
@@ -192,8 +205,8 @@ export default async function AnnoncePage({
   // Sections structurées (nouveau format) ou fallback sur l'ancien contenu_json
   type StatItem = { id: string; valeur: string; label: string };
   type StoredSection =
-    | { id: string; type?: "texte"; titre: string; contenu_json: string; disposition?: "pleine" | "moitie" | "tiers" }
-    | { id: string; type: "stats"; titre: string; stats: StatItem[]; colonnes: 2 | 3 | 4; alignement?: "gauche" | "centre" }
+    | { id: string; type?: "texte"; titre: string; contenu_json: string; disposition?: "pleine" | "moitie" | "tiers"; bleu?: boolean }
+    | { id: string; type: "stats"; titre: string; stats: StatItem[]; colonnes: 2 | 3 | 4; alignement?: "gauche" | "centre"; bleu?: boolean }
     | { id: string; type: "titre"; titre: string };
   let storedSections: StoredSection[] | null = null;
   if (annonce.sections) {
@@ -276,14 +289,15 @@ export default async function AnnoncePage({
         const s = row.s as Extract<StoredSection, { type: "stats" }>;
         const cols = s.colonnes ?? 3;
         const centré = s.alignement === "centre";
+        const bleu = s.bleu ?? false;
         return (
-          <div key={`${keyPrefix}-${ri}`} className="py-2">
-            {s.titre && <h2 className={`text-2xl font-bold text-brand mb-6 ${centré ? "text-center" : ""}`}>{s.titre}</h2>}
+          <div key={`${keyPrefix}-${ri}`} className={bleu ? bleuCardCls : "py-2"}>
+            {s.titre && <h2 className={`text-2xl font-bold mb-6 ${bleu ? "text-white" : "text-brand"} ${centré ? "text-center" : ""}`}>{s.titre}</h2>}
             <div className={STATS_GRID[cols] ?? STATS_GRID[3]}>
               {s.stats.map((stat) => (
                 <div key={stat.id} className={`flex flex-col gap-1 px-4 sm:px-6 ${centré ? "items-center text-center" : ""}`}>
-                  <span className="text-base text-zinc-600 leading-snug">{stat.label}</span>
-                  <span className="text-5xl font-extrabold text-brand leading-none">{stat.valeur}</span>
+                  <span className={`text-base leading-snug ${bleu ? "text-white/80" : "text-zinc-600"}`}>{stat.label}</span>
+                  <span className={`text-5xl font-extrabold leading-none ${bleu ? "text-white" : "text-brand"}`}>{stat.valeur}</span>
                 </div>
               ))}
             </div>
@@ -294,24 +308,28 @@ export default async function AnnoncePage({
         return (
           <div key={`${keyPrefix}-${ri}`} className={GROUP_GRID[row.cols]}>
             {row.pair.map((s) => {
+              const bleu = (s as { bleu?: boolean }).bleu ?? false;
               const { titre, bodyHtml } = renderTextSection(s as Extract<StoredSection, { type?: "texte" }>);
               return (
-                <div key={s.id} className="col-card px-4 py-4 sm:px-6 sm:py-6">
-                  {titre && <h2 className="text-2xl font-bold text-brand mb-4">{titre}</h2>}
-                  {bodyHtml.trim() && <div className={contentCls} dangerouslySetInnerHTML={{ __html: bodyHtml }} />}
+                <div key={s.id} className={bleu ? bleuCardCls : "col-card px-4 py-4 sm:px-6 sm:py-6"}>
+                  {titre && <h2 className={`text-2xl font-bold mb-4 ${bleu ? "text-white" : "text-brand"}`}>{titre}</h2>}
+                  {bodyHtml.trim() && <div className={bleu ? contentClsDark : contentCls} dangerouslySetInnerHTML={{ __html: bodyHtml }} />}
                 </div>
               );
             })}
           </div>
         );
       }
-      const { titre, bodyHtml } = renderTextSection(row.s as Extract<StoredSection, { type?: "texte" }>);
-      return (
-        <div key={`${keyPrefix}-${ri}`} className={cardCls}>
-          {titre && <h2 className="text-2xl font-bold text-brand mb-4">{titre}</h2>}
-          {bodyHtml.trim() && <div className={contentCls} dangerouslySetInnerHTML={{ __html: bodyHtml }} />}
-        </div>
-      );
+      {
+        const bleu = (row.s as { bleu?: boolean }).bleu ?? false;
+        const { titre, bodyHtml } = renderTextSection(row.s as Extract<StoredSection, { type?: "texte" }>);
+        return (
+          <div key={`${keyPrefix}-${ri}`} className={bleu ? bleuCardCls : cardCls}>
+            {titre && <h2 className={`text-2xl font-bold mb-4 ${bleu ? "text-white" : "text-brand"}`}>{titre}</h2>}
+            {bodyHtml.trim() && <div className={bleu ? contentClsDark : contentCls} dangerouslySetInnerHTML={{ __html: bodyHtml }} />}
+          </div>
+        );
+      }
     });
   }
 

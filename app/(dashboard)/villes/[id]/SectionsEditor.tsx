@@ -11,8 +11,8 @@ const BlockEditor = dynamic(() => import("./BlockEditor").then((m) => m.BlockEdi
 export type Stat = { id: string; valeur: string; label: string };
 
 export type Section =
-  | { id: string; type?: "texte"; titre: string; contenu_json: string; disposition?: "pleine" | "moitie" | "tiers" }
-  | { id: string; type: "stats"; titre: string; stats: Stat[]; colonnes: 2 | 3 | 4; alignement?: "gauche" | "centre" }
+  | { id: string; type?: "texte"; titre: string; contenu_json: string; disposition?: "pleine" | "moitie" | "tiers"; bleu?: boolean }
+  | { id: string; type: "stats"; titre: string; stats: Stat[]; colonnes: 2 | 3 | 4; alignement?: "gauche" | "centre"; bleu?: boolean }
   | { id: string; type: "titre"; titre: string };
 
 function uid() { return Math.random().toString(36).slice(2); }
@@ -158,6 +158,17 @@ export function SectionsEditor({ defaultSections }: { defaultSections?: Section[
                 className="flex-1 rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm font-medium"
               />
               <div className="flex items-center gap-1 shrink-0">
+                {!isTitre && (
+                  <label className="flex items-center gap-1 rounded border border-zinc-300 bg-white px-2 py-1 text-xs font-medium text-zinc-500 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={(section as { bleu?: boolean }).bleu ?? false}
+                      onChange={(e) => update(section.id, { bleu: e.target.checked } as Partial<Section>)}
+                      className="h-3 w-3 accent-brand"
+                    />
+                    Fond bleu
+                  </label>
+                )}
                 {!isStats && (
                   <>
                     {(["pleine", "moitie", "tiers"] as const).map((d) => (
