@@ -132,13 +132,18 @@ export async function submitCandidature(
       return Array.isArray(v) ? (v[0] as { nom: string })?.nom : (v as { nom: string } | null)?.nom;
     }).filter(Boolean) as string[];
 
-    // Fetch admin emails
-    const { data: admins } = await service
+    // Destinataires : uniquement les profils dont la fonction est "développeur franchise"
+    const { data: profiles } = await service
       .from("profiles")
-      .select("email")
-      .eq("role", "admin");
+      .select("email, fonction");
 
-    const adminEmails = (admins ?? []).map((a) => a.email).filter(Boolean) as string[];
+    const normalize = (s: string) =>
+      s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+
+    const adminEmails = (profiles ?? [])
+      .filter((p) => p.fonction && normalize(p.fonction).includes("developpeur franchise"))
+      .map((p) => p.email)
+      .filter(Boolean) as string[];
 
     if (adminEmails.length > 0) {
       const d = parsed.data;
