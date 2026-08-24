@@ -50,6 +50,7 @@ export function FranchiseList({
         <p className="text-sm text-zinc-400 text-center py-10">Aucun résultat.</p>
       )}
 
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
       {filtered.map((f) => {
         const leurs = magasinsByFranchise[f.id] ?? [];
         const actifs = leurs.filter((m) => !m.archive);
@@ -58,25 +59,25 @@ export function FranchiseList({
           <div key={f.id} className="rounded-lg border border-zinc-200 bg-white shadow-sm overflow-hidden">
             <Link
               href={`/reseau/franchises/${f.id}`}
-              className="flex items-start justify-between px-5 py-4 bg-[#0089bd] text-white hover:bg-[#00729e] transition-colors"
+              className="flex items-start justify-between gap-4 min-h-[112px] px-5 py-4 bg-[#0089bd] text-white hover:bg-[#00729e] transition-colors"
             >
-              <div>
+              <div className="min-w-0">
                 <h2 className="font-semibold">{f.nom}</h2>
-                {f.raison_sociale && <p className="text-sm text-white/80 mt-0.5">{f.raison_sociale}</p>}
+                {f.raison_sociale && <p className="text-sm text-white/80 mt-0.5 truncate">{f.raison_sociale}</p>}
                 {f.associes.length > 0 && (
-                  <p className="text-xs text-white/70 mt-0.5">
+                  <p className="text-xs text-white/70 mt-0.5 truncate">
                     {f.associes.map((a) => `${a.prenom} ${a.nom}`).join(", ")}
                   </p>
                 )}
                 {(f.siren || f.rcs || f.tva_intracom) && (
-                  <p className="text-xs text-white/70 mt-1 space-x-3">
+                  <p className="text-xs text-white/70 mt-1 space-x-3 truncate">
                     {f.siren && <span>SIREN : {f.siren}</span>}
                     {f.rcs && <span>RCS : {f.rcs}</span>}
                     {f.tva_intracom && <span>TVA : {f.tva_intracom}</span>}
                   </p>
                 )}
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 shrink-0">
                 {actifs.length > 0 && (
                   <span className="text-xs text-white/80 border border-white/30 rounded px-2 py-0.5">
                     {actifs.length} magasin{actifs.length > 1 ? "s" : ""} actif{actifs.length > 1 ? "s" : ""}
@@ -125,6 +126,7 @@ export function FranchiseList({
           </div>
         );
       })}
+      </div>
     </div>
   );
 }
