@@ -147,7 +147,7 @@ export default async function DashboardPage() {
 
         <div className="space-y-4">
           {/* Ligne 1 — totaux pleine largeur */}
-          <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
+          <div className="rounded-lg border border-zinc-200 border-l-4 border-l-[#0089bd] bg-white p-6 shadow-sm">
             <p className="text-xs font-semibold text-zinc-500 mb-5">Magasins dans le réseau</p>
             <div className="space-y-4">
               {/* Ligne 1 — total */}
@@ -183,12 +183,12 @@ export default async function DashboardPage() {
 
           {/* Ligne 2 — deux donuts */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
+            <div className="rounded-lg border border-zinc-200 border-l-4 border-l-[#0089bd] bg-white p-5 shadow-sm">
               <p className="text-xs font-semibold text-zinc-500 mb-4">Répartition par format — ouverts</p>
               <FormatDonut segments={formatSegments} total={formatTotal} />
             </div>
             {formatTotalArchives > 0 && (
-              <div className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm opacity-70">
+              <div className="rounded-lg border border-zinc-200 border-l-4 border-l-[#0089bd] bg-white p-5 shadow-sm opacity-70">
                 <p className="text-xs font-semibold text-zinc-500 mb-4">Répartition par format — archivés</p>
                 <FormatDonut segments={formatSegmentsArchives} total={formatTotalArchives} />
               </div>
