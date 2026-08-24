@@ -59,37 +59,51 @@ export function FranchiseList({
           <div key={f.id} className="rounded-lg border border-zinc-200 bg-white shadow-sm overflow-hidden">
             <Link
               href={`/reseau/franchises/${f.id}`}
-              className="flex items-start justify-between gap-4 min-h-[112px] px-5 py-4 bg-[#0089bd] text-white hover:bg-[#00729e] transition-colors"
+              className="flex items-center justify-between gap-4 min-h-[64px] px-5 py-4 bg-[#0089bd] text-white hover:bg-[#00729e] transition-colors"
             >
-              <div className="min-w-0">
-                <h2 className="font-semibold">{f.nom}</h2>
-                {f.raison_sociale && <p className="text-sm text-white/80 mt-0.5 truncate">{f.raison_sociale}</p>}
-                {f.associes.length > 0 && (
-                  <p className="text-xs text-white/70 mt-0.5 truncate">
-                    {f.associes.map((a) => `${a.prenom} ${a.nom}`).join(", ")}
-                  </p>
-                )}
-                {(f.siren || f.rcs || f.tva_intracom) && (
-                  <p className="text-xs text-white/70 mt-1 space-x-3 truncate">
-                    {f.siren && <span>SIREN : {f.siren}</span>}
-                    {f.rcs && <span>RCS : {f.rcs}</span>}
-                    {f.tva_intracom && <span>TVA : {f.tva_intracom}</span>}
-                  </p>
-                )}
-              </div>
-              <div className="flex items-center gap-3 shrink-0">
+              <h2 className="font-semibold">{f.nom}</h2>
+              <div className="flex items-center gap-2 shrink-0">
                 {actifs.length > 0 && (
-                  <span className="text-xs text-white/80 border border-white/30 rounded px-2 py-0.5">
+                  <span className="text-xs font-semibold rounded-full px-2.5 py-1 bg-white/20 text-white">
                     {actifs.length} magasin{actifs.length > 1 ? "s" : ""} actif{actifs.length > 1 ? "s" : ""}
                   </span>
                 )}
                 {fermes.length > 0 && (
-                  <span className="text-xs text-white/80 border border-white/30 rounded px-2 py-0.5">
+                  <span className="text-xs font-semibold rounded-full px-2.5 py-1 bg-white/20 text-white">
                     {fermes.length} fermé{fermes.length > 1 ? "s" : ""}
                   </span>
                 )}
               </div>
             </Link>
+
+            {(f.raison_sociale || f.siren || f.rcs || f.tva_intracom) && (
+              <div className="grid grid-cols-2 divide-x divide-y divide-zinc-100">
+                {f.raison_sociale && (
+                  <div className="px-5 py-3 col-span-2">
+                    <p className="text-xs text-zinc-400">Raison sociale</p>
+                    <p className="text-sm font-medium text-zinc-900 mt-0.5">{f.raison_sociale}</p>
+                  </div>
+                )}
+                {f.siren && (
+                  <div className="px-5 py-3">
+                    <p className="text-xs text-zinc-400">SIREN</p>
+                    <p className="text-sm font-medium text-zinc-900 mt-0.5">{f.siren}</p>
+                  </div>
+                )}
+                {f.rcs && (
+                  <div className="px-5 py-3">
+                    <p className="text-xs text-zinc-400">RCS</p>
+                    <p className="text-sm font-medium text-zinc-900 mt-0.5">{f.rcs}</p>
+                  </div>
+                )}
+                {f.tva_intracom && (
+                  <div className="px-5 py-3">
+                    <p className="text-xs text-zinc-400">TVA intracom.</p>
+                    <p className="text-sm font-medium text-zinc-900 mt-0.5">{f.tva_intracom}</p>
+                  </div>
+                )}
+              </div>
+            )}
 
             {leurs.length > 0 && (
               <div className="border-t border-zinc-100 px-5 py-3 bg-zinc-50">
