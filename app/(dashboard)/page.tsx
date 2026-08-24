@@ -147,34 +147,34 @@ export default async function DashboardPage() {
 
         <div className="space-y-4">
           {/* Ligne 1 — totaux pleine largeur */}
-          <div className="rounded-lg border border-zinc-200 border-l-4 border-l-[#0089bd] bg-white p-6 shadow-sm">
-            <p className="text-sm font-bold uppercase tracking-wide text-[#0089bd] mb-5">Magasins dans le réseau</p>
+          <div className="rounded-lg bg-gradient-to-br from-[#00729e] to-[#0089bd] p-6 shadow-sm">
+            <p className="text-sm font-bold uppercase tracking-wide text-white mb-5">Magasins dans le réseau</p>
             <div className="space-y-4">
               {/* Ligne 1 — total */}
               <div className="flex items-baseline gap-3">
-                <p className="text-7xl font-bold text-[#0089bd]">{actifs.length}</p>
-                <p className="text-xl text-zinc-400">ouverts</p>
+                <p className="text-7xl font-bold text-white">{actifs.length}</p>
+                <p className="text-xl text-white/70">ouverts</p>
               </div>
               {/* Ligne 2 — détail */}
               <div className="flex flex-wrap items-center gap-6">
                 <div className="flex items-baseline gap-2">
-                  <p className="text-4xl font-bold text-blue-600">{integreCount}</p>
-                  <p className="text-base text-zinc-400">intégré{integreCount > 1 ? "s" : ""}</p>
+                  <p className="text-4xl font-bold text-white">{integreCount}</p>
+                  <p className="text-base text-white/70">intégré{integreCount > 1 ? "s" : ""}</p>
                 </div>
                 <div className="flex items-baseline gap-2">
-                  <p className="text-4xl font-bold text-zinc-700">{franchiseCount}</p>
-                  <p className="text-base text-zinc-400">franchisé{franchiseCount > 1 ? "s" : ""}</p>
+                  <p className="text-4xl font-bold text-white/80">{franchiseCount}</p>
+                  <p className="text-base text-white/70">franchisé{franchiseCount > 1 ? "s" : ""}</p>
                 </div>
                 {ouverturesEnCours > 0 && (
                   <div className="flex items-baseline gap-2">
-                    <p className="text-4xl font-bold text-amber-500">{ouverturesEnCours}</p>
-                    <p className="text-base text-zinc-400">ouverture{ouverturesEnCours > 1 ? "s" : ""} en cours</p>
+                    <p className="text-4xl font-bold text-amber-300">{ouverturesEnCours}</p>
+                    <p className="text-base text-white/70">ouverture{ouverturesEnCours > 1 ? "s" : ""} en cours</p>
                   </div>
                 )}
                 {archives.length > 0 && (
                   <div className="flex items-baseline gap-2">
-                    <p className="text-4xl font-bold text-zinc-300">{archives.length}</p>
-                    <p className="text-base text-zinc-300">archivé{archives.length > 1 ? "s" : ""}</p>
+                    <p className="text-4xl font-bold text-white/40">{archives.length}</p>
+                    <p className="text-base text-white/40">archivé{archives.length > 1 ? "s" : ""}</p>
                   </div>
                 )}
               </div>
@@ -183,14 +183,14 @@ export default async function DashboardPage() {
 
           {/* Ligne 2 — deux donuts */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="rounded-lg border border-zinc-200 border-l-4 border-l-[#0089bd] bg-white p-5 shadow-sm">
-              <p className="text-sm font-bold uppercase tracking-wide text-[#0089bd] mb-4">Répartition par format — ouverts</p>
-              <FormatDonut segments={formatSegments} total={formatTotal} />
+            <div className="rounded-lg bg-gradient-to-br from-[#00729e] to-[#0089bd] p-5 shadow-sm">
+              <p className="text-sm font-bold uppercase tracking-wide text-white mb-4">Répartition par format — ouverts</p>
+              <FormatDonut segments={formatSegments} total={formatTotal} light />
             </div>
             {formatTotalArchives > 0 && (
-              <div className="rounded-lg border border-zinc-200 border-l-4 border-l-[#0089bd] bg-white p-5 shadow-sm opacity-70">
-                <p className="text-sm font-bold uppercase tracking-wide text-[#0089bd] mb-4">Répartition par format — archivés</p>
-                <FormatDonut segments={formatSegmentsArchives} total={formatTotalArchives} />
+              <div className="rounded-lg bg-gradient-to-br from-[#00729e] to-[#0089bd] p-5 shadow-sm opacity-70">
+                <p className="text-sm font-bold uppercase tracking-wide text-white mb-4">Répartition par format — archivés</p>
+                <FormatDonut segments={formatSegmentsArchives} total={formatTotalArchives} light />
               </div>
             )}
           </div>

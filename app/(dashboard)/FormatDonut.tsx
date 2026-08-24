@@ -5,7 +5,7 @@ import type { FormatSegment } from "@/lib/format-colors";
 
 export type { FormatSegment };
 
-type Props = { segments: FormatSegment[]; total: number };
+type Props = { segments: FormatSegment[]; total: number; light?: boolean };
 
 function describeArc(cx: number, cy: number, r: number, ri: number, start: number, end: number) {
   // évite le chemin complet qui ne fonctionne pas avec largeArc=1 sur 360°
@@ -21,11 +21,11 @@ function describeArc(cx: number, cy: number, r: number, ri: number, start: numbe
   ].join(" ");
 }
 
-export function FormatDonut({ segments, total }: Props) {
+export function FormatDonut({ segments, total, light = false }: Props) {
   const [hovered, setHovered] = useState<string | null>(null);
 
   if (total === 0) return (
-    <p className="text-sm text-zinc-400 text-center py-8">Aucun format renseigné</p>
+    <p className={`text-sm text-center py-8 ${light ? "text-white/60" : "text-zinc-400"}`}>Aucun format renseigné</p>
   );
 
   const cx = 80, cy = 80, r = 68, ri = 42;
@@ -60,11 +60,11 @@ export function FormatDonut({ segments, total }: Props) {
           ))}
           {/* Centre : valeur survolée ou total */}
           <text x={cx} y={cy - 7} textAnchor="middle"
-            style={{ fontSize: 22, fontWeight: 700, fontFamily: "inherit", fill: "#18181b" }}>
+            style={{ fontSize: 22, fontWeight: 700, fontFamily: "inherit", fill: light ? "#ffffff" : "#18181b" }}>
             {hoveredSeg ? hoveredSeg.count : total}
           </text>
           <text x={cx} y={cy + 13} textAnchor="middle"
-            style={{ fontSize: 11, fontFamily: "inherit", fill: "#a1a1aa" }}>
+            style={{ fontSize: 11, fontFamily: "inherit", fill: light ? "rgba(255,255,255,0.65)" : "#a1a1aa" }}>
             {hoveredSeg ? hoveredSeg.label : "magasins"}
           </text>
         </svg>
@@ -82,8 +82,8 @@ export function FormatDonut({ segments, total }: Props) {
             onMouseLeave={() => setHovered(null)}
           >
             <span className="inline-block w-2.5 h-2.5 rounded-full shrink-0" style={{ background: s.color }} />
-            <span className="text-sm text-zinc-600 truncate">{s.label}</span>
-            <span className="ml-auto text-sm font-semibold text-zinc-900 tabular-nums">{s.count}</span>
+            <span className={`text-sm truncate ${light ? "text-white/85" : "text-zinc-600"}`}>{s.label}</span>
+            <span className={`ml-auto text-sm font-semibold tabular-nums ${light ? "text-white" : "text-zinc-900"}`}>{s.count}</span>
           </li>
         ))}
       </ul>
