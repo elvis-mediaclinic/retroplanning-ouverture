@@ -352,15 +352,15 @@ export default async function AnnoncePage({
         )}
 
         {/* Hero — titre + accroche */}
-        <div className={cardCls}>
-          <p className="text-xs font-semibold uppercase tracking-widest text-brand mb-4">
+        <div className="rounded-2xl bg-gradient-to-br from-[#00729e] to-[#0089bd] shadow-sm px-4 py-4 sm:px-6 sm:py-6">
+          <p className="text-xs font-semibold uppercase tracking-widest text-white/70 mb-4">
             Opportunité de franchise
           </p>
-          <h1 className="text-3xl sm:text-4xl font-bold text-zinc-900 leading-tight">
+          <h1 className="text-3xl sm:text-4xl font-bold text-white leading-tight">
             {annonce.titre}
           </h1>
           {annonce.accroche && (
-            <p className="mt-4 text-lg sm:text-xl text-zinc-500 leading-relaxed">
+            <p className="mt-4 text-lg sm:text-xl text-white/80 leading-relaxed">
               {annonce.accroche}
             </p>
           )}
