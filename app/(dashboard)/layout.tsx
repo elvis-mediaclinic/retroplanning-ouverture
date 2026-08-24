@@ -16,7 +16,7 @@ export default async function DashboardLayout({
         fonction={profile.fonction}
       />
       <main className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-[1600px] px-6 py-8">{children}</div>
+        <div className="mx-auto max-w-[1600px] px-6 pt-1.5 pb-8">{children}</div>
       </main>
     </div>
   );
