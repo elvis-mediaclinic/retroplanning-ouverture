@@ -46,16 +46,16 @@ export default async function EditMagasinPage({
   const franchiseMap = Object.fromEntries(franchises.map((f) => [f.id, f.nom]));
 
   return (
-    <div className="space-y-6 max-w-2xl">
-      <div>
-        <a href="/reseau" className="text-sm text-zinc-500 hover:text-zinc-900">← Réseau</a>
-      </div>
+    <div className="space-y-6">
       <div className="rounded-xl bg-gradient-to-br from-[#00729e] to-[#0089bd] p-6 shadow-sm flex items-center justify-between">
         <h1 className="text-2xl font-bold uppercase text-white">{magasin.nom}</h1>
         <div className="flex items-center gap-2">
           <CessionModal magasin={magasin} franchises={franchises} siretActuel={siretActuel} />
           <DeleteMagasinButton id={id} />
         </div>
+      </div>
+      <div>
+        <a href="/reseau" className="text-sm text-zinc-500 hover:text-zinc-900">← Réseau</a>
       </div>
 
       <MagasinForm magasin={magasin} franchises={franchises} siretActuel={siretActuel} />

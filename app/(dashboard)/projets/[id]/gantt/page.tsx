@@ -22,21 +22,21 @@ export default async function GanttPage({ params }: { params: Promise<{ id: stri
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <Link
-            href={isMC ? `/projets/${id}` : "/mon-projet"}
-            className="text-sm text-zinc-500 hover:text-zinc-900"
-          >
-            ← {projet.nom}
-          </Link>
-          <h1 className="mt-1 text-xl font-semibold text-zinc-900">Gantt — {projet.nom}</h1>
-        </div>
+      <div className="rounded-xl bg-gradient-to-br from-[#00729e] to-[#0089bd] p-6 shadow-sm flex items-center justify-between">
+        <h1 className="text-2xl font-bold uppercase text-white">Gantt — {projet.nom}</h1>
         <Link
           href={`/projets/${id}`}
-          className="btn-secondary text-sm"
+          className="rounded-md border border-white/40 px-3 py-1.5 text-sm text-white hover:bg-white/10"
         >
           Vue liste
+        </Link>
+      </div>
+      <div>
+        <Link
+          href={isMC ? `/projets/${id}` : "/mon-projet"}
+          className="text-sm text-zinc-500 hover:text-zinc-900"
+        >
+          ← {projet.nom}
         </Link>
       </div>
 

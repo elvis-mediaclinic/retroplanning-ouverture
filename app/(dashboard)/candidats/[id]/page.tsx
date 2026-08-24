@@ -33,11 +33,6 @@ export default async function EditCandidatPage({
 
   return (
     <div className="space-y-6">
-      <div>
-        <Link href="/candidats" className="text-sm text-zinc-500 hover:text-zinc-900">
-          ← Candidats
-        </Link>
-      </div>
       <div className="rounded-xl bg-gradient-to-br from-[#00729e] to-[#0089bd] p-6 shadow-sm flex items-center gap-3">
         <h1 className="text-2xl font-bold uppercase text-white">
           {candidat.prenom} {candidat.nom}
@@ -50,6 +45,11 @@ export default async function EditCandidatPage({
             ✓ Compte actif
           </span>
         )}
+      </div>
+      <div>
+        <Link href="/candidats" className="text-sm text-zinc-500 hover:text-zinc-900">
+          ← Candidats
+        </Link>
       </div>
       <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
         <CandidatForm action={action} defaultValues={candidat} villes={villes ?? []} selectedVilleIds={selectedVilleIds} />

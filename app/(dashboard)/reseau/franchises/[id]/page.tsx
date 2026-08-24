@@ -20,13 +20,13 @@ export default async function EditFranchisePage({
   const franchise = data as Franchise;
 
   return (
-    <div className="space-y-6 max-w-2xl">
-      <div>
-        <a href="/reseau/franchises" className="text-sm text-zinc-500 hover:text-zinc-900">← Franchisés</a>
-      </div>
+    <div className="space-y-6">
       <div className="rounded-xl bg-gradient-to-br from-[#00729e] to-[#0089bd] p-6 shadow-sm flex items-center justify-between">
         <h1 className="text-2xl font-bold uppercase text-white">{franchise.nom}</h1>
         <DeleteFranchiseButton id={id} />
+      </div>
+      <div>
+        <a href="/reseau/franchises" className="text-sm text-zinc-500 hover:text-zinc-900">← Franchisés</a>
       </div>
       <FranchiseForm franchise={franchise} />
     </div>

@@ -54,9 +54,6 @@ export default async function FranchisesPage({
 
   return (
     <div className="space-y-6">
-      <div>
-        <a href="/reseau" className="text-sm text-zinc-500 hover:text-zinc-900">← Réseau</a>
-      </div>
       <div className="rounded-xl bg-gradient-to-br from-[#00729e] to-[#0089bd] p-6 shadow-sm flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold uppercase text-white">Franchisés</h1>
