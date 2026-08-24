@@ -341,7 +341,7 @@ export default async function AnnoncePage({
         .col-card { background: #fff; border: 1px solid #e4e4e7; border-left: 2px solid #0ea5e9; border-radius: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
       `}</style>
 
-      <PublicSidebar villeNom={ville?.nom} />
+      <PublicSidebar active="opportunites" />
 
       <main className="flex-1 mx-auto w-full max-w-6xl px-4 sm:px-8 py-8 sm:py-12 space-y-6">
 

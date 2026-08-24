@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { PublicSidebar } from "@/components/PublicSidebar";
 
 export const metadata = { title: "Opportunités de franchise — Mediaclinic" };
 
@@ -13,18 +14,14 @@ export default async function AnnoncesPage() {
     .order("created_at", { ascending: false });
 
   return (
-    <>
+    <div className="flex min-h-screen flex-col md:flex-row">
       <style>{`
         body { background: #f4f4f5; }
       `}</style>
 
-      <header className="border-b border-zinc-200 bg-white">
-        <div className="mx-auto w-full max-w-6xl px-4 sm:px-8 py-4">
-          <span className="font-bold text-zinc-900 text-sm">Mediaclinic</span>
-        </div>
-      </header>
+      <PublicSidebar active="opportunites" />
 
-      <main className="mx-auto w-full max-w-6xl px-4 sm:px-8 py-8 sm:py-12 space-y-6">
+      <main className="flex-1 mx-auto w-full max-w-6xl px-4 sm:px-8 py-8 sm:py-12 space-y-6">
         <div>
           <p className="text-xs font-semibold uppercase tracking-widest text-brand mb-2">
             Opportunités de franchise
@@ -68,6 +65,6 @@ export default async function AnnoncesPage() {
           </div>
         )}
       </main>
-    </>
+    </div>
   );
 }

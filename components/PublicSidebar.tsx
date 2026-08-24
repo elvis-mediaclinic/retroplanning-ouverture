@@ -1,7 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
 
-export function PublicSidebar({ villeNom }: { villeNom?: string | null }) {
+const NAV = [
+  { href: "/opportunites", label: "Opportunités", key: "opportunites" },
+  { href: "/franchise", label: "La franchise", key: "franchise" },
+  { href: "/nos-magasins", label: "Nos magasins", key: "magasins" },
+] as const;
+
+type ActiveKey = (typeof NAV)[number]["key"];
+
+export function PublicSidebar({ active }: { active?: ActiveKey }) {
   return (
     <>
       {/* Colonne fixe (desktop) */}
@@ -19,23 +27,21 @@ export function PublicSidebar({ villeNom }: { villeNom?: string | null }) {
               />
             </div>
 
-            <div className="flex-1 px-5 py-4 space-y-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-white/60">
-                Opportunité de franchise
-              </p>
-              {villeNom && (
-                <p className="text-lg font-bold uppercase text-white leading-tight">{villeNom}</p>
-              )}
-            </div>
-
-            <div className="border-t border-white/20 p-3">
-              <Link
-                href="/opportunites"
-                className="block rounded-md px-2 py-1.5 text-sm text-white/80 hover:bg-white/10 hover:text-white"
-              >
-                ← Toutes les opportunités
-              </Link>
-            </div>
+            <nav className="flex-1 space-y-1 px-3 py-4">
+              {NAV.map((item) => (
+                <Link
+                  key={item.key}
+                  href={item.href}
+                  className={`block rounded-md px-2 py-1.5 text-sm ${
+                    active === item.key
+                      ? "bg-[#00729e] font-medium text-white"
+                      : "text-white/80 hover:bg-white/10 hover:text-white"
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
           </div>
         </div>
       </aside>
@@ -44,9 +50,17 @@ export function PublicSidebar({ villeNom }: { villeNom?: string | null }) {
       <div className="flex items-center justify-between border-b border-zinc-200 bg-white px-4 py-3 md:hidden">
         <Image src="/Logo_Media_Clinic_monochrome-blanc_rvb.png" alt="Mediaclinic" width={110} height={30}
           className="object-contain brightness-0" />
-        <Link href="/opportunites" className="text-sm text-zinc-500 hover:text-zinc-900">
-          ← Toutes les opportunités
-        </Link>
+        <nav className="flex items-center gap-4">
+          {NAV.map((item) => (
+            <Link
+              key={item.key}
+              href={item.href}
+              className={`text-sm ${active === item.key ? "font-semibold text-zinc-900" : "text-zinc-500 hover:text-zinc-900"}`}
+            >
+              {item.label}
+            </Link>
+          ))}
+        </nav>
       </div>
     </>
   );
