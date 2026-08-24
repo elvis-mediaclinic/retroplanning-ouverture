@@ -175,7 +175,7 @@ export default async function AnnoncePage({
   const [{ data: annonce }, { data: conceptPage }, { data: { user } }] = await Promise.all([
     supabase
       .from("annonces")
-      .select("id, titre, accroche, contenu, contenu_json, sections, actif, villes(id, nom)")
+      .select("id, titre, accroche, contenu, contenu_json, sections, actif, hero_bleu, villes(id, nom)")
       .eq("id", id)
       .single(),
     supabase.from("pages").select("sections").eq("key", "concept").maybeSingle(),
@@ -352,15 +352,18 @@ export default async function AnnoncePage({
         )}
 
         {/* Hero — titre + accroche */}
-        <div className="rounded-2xl bg-gradient-to-br from-[#00729e] to-[#0089bd] shadow-sm px-4 py-4 sm:px-6 sm:py-6">
-          <p className="text-xs font-semibold uppercase tracking-widest text-white/70 mb-4">
+        <div className={annonce.hero_bleu
+          ? "rounded-2xl bg-gradient-to-br from-[#00729e] to-[#0089bd] shadow-sm px-4 py-4 sm:px-6 sm:py-6"
+          : cardCls
+        }>
+          <p className={`text-xs font-semibold uppercase tracking-widest mb-4 ${annonce.hero_bleu ? "text-white/70" : "text-brand"}`}>
             Opportunité de franchise
           </p>
-          <h1 className="text-3xl sm:text-4xl font-bold text-white leading-tight">
+          <h1 className={`text-3xl sm:text-4xl font-bold leading-tight ${annonce.hero_bleu ? "text-white" : "text-zinc-900"}`}>
             {annonce.titre}
           </h1>
           {annonce.accroche && (
-            <p className="mt-4 text-lg sm:text-xl text-white/80 leading-relaxed">
+            <p className={`mt-4 text-lg sm:text-xl leading-relaxed ${annonce.hero_bleu ? "text-white/80" : "text-zinc-500"}`}>
               {annonce.accroche}
             </p>
           )}

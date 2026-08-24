@@ -22,6 +22,7 @@ export async function upsertAnnonce(
     accroche: (formData.get("accroche") as string | null)?.trim() || null,
     sections: sectionsRaw ? JSON.parse(sectionsRaw) : null,
     actif: formData.get("actif") === "true",
+    hero_bleu: formData.get("hero_bleu") === "true",
     updated_at: new Date().toISOString(),
   };
 

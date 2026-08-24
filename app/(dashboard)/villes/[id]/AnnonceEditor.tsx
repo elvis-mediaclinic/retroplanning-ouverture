@@ -18,6 +18,7 @@ type Annonce = {
   contenu_json: string | null;
   sections: string | null;
   actif: boolean;
+  hero_bleu?: boolean;
 };
 
 export function AnnonceEditor({
@@ -32,6 +33,7 @@ export function AnnonceEditor({
   const action = upsertAnnonce.bind(null, villeId, annonce?.id ?? null);
   const [state, formAction, pending] = useActionState(action, undefined);
   const [actif, setActif] = useState(annonce?.actif ?? false);
+  const [heroBleu, setHeroBleu] = useState(annonce?.hero_bleu ?? true);
   const [copied, setCopied] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -127,6 +129,21 @@ export function AnnonceEditor({
               placeholder="Rejoignez le réseau Mediaclinic dans votre ville"
               className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
             />
+          </div>
+
+          <div className="flex items-center gap-2">
+            <input
+              id="hero_bleu_checkbox"
+              type="checkbox"
+              checked={heroBleu}
+              onChange={(e) => setHeroBleu(e.target.checked)}
+              className="h-4 w-4 accent-brand"
+            />
+            <input type="hidden" name="hero_bleu" value={heroBleu ? "true" : "false"} />
+            <label htmlFor="hero_bleu_checkbox" className="text-sm font-medium text-zinc-700">
+              Carte titre en fond bleu
+            </label>
+            <span className="text-xs text-zinc-400">(décoché = fond clair)</span>
           </div>
 
           <div className="space-y-2">
