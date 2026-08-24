@@ -115,7 +115,7 @@ function NavContent({
   onNavigate?: () => void;
 }) {
   return (
-    <div className="flex h-full flex-col bg-[#0089bd]">
+    <div className="flex h-full flex-col bg-gradient-to-br from-[#00729e] to-[#0089bd]">
       <div className="flex h-16 items-center border-b border-white/20 px-5">
         <Image
           src="/Logo-MediaClinic-Noir.png"
