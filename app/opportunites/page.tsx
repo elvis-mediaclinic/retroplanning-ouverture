@@ -22,20 +22,23 @@ export default async function AnnoncesPage() {
       <PublicSidebar active="opportunites" />
 
       <main className="flex-1 mx-auto w-full max-w-[1600px] px-6 pt-3 pb-8 space-y-6">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-brand mb-2">
+        <div className="rounded-xl bg-gradient-to-br from-[#00729e] to-[#0089bd] p-6 shadow-sm">
+          <h1 className="text-2xl font-bold uppercase text-white text-center">
             Opportunités de franchise
-          </p>
-          <h1 className="text-3xl sm:text-4xl font-bold text-zinc-900 leading-tight">
-            Ouvrez votre Mediaclinic
           </h1>
-          <p className="mt-3 text-lg text-zinc-500 max-w-2xl">
+        </div>
+
+        <div className="text-center">
+          <h2 className="text-3xl sm:text-4xl font-bold text-zinc-900 leading-tight">
+            Ouvrez votre Mediaclinic
+          </h2>
+          <p className="mt-3 text-lg text-zinc-500 max-w-2xl mx-auto">
             Découvrez les villes où Mediaclinic recherche un franchisé pour ouvrir un magasin spécialisé dans le multimédia reconditionné.
           </p>
         </div>
 
         {!annonces || annonces.length === 0 ? (
-          <p className="text-zinc-500">Aucune opportunité disponible pour le moment.</p>
+          <p className="text-zinc-500 text-center">Aucune opportunité disponible pour le moment.</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {annonces.map((a) => {
@@ -45,18 +48,18 @@ export default async function AnnoncesPage() {
                 <Link
                   key={a.id}
                   href={`/annonce/${a.id}`}
-                  className="block rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm hover:border-brand hover:shadow-md transition-all"
+                  className="block rounded-2xl bg-gradient-to-br from-[#00729e] to-[#0089bd] p-6 shadow-sm hover:brightness-110 transition-all"
                 >
                   {ville && (
-                    <p className="text-xs font-semibold uppercase tracking-widest text-brand mb-2">
+                    <p className="text-xs font-semibold uppercase tracking-widest text-white/70 mb-2">
                       {ville.nom}{ville.departement ? ` · ${ville.departement}` : ""}
                     </p>
                   )}
-                  <h2 className="text-lg font-bold text-zinc-900 leading-snug mb-2">{a.titre}</h2>
+                  <h2 className="text-lg font-bold text-white leading-snug mb-2">{a.titre}</h2>
                   {a.accroche && (
-                    <p className="text-sm text-zinc-500 leading-relaxed line-clamp-3">{a.accroche}</p>
+                    <p className="text-sm text-white/80 leading-relaxed line-clamp-3">{a.accroche}</p>
                   )}
-                  <span className="mt-4 inline-block text-sm font-medium text-brand">
+                  <span className="mt-4 inline-block text-sm font-medium text-white">
                     En savoir plus →
                   </span>
                 </Link>
