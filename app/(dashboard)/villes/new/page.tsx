@@ -7,11 +7,13 @@ export default async function NewVillePage() {
   await requireMarketing();
   return (
     <div className="space-y-6">
+      <div className="rounded-xl bg-gradient-to-br from-[#00729e] to-[#0089bd] p-6 shadow-sm">
+        <h1 className="text-2xl font-bold uppercase text-white">Nouvelle ville</h1>
+      </div>
       <div>
         <Link href="/villes" className="text-sm text-zinc-500 hover:text-zinc-900">
           ← Villes
         </Link>
-        <h1 className="mt-2 text-lg font-semibold text-zinc-900">Nouvelle ville</h1>
       </div>
       <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
         <VilleForm action={createVille} submitLabel="Créer" />

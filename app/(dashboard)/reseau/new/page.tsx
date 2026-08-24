@@ -16,10 +16,12 @@ export default async function NewMagasinPage({
   const franchises = (data ?? []) as Franchise[];
 
   return (
-    <div className="space-y-6 max-w-2xl">
+    <div className="space-y-6">
+      <div className="rounded-xl bg-gradient-to-br from-[#00729e] to-[#0089bd] p-6 shadow-sm">
+        <h1 className="text-2xl font-bold uppercase text-white">Nouveau magasin</h1>
+      </div>
       <div>
-        <a href="/reseau" className="text-sm text-zinc-500 hover:text-zinc-900">← Réseau</a>
-        <h1 className="mt-2 text-xl font-semibold text-zinc-900">Nouveau magasin</h1>
+        <a href="/reseau" className="text-sm text-zinc-500 hover:text-zinc-900">← Magasins</a>
       </div>
       <MagasinForm
         projetId={projet_id}

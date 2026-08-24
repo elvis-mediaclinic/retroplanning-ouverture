@@ -28,6 +28,11 @@ export default async function EditProjetPage({
 
   return (
     <div className="space-y-6">
+      <div className="rounded-xl bg-gradient-to-br from-[#00729e] to-[#0089bd] p-6 shadow-sm">
+        <h1 className="text-2xl font-bold uppercase text-white">
+          Modifier le projet
+        </h1>
+      </div>
       <div>
         <Link
           href={`/projets/${id}`}
@@ -35,9 +40,6 @@ export default async function EditProjetPage({
         >
           ← {projet.nom}
         </Link>
-        <h1 className="mt-2 text-lg font-semibold text-zinc-900">
-          Modifier le projet
-        </h1>
       </div>
       <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
         <ProjetForm
