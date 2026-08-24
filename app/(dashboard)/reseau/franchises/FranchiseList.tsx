@@ -105,6 +105,21 @@ export function FranchiseList({
               </div>
             )}
 
+            {f.associes.length > 0 && (
+              <div className="border-t border-zinc-100 px-5 py-3">
+                <p className="text-xs font-medium text-zinc-400 mb-2">Contacts</p>
+                <div className="flex flex-wrap gap-6">
+                  {f.associes.map((a, i) => (
+                    <div key={i} className="text-sm">
+                      <span className="font-medium text-zinc-900">{a.prenom} {a.nom}</span>
+                      {a.telephone && <span className="text-zinc-500 ml-2">{a.telephone}</span>}
+                      {a.email && <span className="text-zinc-400 ml-2 text-xs">{a.email}</span>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {leurs.length > 0 && (
               <div className="border-t border-zinc-100 px-5 py-3 bg-zinc-50">
                 <p className="text-xs font-medium text-zinc-400 mb-2">Magasins</p>
@@ -118,21 +133,6 @@ export function FranchiseList({
                       }`}>
                       {m.nom}{m.ville ? ` · ${m.ville}` : ""}
                     </Link>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {f.associes.length > 0 && (
-              <div className="border-t border-zinc-100 px-5 py-3">
-                <p className="text-xs font-medium text-zinc-400 mb-2">Contacts</p>
-                <div className="flex flex-wrap gap-6">
-                  {f.associes.map((a, i) => (
-                    <div key={i} className="text-sm">
-                      <span className="font-medium text-zinc-900">{a.prenom} {a.nom}</span>
-                      {a.telephone && <span className="text-zinc-500 ml-2">{a.telephone}</span>}
-                      {a.email && <span className="text-zinc-400 ml-2 text-xs">{a.email}</span>}
-                    </div>
                   ))}
                 </div>
               </div>
