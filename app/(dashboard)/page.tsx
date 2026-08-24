@@ -131,7 +131,7 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-8">
       {/* En-tête */}
-      <div className="rounded-lg bg-gradient-to-br from-[#00729e] to-[#0089bd] p-6 shadow-sm">
+      <div className="rounded-xl bg-gradient-to-br from-[#00729e] to-[#0089bd] p-6 shadow-sm">
         <h1 className="text-2xl font-bold uppercase text-white">Suivi développement franchise</h1>
         <p className="mt-1 text-sm text-white/70">Bonjour {profile.prenom} !</p>
       </div>
@@ -147,7 +147,7 @@ export default async function DashboardPage() {
 
         <div className="space-y-4">
           {/* Ligne 1 — totaux pleine largeur */}
-          <div className="rounded-lg bg-gradient-to-br from-[#00729e] to-[#0089bd] p-6 shadow-sm">
+          <div className="rounded-xl bg-gradient-to-br from-[#00729e] to-[#0089bd] p-6 shadow-sm">
             <p className="text-sm font-bold uppercase tracking-wide text-white mb-5">Magasins dans le réseau</p>
             <div className="space-y-4">
               {/* Ligne 1 — total */}
@@ -183,12 +183,12 @@ export default async function DashboardPage() {
 
           {/* Ligne 2 — deux donuts */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="rounded-lg bg-gradient-to-br from-[#00729e] to-[#0089bd] p-5 shadow-sm">
+            <div className="rounded-xl bg-gradient-to-br from-[#00729e] to-[#0089bd] p-5 shadow-sm">
               <p className="text-sm font-bold uppercase tracking-wide text-white mb-4">Répartition par format — ouverts</p>
               <FormatDonut segments={formatSegments} total={formatTotal} light />
             </div>
             {formatTotalArchives > 0 && (
-              <div className="rounded-lg bg-gradient-to-br from-[#00729e] to-[#0089bd] p-5 shadow-sm">
+              <div className="rounded-xl bg-gradient-to-br from-[#00729e] to-[#0089bd] p-5 shadow-sm">
                 <p className="text-sm font-bold uppercase tracking-wide text-white mb-4">Répartition par format — archivés</p>
                 <FormatDonut segments={formatSegmentsArchives} total={formatTotalArchives} light />
               </div>
@@ -218,7 +218,7 @@ export default async function DashboardPage() {
             <Link
               key={label}
               href={href}
-              className="rounded-lg bg-gradient-to-br from-[#00729e] to-[#0089bd] p-4 shadow-sm hover:brightness-110 transition-all"
+              className="rounded-xl bg-gradient-to-br from-[#00729e] to-[#0089bd] p-4 shadow-sm hover:brightness-110 transition-all"
             >
               <p className="text-2xl font-bold text-white">{value}</p>
               <p className="mt-0.5 text-xs text-white/70">{label}</p>
