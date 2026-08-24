@@ -33,7 +33,7 @@ function esc(s: string) {
 function renderInline(items: InlineItem[]): string {
   return (items ?? []).map((item) => {
     if (item.type === "link") {
-      return `<a href="${item.href}" class="text-brand underline">${renderInline(item.content as InlineItem[])}</a>`;
+      return `<a href="${item.href}" class="text-[#0089bd] underline">${renderInline(item.content as InlineItem[])}</a>`;
     }
     let t = esc(item.text);
     const s = item.styles ?? {};
@@ -153,13 +153,13 @@ const cardCls =
 
 const contentCls =
   "text-zinc-700 text-base leading-relaxed " +
-  "[&_h2]:text-xl [&_h2]:font-semibold [&_h2]:text-brand [&_h2]:mb-3 " +
+  "[&_h2]:text-xl [&_h2]:font-semibold [&_h2]:text-[#0089bd] [&_h2]:mb-3 " +
   "[&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-zinc-900 [&_h3]:mb-2 " +
   "[&_p]:mb-3 " +
   "[&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1.5 [&_ul]:mb-3 " +
   "[&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:space-y-1.5 [&_ol]:mb-3 " +
-  "[&_blockquote]:border-l-4 [&_blockquote]:border-brand/40 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-zinc-500 [&_blockquote]:my-4 " +
-  "[&_a]:text-brand [&_a]:underline " +
+  "[&_blockquote]:border-l-4 [&_blockquote]:border-[#0089bd]/40 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-zinc-500 [&_blockquote]:my-4 " +
+  "[&_a]:text-[#0089bd] [&_a]:underline " +
   "[&_strong]:font-semibold";
 
 const contentClsDark =
@@ -290,7 +290,7 @@ export default async function AnnoncePage({
       if (row.kind === "full" && row.s.type === "titre") {
         return (
           <div key={`${keyPrefix}-${ri}`} className="text-center py-2">
-            <h2 className="flex items-center justify-center gap-2 text-2xl font-bold text-brand">
+            <h2 className="flex items-center justify-center gap-2 text-2xl font-bold text-[#0089bd]">
               <SectionIcon svg={row.s.icone} />
               {row.s.titre}
             </h2>
@@ -306,7 +306,7 @@ export default async function AnnoncePage({
         return (
           <div key={`${keyPrefix}-${ri}`} className={bleu ? bleuCardCls : "py-2"}>
             {s.titre && (
-              <h2 className={`flex items-center gap-2 text-2xl font-bold mb-6 ${bleu ? "text-white" : "text-brand"} ${centré ? "justify-center text-center" : ""}`}>
+              <h2 className={`flex items-center gap-2 text-2xl font-bold mb-6 ${bleu ? "text-white" : "text-[#0089bd]"} ${centré ? "justify-center text-center" : ""}`}>
                 <SectionIcon svg={s.icone} />
                 {s.titre}
               </h2>
@@ -315,7 +315,7 @@ export default async function AnnoncePage({
               {s.stats.map((stat) => (
                 <div key={stat.id} className={`flex flex-col gap-1 px-4 sm:px-6 ${centré ? "items-center text-center" : ""}`}>
                   <span className={`text-base leading-snug ${bleu ? "text-white/80" : "text-zinc-600"}`}>{stat.label}</span>
-                  <span className={`text-5xl font-extrabold leading-none ${bleu ? "text-white" : "text-brand"}`}>{stat.valeur}</span>
+                  <span className={`text-5xl font-extrabold leading-none ${bleu ? "text-white" : "text-[#0089bd]"}`}>{stat.valeur}</span>
                 </div>
               ))}
             </div>
@@ -331,7 +331,7 @@ export default async function AnnoncePage({
               return (
                 <div key={s.id} className={bleu ? bleuCardCls : "col-card px-4 py-4 sm:px-6 sm:py-6"}>
                   {titre && (
-                    <h2 className={`flex items-center gap-2 text-2xl font-bold mb-4 ${bleu ? "text-white" : "text-brand"}`}>
+                    <h2 className={`flex items-center gap-2 text-2xl font-bold mb-4 ${bleu ? "text-white" : "text-[#0089bd]"}`}>
                       <SectionIcon svg={(s as { icone?: string }).icone} />
                       {titre}
                     </h2>
@@ -349,7 +349,7 @@ export default async function AnnoncePage({
         return (
           <div key={`${keyPrefix}-${ri}`} className={bleu ? bleuCardCls : cardCls}>
             {titre && (
-              <h2 className={`flex items-center gap-2 text-2xl font-bold mb-4 ${bleu ? "text-white" : "text-brand"}`}>
+              <h2 className={`flex items-center gap-2 text-2xl font-bold mb-4 ${bleu ? "text-white" : "text-[#0089bd]"}`}>
                 <SectionIcon svg={(row.s as { icone?: string }).icone} />
                 {titre}
               </h2>
@@ -402,7 +402,7 @@ export default async function AnnoncePage({
           ? "rounded-2xl bg-gradient-to-br from-[#00729e] to-[#0089bd] shadow-sm px-4 py-4 sm:px-6 sm:py-6"
           : cardCls
         }>
-          <p className={`text-xs font-semibold uppercase tracking-widest mb-4 ${annonce.hero_bleu ? "text-white/70" : "text-brand"}`}>
+          <p className={`text-xs font-semibold uppercase tracking-widest mb-4 ${annonce.hero_bleu ? "text-white/70" : "text-[#0089bd]"}`}>
             Opportunité de franchise
           </p>
           <h1 className={`text-3xl sm:text-4xl font-bold leading-tight ${annonce.hero_bleu ? "text-white" : "text-zinc-900"}`}>
@@ -459,7 +459,7 @@ export default async function AnnoncePage({
                 if (!headingHtml && !bodyHtml.trim()) return null;
                 return (
                   <div key={i} className={cardCls}>
-                    {headingHtml && <div className="text-2xl font-bold text-brand mb-4 [&_h2]:text-2xl [&_h3]:text-xl [&_h2]:font-bold [&_h3]:font-semibold" dangerouslySetInnerHTML={{ __html: headingHtml }} />}
+                    {headingHtml && <div className="text-2xl font-bold text-[#0089bd] mb-4 [&_h2]:text-2xl [&_h3]:text-xl [&_h2]:font-bold [&_h3]:font-semibold" dangerouslySetInnerHTML={{ __html: headingHtml }} />}
                     {bodyHtml.trim() && <div className={contentCls} dangerouslySetInnerHTML={{ __html: bodyHtml }} />}
                   </div>
                 );
@@ -476,7 +476,7 @@ export default async function AnnoncePage({
           <details className="group">
             <summary className="flex cursor-pointer list-none items-center gap-3 px-1 [&::-webkit-details-marker]:hidden">
               <div className="h-px flex-1 bg-zinc-200" />
-              <span className="inline-flex items-center gap-2 rounded-full border border-zinc-300 px-5 py-2 text-base font-medium text-zinc-500 hover:border-brand hover:text-brand transition-colors select-none whitespace-nowrap">
+              <span className="inline-flex items-center gap-2 rounded-full border border-zinc-300 px-5 py-2 text-base font-medium text-zinc-500 hover:border-[#0089bd] hover:text-[#0089bd] transition-colors select-none whitespace-nowrap">
                 <span className="group-open:hidden">Découvrir le concept Mediaclinic →</span>
                 <span className="hidden group-open:inline">Masquer le concept Mediaclinic ↑</span>
               </span>
