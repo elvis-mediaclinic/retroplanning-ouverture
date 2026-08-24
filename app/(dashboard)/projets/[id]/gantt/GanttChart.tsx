@@ -79,10 +79,10 @@ function StatusPopover({
   return createPortal(
     <div
       ref={ref}
-      className="fixed z-50 bg-white border border-zinc-200 rounded-lg shadow-lg py-1 min-w-[140px]"
+      className="fixed z-[200] bg-[#04324a] border border-white/15 rounded-lg shadow-2xl py-1 min-w-[140px]"
       style={pos ?? { top: anchorRect.top, left: anchorRect.left, visibility: "hidden" }}
     >
-      <p className="px-3 py-1 text-[10px] font-semibold text-zinc-400 uppercase tracking-wide border-b border-zinc-100 mb-1 truncate max-w-[200px]">
+      <p className="px-3 py-1 text-[10px] font-semibold text-white/50 uppercase tracking-wide border-b border-white/10 mb-1 truncate max-w-[200px]">
         {etape.nom}
       </p>
       {STATUTS.map((s) => (
@@ -94,13 +94,13 @@ function StatusPopover({
             updateStatutEtape(etape.id, projetId, s.value);
             onClose();
           }}
-          className={`w-full flex items-center gap-2 px-3 py-1.5 text-xs text-left hover:bg-zinc-50 ${
-            etape.statut === s.value ? "font-semibold" : "text-zinc-700"
+          className={`w-full flex items-center gap-2 px-3 py-1.5 text-xs text-left hover:bg-white/10 ${
+            etape.statut === s.value ? "font-semibold text-white" : "text-white/80"
           }`}
         >
           <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: s.color }} />
           {s.label}
-          {etape.statut === s.value && <span className="ml-auto text-zinc-400">✓</span>}
+          {etape.statut === s.value && <span className="ml-auto text-white/50">✓</span>}
         </button>
       ))}
     </div>,
@@ -245,7 +245,7 @@ function DraggableMilestone({
       {dragging && dragDate && (
         <div
           className="absolute z-30 pointer-events-none"
-          style={{ left: `${pct}%`, top: "50%", transform: "translateX(-50%) translateY(-220%)" }}
+          style={{ left: `${pct}%`, top: "50%", transform: "translateX(-50%) translateY(calc(-100% - 12px))" }}
         >
           <div className="bg-zinc-900 text-white text-[11px] font-medium rounded px-2 py-1 whitespace-nowrap shadow-lg">
             {dragDate}
@@ -258,7 +258,7 @@ function DraggableMilestone({
       {!dragging && !showPopover && (
         <div
           className="absolute z-20 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
-          style={{ left: `${pct}%`, top: "50%", transform: "translateX(-50%) translateY(-220%)" }}
+          style={{ left: `${pct}%`, top: "50%", transform: "translateX(-50%) translateY(calc(-100% - 8px))" }}
         >
           <div className="bg-zinc-900 text-white text-[10px] rounded px-2 py-1 whitespace-nowrap shadow-lg">
             <div className="font-semibold">{etape.nom}</div>
@@ -288,7 +288,7 @@ export function GanttChart({
 
   const withDate = etapes.filter((e) => e.date_cible);
   if (withDate.length === 0) {
-    return <p className="text-white/60 text-sm py-8 text-center">Aucune étape avec une date cible.</p>;
+    return <p className="text-white text-sm py-8 text-center">Aucune étape avec une date cible.</p>;
   }
 
   const dates = withDate.map((e) => toDay(e.date_cible!));
@@ -327,7 +327,7 @@ export function GanttChart({
             {ticks.map((t) => (
               <span
                 key={t.label}
-                className="absolute -translate-x-1/2 text-[10px] text-white/60 whitespace-nowrap"
+                className="absolute -translate-x-1/2 text-[10px] font-medium text-white whitespace-nowrap"
                 style={{ left: `${t.pct}%` }}
               >
                 {t.label}
@@ -363,7 +363,7 @@ export function GanttChart({
             return (
               <div key={phase} className="mb-4">
                 <div className="flex items-center mb-1">
-                  <div className="w-52 shrink-0 pr-3 text-xs font-semibold text-white/70 uppercase tracking-wide truncate">
+                  <div className="w-52 shrink-0 pr-3 text-xs font-bold text-white uppercase tracking-wide truncate">
                     {PHASE_LABELS[phase]}
                   </div>
                   <div className="flex-1 h-px bg-white/20" />
@@ -377,7 +377,7 @@ export function GanttChart({
 
                   return (
                     <div key={etape.id} className="flex items-center h-8 group">
-                      <div className="w-52 shrink-0 pr-3 text-xs text-white/90 truncate" title={etape.nom}>
+                      <div className="w-52 shrink-0 pr-3 text-xs font-medium text-white truncate" title={etape.nom}>
                         {etape.nom}
                       </div>
                       <DraggableMilestone
@@ -397,7 +397,7 @@ export function GanttChart({
           })}
         </div>
 
-        <div className="flex items-center gap-4 mt-6 flex-wrap text-xs text-white/70">
+        <div className="flex items-center gap-4 mt-6 flex-wrap text-xs text-white">
           {[
             { label: "Fait", color: STATUT_COLORS.fait },
             { label: "En cours", color: STATUT_COLORS.en_cours },
@@ -411,7 +411,7 @@ export function GanttChart({
             </div>
           ))}
           {canEdit && (
-            <span className="ml-auto text-white/50">Cliquer sur un marqueur pour changer le statut · Glisser pour modifier la date</span>
+            <span className="ml-auto text-white/80">Cliquer sur un marqueur pour changer le statut · Glisser pour modifier la date</span>
           )}
         </div>
       </div>
