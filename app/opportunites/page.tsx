@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import { PublicNavbar } from "@/components/PublicNavbar";
+import { PublicFooter } from "@/components/PublicFooter";
 import { OpportunitesExplorer } from "./OpportunitesExplorer";
 
 export const metadata = { title: "Opportunités de franchise — Mediaclinic" };
@@ -58,6 +59,8 @@ export default async function AnnoncesPage() {
 
         <OpportunitesExplorer annonces={annonces} />
       </main>
+
+      <PublicFooter />
     </div>
   );
 }

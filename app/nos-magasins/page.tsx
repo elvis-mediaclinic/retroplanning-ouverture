@@ -2,6 +2,7 @@ import Image from "next/image";
 import { createServiceClient } from "@/lib/supabase/service";
 import { geocodeAddress } from "@/lib/geocode";
 import { PublicNavbar } from "@/components/PublicNavbar";
+import { PublicFooter } from "@/components/PublicFooter";
 import { MagasinsExplorer } from "./MagasinsExplorer";
 import type { MagasinPoint, VilleEnEtudePoint } from "./MagasinsMap";
 
@@ -151,6 +152,8 @@ export default async function NosMagasinsPage() {
           <MagasinsExplorer points={points} villesEnEtude={villesEnEtude} />
         )}
       </main>
+
+      <PublicFooter />
     </div>
   );
 }

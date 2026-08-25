@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import { PublicNavbar } from "@/components/PublicNavbar";
+import { PublicFooter } from "@/components/PublicFooter";
 import { BoldText } from "@/components/BoldText";
 import {
   renderStoredSections,
@@ -198,11 +199,9 @@ export default async function AnnoncePage({
           </p>
           <CandidatureForm annonceId={annonce.id} villeId={ville?.id ?? ""} />
         </div>
-
-        <p className="text-center text-xs text-zinc-400 py-4">
-          © Mediaclinic — Réseau de franchise
-        </p>
       </main>
+
+      <PublicFooter />
 
       {/* Suivi d'audience RGPD — ignoré si l'utilisateur est connecté */}
       {!user && <ViewTracker annonceId={annonce.id} />}

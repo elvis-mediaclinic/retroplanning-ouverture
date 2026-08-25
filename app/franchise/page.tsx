@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import { PublicNavbar } from "@/components/PublicNavbar";
+import { PublicFooter } from "@/components/PublicFooter";
 import { renderStoredSections, parseStoredSections } from "@/components/StoredSectionsRenderer";
 
 export const metadata = { title: "La franchise — Mediaclinic" };
@@ -51,6 +52,8 @@ export default async function FranchisePage() {
           </p>
         )}
       </main>
+
+      <PublicFooter />
     </div>
   );
 }
