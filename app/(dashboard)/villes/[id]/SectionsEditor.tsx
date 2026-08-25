@@ -275,37 +275,39 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
         } ${dragIndex === i ? "opacity-40" : ""}`}
       >
         {/* Header */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <span
-            draggable
-            onDragStart={() => setDragIndex(i)}
-            onDragEnd={() => { setDragIndex(null); setDragOverIndex(null); }}
-            title="Glisser pour déplacer"
-            className="shrink-0 cursor-grab active:cursor-grabbing text-zinc-300 hover:text-zinc-500 select-none px-0.5"
-          >
-            ⠿
-          </span>
-          <button
-            type="button"
-            onClick={() => toggleCollapsed(section.id)}
-            title={collapsed ? "Déployer" : "Replier"}
-            className="shrink-0 text-zinc-400 hover:text-zinc-700 w-4 text-xs"
-          >
-            {collapsed ? "▶" : "▼"}
-          </button>
-          <div className="flex items-center gap-1.5 shrink-0">
-            <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${isStats ? "bg-amber-100 text-amber-700" : isTitre ? "bg-violet-100 text-violet-700" : "bg-zinc-200 text-zinc-500"}`}>
-              {isStats ? "Stats" : isTitre ? "Titre" : "Texte"}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <span
+              draggable
+              onDragStart={() => setDragIndex(i)}
+              onDragEnd={() => { setDragIndex(null); setDragOverIndex(null); }}
+              title="Glisser pour déplacer"
+              className="shrink-0 cursor-grab active:cursor-grabbing text-zinc-300 hover:text-zinc-500 select-none px-0.5"
+            >
+              ⠿
             </span>
+            <button
+              type="button"
+              onClick={() => toggleCollapsed(section.id)}
+              title={collapsed ? "Déployer" : "Replier"}
+              className="shrink-0 text-zinc-400 hover:text-zinc-700 w-4 text-xs"
+            >
+              {collapsed ? "▶" : "▼"}
+            </button>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${isStats ? "bg-amber-100 text-amber-700" : isTitre ? "bg-violet-100 text-violet-700" : "bg-zinc-200 text-zinc-500"}`}>
+                {isStats ? "Stats" : isTitre ? "Titre" : "Texte"}
+              </span>
+            </div>
+            <input
+              type="text"
+              value={section.titre}
+              onChange={(e) => update(section.id, { titre: e.target.value })}
+              placeholder="Titre de la section (optionnel)"
+              className="flex-1 min-w-0 rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm font-medium"
+            />
           </div>
-          <input
-            type="text"
-            value={section.titre}
-            onChange={(e) => update(section.id, { titre: e.target.value })}
-            placeholder="Titre de la section (optionnel)"
-            className="flex-1 min-w-[140px] rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm font-medium"
-          />
-          <div className="flex items-center gap-1 shrink-0 flex-wrap">
+          <div className="flex items-center gap-1 flex-wrap">
             <button
               type="button"
               onClick={() => toggleIconEditor(section.id)}
