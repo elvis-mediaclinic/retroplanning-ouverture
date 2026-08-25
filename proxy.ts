@@ -41,9 +41,13 @@ export async function proxy(request: NextRequest) {
   // Doit rester accessible sans session : c'est cette route qui en crée une
   // (verifyOtp) à partir du lien d'invitation/récupération envoyé par email.
   const isAuthConfirmPath = pathname.startsWith("/auth/confirm");
-  const isPublicAnnoncePath = pathname.startsWith("/annonce");
+  const isPublicPagePath =
+    pathname.startsWith("/annonce") ||
+    pathname.startsWith("/opportunites") ||
+    pathname.startsWith("/franchise") ||
+    pathname.startsWith("/nos-magasins");
 
-  if (!user && !isLoginPath && !isAuthConfirmPath && !isPublicAnnoncePath) {
+  if (!user && !isLoginPath && !isAuthConfirmPath && !isPublicPagePath) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
