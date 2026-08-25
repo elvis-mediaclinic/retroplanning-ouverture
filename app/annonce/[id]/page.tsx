@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import { PublicSidebar } from "@/components/PublicSidebar";
 import { BoldText } from "@/components/BoldText";
@@ -88,8 +89,17 @@ export default async function AnnoncePage({
           ? "rounded-2xl bg-gradient-to-br from-[#00729e] to-[#0089bd] shadow-sm px-4 py-4 sm:px-6 sm:py-6"
           : cardCls
         }>
-          <p className={`text-xs font-semibold uppercase tracking-widest mb-4 ${annonce.hero_titre_centre ? "text-center" : ""} ${annonce.hero_carte && annonce.hero_bleu ? "text-white/70" : "text-[#0089bd]"}`}>
-            Opportunité de franchise
+          <div className="flex justify-center mb-4">
+            <Image
+              src={annonce.hero_carte && annonce.hero_bleu ? "/Logo_Media_Clinic_monochrome-blanc_rvb.png" : "/Logo-MediaClinic-Noir.png"}
+              alt="Mediaclinic"
+              width={160}
+              height={40}
+              className="h-10 w-auto object-contain"
+            />
+          </div>
+          <p className={`text-sm font-semibold uppercase tracking-widest mb-4 ${annonce.hero_titre_centre ? "text-center" : ""} ${annonce.hero_carte && annonce.hero_bleu ? "text-white/70" : "text-[#0089bd]"}`}>
+            Opportunité de franchise{ville?.nom ? ` — ${ville.nom}` : ""}
           </p>
           <h1 className={`text-3xl sm:text-4xl font-bold leading-tight ${annonce.hero_titre_centre ? "text-center" : ""} ${annonce.hero_carte && annonce.hero_bleu ? "text-white" : "text-[#0089bd]"}`}>
             {annonce.titre}
