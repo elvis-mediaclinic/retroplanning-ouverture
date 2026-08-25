@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import { PublicSidebar } from "@/components/PublicSidebar";
 import { renderStoredSections, parseStoredSections } from "@/components/StoredSectionsRenderer";
@@ -24,9 +25,23 @@ export default async function FranchisePage() {
       <PublicSidebar active="franchise" />
 
       <main className="flex-1 mx-auto w-full max-w-[1600px] px-6 pt-3 pb-8 space-y-6">
-        <div className="rounded-xl bg-gradient-to-br from-[#00729e] to-[#0089bd] p-6 shadow-sm">
-          <h1 className="text-2xl font-bold uppercase text-white text-center">La franchise</h1>
+        {/* Header automatique — logo + "La franchise" */}
+        <div className="text-center mt-10">
+          <div className="flex justify-center mb-6">
+            <Image
+              src="/Logo-MediaClinic-Noir.png"
+              alt="Mediaclinic"
+              width={400}
+              height={100}
+              className="h-[100px] w-auto object-contain"
+            />
+          </div>
+          <p className="text-xl sm:text-2xl font-semibold uppercase tracking-widest text-[#0089bd]">
+            La franchise
+          </p>
         </div>
+
+        <hr className="border-t border-zinc-200 my-12" />
 
         {conceptSections.length > 0 ? (
           renderStoredSections(conceptSections, "franchise")
