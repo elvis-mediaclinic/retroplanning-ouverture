@@ -10,7 +10,7 @@ const NAV = [
 export function PublicFooter() {
   return (
     <footer className="mt-12 bg-gradient-to-br from-[#00729e] to-[#0089bd]">
-      <div className="mx-auto grid w-full max-w-[1600px] grid-cols-1 gap-8 px-6 py-10 sm:grid-cols-3 sm:gap-0">
+      <div className="mx-auto grid w-full max-w-[1600px] grid-cols-1 gap-8 px-6 py-10 sm:grid-cols-4 sm:gap-0">
         <div className="sm:border-r sm:border-white/20 sm:pr-8">
           <Image
             src="/Logo_Media_Clinic_monochrome-blanc_rvb.png"
@@ -19,9 +19,12 @@ export function PublicFooter() {
             height={40}
             className="h-8 w-auto object-contain"
           />
-          <p className="mt-3 text-sm text-white/70">
-            On répare — On rachète — On revend
-          </p>
+        </div>
+
+        <div className="flex flex-col gap-2 text-sm text-white/70 sm:border-r sm:border-white/20 sm:px-8">
+          <p>On répare</p>
+          <p>On rachète</p>
+          <p>On revend</p>
         </div>
 
         <nav className="flex flex-col gap-2 sm:border-r sm:border-white/20 sm:px-8">
