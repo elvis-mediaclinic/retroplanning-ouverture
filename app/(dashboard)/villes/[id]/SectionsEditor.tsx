@@ -15,7 +15,7 @@ export type Section =
   | { id: string; type?: "texte"; titre: string; contenu_json: string; disposition?: "pleine" | "moitie" | "tiers"; bleu?: boolean; icone?: string; dansAnnonces?: boolean; titreCentre?: boolean; carte?: boolean; separateurDroite?: boolean }
   | { id: string; type: "stats"; titre: string; stats: Stat[]; colonnes: 2 | 3 | 4; alignement?: "gauche" | "centre"; bleu?: boolean; icone?: string; dansAnnonces?: boolean; separateurs?: boolean }
   | { id: string; type: "titre"; titre: string; icone?: string; dansAnnonces?: boolean }
-  | { id: string; type: "separateur" };
+  | { id: string; type: "separateur"; espacement?: "petit" | "moyen" | "grand" };
 
 function uid() { return Math.random().toString(36).slice(2); }
 
@@ -306,6 +306,22 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
             Séparateur
           </span>
           <div className="flex-1 h-px bg-zinc-300" />
+          <div className="flex items-center gap-1 shrink-0">
+            <label className="text-xs text-zinc-500 shrink-0">Marges :</label>
+            {(["petit", "moyen", "grand"] as const).map((e) => (
+              <button
+                key={e}
+                type="button"
+                title={{ petit: "Marges petites", moyen: "Marges moyennes", grand: "Marges grandes" }[e]}
+                onClick={() => update(section.id, { espacement: e } as Partial<Section>)}
+                className={`rounded border px-2 py-1 text-xs font-medium transition-colors ${
+                  ((section as { espacement?: string }).espacement ?? "moyen") === e ? "border-brand bg-brand/10 text-brand" : "border-zinc-300 bg-white text-zinc-400 hover:text-zinc-600"
+                }`}
+              >
+                {{ petit: "S", moyen: "M", grand: "L" }[e]}
+              </button>
+            ))}
+          </div>
           <div className="flex items-center gap-1 shrink-0">
             <button type="button" onClick={() => move(i, -1)} disabled={i === 0} title="Monter"
               className="rounded border border-zinc-300 bg-white px-2 py-1 text-xs text-zinc-500 hover:bg-zinc-50 disabled:opacity-30">↑</button>

@@ -91,7 +91,7 @@ export default async function AnnoncePage({
           <p className={`text-xs font-semibold uppercase tracking-widest mb-4 ${annonce.hero_titre_centre ? "text-center" : ""} ${annonce.hero_carte && annonce.hero_bleu ? "text-white/70" : "text-[#0089bd]"}`}>
             Opportunité de franchise
           </p>
-          <h1 className={`text-3xl sm:text-4xl font-bold leading-tight ${annonce.hero_titre_centre ? "text-center" : ""} ${annonce.hero_carte && annonce.hero_bleu ? "text-white" : "text-zinc-900"}`}>
+          <h1 className={`text-3xl sm:text-4xl font-bold leading-tight ${annonce.hero_titre_centre ? "text-center" : ""} ${annonce.hero_carte && annonce.hero_bleu ? "text-white" : "text-[#0089bd]"}`}>
             {annonce.titre}
           </h1>
           {annonce.accroche && (

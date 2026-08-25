@@ -146,9 +146,9 @@ export type { Block };
 // ── Card styles ───────────────────────────────────────────────────────────────
 
 const STATS_GRID: Record<number, string> = {
-  2: "grid grid-cols-2 gap-4",
-  3: "grid grid-cols-2 sm:grid-cols-3 gap-4",
-  4: "grid grid-cols-2 sm:grid-cols-4 gap-4",
+  2: "grid grid-cols-2",
+  3: "grid grid-cols-2 sm:grid-cols-3",
+  4: "grid grid-cols-2 sm:grid-cols-4",
 };
 
 export const cardCls =
@@ -188,7 +188,7 @@ export type StoredSection =
   | { id: string; type?: "texte"; titre: string; contenu_json: string; disposition?: "pleine" | "moitie" | "tiers"; bleu?: boolean; icone?: string; dansAnnonces?: boolean; titreCentre?: boolean; carte?: boolean; separateurDroite?: boolean }
   | { id: string; type: "stats"; titre: string; stats: StatItem[]; colonnes: 2 | 3 | 4; alignement?: "gauche" | "centre"; bleu?: boolean; icone?: string; dansAnnonces?: boolean; separateurs?: boolean }
   | { id: string; type: "titre"; titre: string; icone?: string; dansAnnonces?: boolean }
-  | { id: string; type: "separateur" };
+  | { id: string; type: "separateur"; espacement?: "petit" | "moyen" | "grand" };
 
 function SectionIcon({ svg, className }: { svg?: string; className?: string }) {
   if (!svg) return null;
@@ -255,7 +255,8 @@ export function renderStoredSections(list: StoredSection[], keyPrefix: string) {
 
   return rows.map((row, ri) => {
     if (row.kind === "full" && row.s.type === "separateur") {
-      return <hr key={`${keyPrefix}-${ri}`} className="border-t border-zinc-200 my-2" />;
+      const ESPACEMENT: Record<string, string> = { petit: "my-1", moyen: "my-4", grand: "my-8" };
+      return <hr key={`${keyPrefix}-${ri}`} className={`border-t border-zinc-200 ${ESPACEMENT[row.s.espacement ?? "moyen"]}`} />;
     }
 
     if (row.kind === "full" && row.s.type === "titre") {
@@ -282,7 +283,7 @@ export function renderStoredSections(list: StoredSection[], keyPrefix: string) {
               {s.titre}
             </h2>
           )}
-          <div className={STATS_GRID[cols] ?? STATS_GRID[3]}>
+          <div className={`${STATS_GRID[cols] ?? STATS_GRID[3]} gap-y-4 ${s.separateurs ? "" : "gap-x-4"}`}>
             {s.stats.map((stat, idx) => {
               const borderCls = s.separateurs
                 ? `${idx % 2 !== 0 ? "border-l" : ""} ${cols !== 2 ? (idx % cols !== 0 ? "sm:border-l" : "sm:border-l-0") : ""} ${bleu ? "border-white/20" : "border-zinc-200"}`
