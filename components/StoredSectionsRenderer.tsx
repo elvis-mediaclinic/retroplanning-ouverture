@@ -146,9 +146,9 @@ export type { Block };
 // ── Card styles ───────────────────────────────────────────────────────────────
 
 const STATS_GRID: Record<number, string> = {
-  2: "grid grid-cols-2",
-  3: "grid grid-cols-2 sm:grid-cols-3",
-  4: "grid grid-cols-2 sm:grid-cols-4",
+  2: "grid grid-cols-1 sm:grid-cols-2",
+  3: "grid grid-cols-1 sm:grid-cols-3",
+  4: "grid grid-cols-1 sm:grid-cols-4",
 };
 
 export const cardCls =
@@ -287,8 +287,11 @@ export function renderStoredSections(list: StoredSection[], keyPrefix: string) {
           )}
           <div className={`${STATS_GRID[cols] ?? STATS_GRID[3]} gap-y-4 ${s.separateurs ? "" : "gap-x-4"}`}>
             {s.stats.map((stat, idx) => {
+              // Sur mobile (1 colonne) : séparateur horizontal au-dessus de chaque
+              // élément sauf le premier. À partir de sm (grille en colonnes) :
+              // séparateur vertical entre colonnes, pas de trait horizontal.
               const borderCls = s.separateurs
-                ? `${idx % 2 !== 0 ? "border-l" : ""} ${cols !== 2 ? (idx % cols !== 0 ? "sm:border-l" : "sm:border-l-0") : ""} ${bleu ? "border-white/20" : "border-zinc-200"}`
+                ? `${idx > 0 ? "border-t pt-4 sm:border-t-0 sm:pt-0" : ""} ${idx % cols !== 0 ? "sm:border-l" : ""} ${bleu ? "border-white/20" : "border-zinc-200"}`
                 : "";
               return (
                 <div key={stat.id} className={`flex flex-col gap-1 px-4 sm:px-6 ${centré ? "items-center text-center" : ""} ${borderCls}`}>
