@@ -185,7 +185,7 @@ export const colCardCls = "rounded-2xl bg-white border border-zinc-200 border-l-
 export type StatItem = { id: string; valeur: string; label: string };
 
 export type StoredSection =
-  | { id: string; type?: "texte"; titre: string; contenu_json: string; disposition?: "pleine" | "moitie" | "tiers"; bleu?: boolean; icone?: string; dansAnnonces?: boolean }
+  | { id: string; type?: "texte"; titre: string; contenu_json: string; disposition?: "pleine" | "moitie" | "tiers"; bleu?: boolean; icone?: string; dansAnnonces?: boolean; titreCentre?: boolean }
   | { id: string; type: "stats"; titre: string; stats: StatItem[]; colonnes: 2 | 3 | 4; alignement?: "gauche" | "centre"; bleu?: boolean; icone?: string; dansAnnonces?: boolean }
   | { id: string; type: "titre"; titre: string; icone?: string; dansAnnonces?: boolean };
 
@@ -293,11 +293,12 @@ export function renderStoredSections(list: StoredSection[], keyPrefix: string) {
         <div key={`${keyPrefix}-${ri}`} className={GROUP_GRID[row.cols]}>
           {row.pair.map((s) => {
             const bleu = (s as { bleu?: boolean }).bleu ?? false;
+            const titreCentre = (s as { titreCentre?: boolean }).titreCentre ?? false;
             const { titre, bodyHtml } = renderTextSection(s as Extract<StoredSection, { type?: "texte" }>);
             return (
               <div key={s.id} className={bleu ? bleuCardCls : colCardCls}>
                 {titre && (
-                  <h2 className={`flex items-center gap-2 text-2xl font-bold mb-4 ${bleu ? "text-white" : "text-[#0089bd]"}`}>
+                  <h2 className={`flex items-center gap-2 text-2xl font-bold mb-4 ${bleu ? "text-white" : "text-[#0089bd]"} ${titreCentre ? "justify-center text-center" : ""}`}>
                     <SectionIcon svg={(s as { icone?: string }).icone} />
                     {titre}
                   </h2>
@@ -311,11 +312,12 @@ export function renderStoredSections(list: StoredSection[], keyPrefix: string) {
     }
     {
       const bleu = (row.s as { bleu?: boolean }).bleu ?? false;
+      const titreCentre = (row.s as { titreCentre?: boolean }).titreCentre ?? false;
       const { titre, bodyHtml } = renderTextSection(row.s as Extract<StoredSection, { type?: "texte" }>);
       return (
         <div key={`${keyPrefix}-${ri}`} className={bleu ? bleuCardCls : cardCls}>
           {titre && (
-            <h2 className={`flex items-center gap-2 text-2xl font-bold mb-4 ${bleu ? "text-white" : "text-[#0089bd]"}`}>
+            <h2 className={`flex items-center gap-2 text-2xl font-bold mb-4 ${bleu ? "text-white" : "text-[#0089bd]"} ${titreCentre ? "justify-center text-center" : ""}`}>
               <SectionIcon svg={(row.s as { icone?: string }).icone} />
               {titre}
             </h2>

@@ -12,7 +12,7 @@ const BlockEditor = dynamic(() => import("./BlockEditor").then((m) => m.BlockEdi
 export type Stat = { id: string; valeur: string; label: string };
 
 export type Section =
-  | { id: string; type?: "texte"; titre: string; contenu_json: string; disposition?: "pleine" | "moitie" | "tiers"; bleu?: boolean; icone?: string; dansAnnonces?: boolean }
+  | { id: string; type?: "texte"; titre: string; contenu_json: string; disposition?: "pleine" | "moitie" | "tiers"; bleu?: boolean; icone?: string; dansAnnonces?: boolean; titreCentre?: boolean }
   | { id: string; type: "stats"; titre: string; stats: Stat[]; colonnes: 2 | 3 | 4; alignement?: "gauche" | "centre"; bleu?: boolean; icone?: string; dansAnnonces?: boolean }
   | { id: string; type: "titre"; titre: string; icone?: string; dansAnnonces?: boolean };
 
@@ -335,6 +335,17 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
                   className="h-3 w-3 accent-brand"
                 />
                 Fond bleu
+              </label>
+            )}
+            {!isStats && !isTitre && (
+              <label className="flex items-center gap-1 rounded border border-zinc-300 bg-white px-2 py-1 text-xs font-medium text-zinc-500 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={(section as { titreCentre?: boolean }).titreCentre ?? false}
+                  onChange={(e) => update(section.id, { titreCentre: e.target.checked } as Partial<Section>)}
+                  className="h-3 w-3 accent-brand"
+                />
+                Titre centré
               </label>
             )}
             {annonceToggle && (
