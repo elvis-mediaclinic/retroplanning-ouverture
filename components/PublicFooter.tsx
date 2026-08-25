@@ -24,7 +24,7 @@ export function PublicFooter() {
         </p>
 
         <div className="flex flex-col items-center gap-8 sm:flex-row sm:items-start">
-          <nav className="flex flex-col items-center gap-2 sm:border-r sm:border-white/20 sm:pr-8">
+          <nav className="flex flex-col items-center gap-2 sm:w-56 sm:border-r sm:border-white/20">
             {NAV.map((item) => (
               <Link
                 key={item.href}
@@ -36,7 +36,7 @@ export function PublicFooter() {
             ))}
           </nav>
 
-          <div className="flex flex-col items-center gap-2 text-sm text-white/70 sm:pl-8">
+          <div className="flex flex-col items-center gap-2 text-sm text-white/70 sm:w-56">
             <p>© Mediaclinic {new Date().getFullYear()} — Réseau de franchise</p>
             <Link href="/cgu" className="hover:text-white">
               Conditions générales d&apos;utilisation
