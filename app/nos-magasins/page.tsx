@@ -1,6 +1,7 @@
+import Image from "next/image";
 import { createServiceClient } from "@/lib/supabase/service";
 import { geocodeAddress } from "@/lib/geocode";
-import { PublicSidebar } from "@/components/PublicSidebar";
+import { PublicNavbar } from "@/components/PublicNavbar";
 import { MagasinsExplorer } from "./MagasinsExplorer";
 import type { MagasinPoint, VilleEnEtudePoint } from "./MagasinsMap";
 
@@ -93,17 +94,31 @@ export default async function NosMagasinsPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col md:flex-row">
+    <div className="min-h-screen">
       <style>{`
         body { background: #f4f4f5; }
       `}</style>
 
-      <PublicSidebar active="magasins" />
+      <PublicNavbar active="magasins" />
 
-      <main className="flex-1 mx-auto w-full max-w-[1600px] px-6 pt-3 pb-8 space-y-6">
-        <div className="rounded-xl bg-gradient-to-br from-[#00729e] to-[#0089bd] p-6 shadow-sm">
-          <h1 className="text-2xl font-bold uppercase text-white text-center">Nos magasins</h1>
+      <main className="mx-auto w-full max-w-[1600px] px-6 pt-3 pb-8 space-y-6">
+        {/* Header automatique — logo + "Nos magasins" */}
+        <div className="text-center mt-10">
+          <div className="flex justify-center mb-6">
+            <Image
+              src="/Logo-MediaClinic-Noir.png"
+              alt="Mediaclinic"
+              width={400}
+              height={100}
+              className="h-[100px] w-auto object-contain"
+            />
+          </div>
+          <p className="text-xl sm:text-2xl font-semibold uppercase tracking-widest text-[#0089bd]">
+            Nos magasins
+          </p>
         </div>
+
+        <hr className="border-t border-zinc-200 my-12" />
 
         <div className="text-center">
           <h2 className="text-3xl sm:text-4xl font-bold text-zinc-900 leading-tight">

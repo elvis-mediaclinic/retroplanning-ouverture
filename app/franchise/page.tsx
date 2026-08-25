@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
-import { PublicSidebar } from "@/components/PublicSidebar";
+import { PublicNavbar } from "@/components/PublicNavbar";
 import { renderStoredSections, parseStoredSections } from "@/components/StoredSectionsRenderer";
 
 export const metadata = { title: "La franchise — Mediaclinic" };
@@ -17,14 +17,14 @@ export default async function FranchisePage() {
   const conceptSections = parseStoredSections(conceptPage?.sections) ?? [];
 
   return (
-    <div className="flex min-h-screen flex-col md:flex-row">
+    <div className="min-h-screen">
       <style>{`
         body { background: #f4f4f5; }
       `}</style>
 
-      <PublicSidebar active="franchise" />
+      <PublicNavbar active="franchise" />
 
-      <main className="flex-1 mx-auto w-full max-w-[1600px] px-6 pt-3 pb-8 space-y-6">
+      <main className="mx-auto w-full max-w-[1600px] px-6 pt-3 pb-8 space-y-6">
         {/* Header automatique — logo + "La franchise" */}
         <div className="text-center mt-10">
           <div className="flex justify-center mb-6">

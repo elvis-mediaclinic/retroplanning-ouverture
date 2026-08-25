@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
-import { PublicSidebar } from "@/components/PublicSidebar";
+import { PublicNavbar } from "@/components/PublicNavbar";
 import { BoldText } from "@/components/BoldText";
 import {
   renderStoredSections,
@@ -59,7 +59,7 @@ export default async function AnnoncePage({
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-zinc-100 md:flex-row">
+    <div className="min-h-screen bg-zinc-100">
       <style>{`
         [data-text-color="gray"]   { color: #9b9a97 !important; }
         [data-text-color="brown"]  { color: #64473a !important; }
@@ -74,9 +74,9 @@ export default async function AnnoncePage({
         .card-heading h1, .card-heading h2, .card-heading h3 { font-size: 1.5rem; font-weight: 700; margin: 0; }
       `}</style>
 
-      <PublicSidebar active="opportunites" />
+      <PublicNavbar active="opportunites" />
 
-      <main className="flex-1 mx-auto w-full max-w-[1600px] px-6 pt-3 pb-8 space-y-6">
+      <main className="mx-auto w-full max-w-[1600px] px-6 pt-3 pb-8 space-y-6">
 
         {!annonce.actif && (
           <div className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
