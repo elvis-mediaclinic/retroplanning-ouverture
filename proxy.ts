@@ -46,7 +46,8 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith("/opportunites") ||
     pathname.startsWith("/franchise") ||
     pathname.startsWith("/nos-magasins") ||
-    pathname.startsWith("/cgu");
+    pathname.startsWith("/cgu") ||
+    pathname.startsWith("/mentions-legales");
 
   if (!user && !isLoginPath && !isAuthConfirmPath && !isPublicPagePath) {
     const url = request.nextUrl.clone();
