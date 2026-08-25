@@ -84,23 +84,27 @@ export default async function AnnoncePage({
           </div>
         )}
 
-        {/* Hero — titre + accroche */}
-        <div className={`${!annonce.hero_carte ? "px-4 py-6 sm:px-6 sm:py-8" : annonce.hero_bleu
-          ? "rounded-2xl bg-gradient-to-br from-[#00729e] to-[#0089bd] shadow-sm px-6 py-8 sm:px-10 sm:py-10"
-          : `${cardCls} py-8 sm:py-10`
-        } mb-14`}>
+        {/* Header automatique — logo + fil d'ariane "Opportunité de franchise — ville" */}
+        <div className="text-center mb-10">
           <div className="flex justify-center mb-6">
             <Image
-              src={annonce.hero_carte && annonce.hero_bleu ? "/Logo_Media_Clinic_monochrome-blanc_rvb.png" : "/Logo-MediaClinic-Noir.png"}
+              src="/Logo-MediaClinic-Noir.png"
               alt="Mediaclinic"
               width={400}
               height={100}
               className="h-[100px] w-auto object-contain"
             />
           </div>
-          <p className={`text-xl sm:text-2xl font-semibold uppercase tracking-widest mb-4 ${annonce.hero_titre_centre ? "text-center" : ""} ${annonce.hero_carte && annonce.hero_bleu ? "text-white/70" : "text-[#0089bd]"}`}>
+          <p className="text-xl sm:text-2xl font-semibold uppercase tracking-widest text-[#0089bd]">
             Opportunité de franchise{ville?.nom ? ` — ${ville.nom}` : ""}
           </p>
+        </div>
+
+        {/* Hero — titre + accroche */}
+        <div className={`${!annonce.hero_carte ? "px-4 py-6 sm:px-6 sm:py-8" : annonce.hero_bleu
+          ? "rounded-2xl bg-gradient-to-br from-[#00729e] to-[#0089bd] shadow-sm px-6 py-8 sm:px-10 sm:py-10"
+          : `${cardCls} py-8 sm:py-10`
+        }`}>
           <h1 className={`text-3xl sm:text-4xl font-bold leading-tight ${annonce.hero_titre_centre ? "text-center" : ""} ${annonce.hero_carte && annonce.hero_bleu ? "text-white" : "text-[#0089bd]"}`}>
             {annonce.titre}
           </h1>
