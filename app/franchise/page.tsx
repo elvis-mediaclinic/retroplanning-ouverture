@@ -18,7 +18,7 @@ export default async function FranchisePage() {
   const conceptSections = parseStoredSections(conceptPage?.sections) ?? [];
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-dvh flex flex-col">
       <style>{`
         body { background: #f4f4f5; }
       `}</style>

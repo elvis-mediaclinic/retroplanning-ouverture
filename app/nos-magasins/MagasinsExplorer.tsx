@@ -19,9 +19,9 @@ export function MagasinsExplorer({
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   return (
-    <div className="flex flex-col lg:flex-row gap-4 h-[600px]">
+    <div className="flex flex-col gap-4 lg:h-[600px] lg:flex-row">
       {/* Liste */}
-      <div className="lg:w-72 shrink-0 overflow-y-auto rounded-2xl border border-zinc-200 bg-white shadow-sm divide-y divide-zinc-100">
+      <div className="h-64 lg:h-auto lg:w-72 shrink-0 overflow-y-auto rounded-2xl border border-zinc-200 bg-white shadow-sm divide-y divide-zinc-100">
         {points.map((m) => (
           <button
             key={m.id}
@@ -50,7 +50,7 @@ export function MagasinsExplorer({
       </div>
 
       {/* Carte */}
-      <div className="flex-1 min-h-[400px]">
+      <div className="h-96 lg:h-auto lg:flex-1 lg:min-h-[400px]">
         <MagasinsMap points={points} villesEnEtude={villesEnEtude} selectedId={selectedId} />
       </div>
     </div>

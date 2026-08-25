@@ -60,7 +60,7 @@ export default async function AnnoncePage({
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-zinc-100">
+    <div className="min-h-dvh flex flex-col bg-zinc-100">
       <style>{`
         [data-text-color="gray"]   { color: #9b9a97 !important; }
         [data-text-color="brown"]  { color: #64473a !important; }
