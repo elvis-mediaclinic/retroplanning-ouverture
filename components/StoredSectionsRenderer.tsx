@@ -47,25 +47,30 @@ function renderBlock(block: Block): string {
   const inner = renderInline(block.content ?? []);
   const color = block.props?.textColor as string | undefined;
   const ca = color && color !== "default" ? ` data-text-color="${color}"` : "";
+  const align = block.props?.textAlignment as string | undefined;
+  const alignStyle = align && align !== "left" ? ` style="text-align:${align}"` : "";
 
   switch (block.type) {
     case "paragraph":
-      return inner ? `<p${ca}>${inner}</p>` : "<br/>";
+      return inner ? `<p${ca}${alignStyle}>${inner}</p>` : "<br/>";
     case "heading": {
       const lvl = (block.props?.level as number) ?? 2;
       const tag = lvl === 1 ? "h1" : lvl === 2 ? "h2" : "h3";
-      return `<${tag}${ca}>${inner}</${tag}>`;
+      return `<${tag}${ca}${alignStyle}>${inner}</${tag}>`;
     }
     case "bulletListItem":
-      return `<li${ca}>${inner}</li>`;
+      return `<li${ca}${alignStyle}>${inner}</li>`;
     case "numberedListItem":
-      return `<li${ca}>${inner}</li>`;
+      return `<li${ca}${alignStyle}>${inner}</li>`;
     case "image": {
       const url = block.props?.url as string | undefined;
       const caption = block.props?.caption as string | undefined;
+      const previewWidth = block.props?.previewWidth as number | undefined;
       if (!url) return "";
-      const img = `<img src="${url}" alt="${caption ? esc(caption) : ""}" style="max-width:100%;border-radius:0.75rem;margin:1rem 0;" />`;
-      return caption ? `<figure>${img}<figcaption style="text-align:center;font-size:0.875rem;color:#71717a;margin-top:0.25rem;">${esc(caption)}</figcaption></figure>` : img;
+      const widthStyle = previewWidth ? `width:${previewWidth}px;max-width:100%` : "max-width:100%";
+      const img = `<img src="${url}" alt="${caption ? esc(caption) : ""}" style="${widthStyle};border-radius:0.75rem;display:inline-block" />`;
+      const wrapAlign = align ?? "left";
+      return `<div style="text-align:${wrapAlign};margin:1rem 0">${img}${caption ? `<figcaption style="font-size:0.875rem;color:#71717a;margin-top:0.25rem">${esc(caption)}</figcaption>` : ""}</div>`;
     }
     case "quote":
       return `<blockquote>${inner}</blockquote>`;
@@ -207,9 +212,11 @@ function renderTextSection(s: Extract<StoredSection, { type?: "texte" }>) {
     if (sec.kind === "image") {
       const url = sec.block.props?.url as string | undefined;
       const caption = sec.block.props?.caption as string | undefined;
-      const width = sec.block.props?.width as number | undefined;
+      const previewWidth = sec.block.props?.previewWidth as number | undefined;
+      const align = (sec.block.props?.textAlignment as string | undefined) ?? "center";
       if (!url) return "";
-      return `<figure style="text-align:center;margin:1rem 0"><img src="${url}" alt="${caption ?? ""}" style="max-width:${width ? `${width}px` : "100%"};border-radius:0.75rem" />${caption ? `<figcaption style="font-size:0.875rem;color:#71717a;margin-top:0.25rem">${esc(caption)}</figcaption>` : ""}</figure>`;
+      const widthStyle = previewWidth ? `width:${previewWidth}px;max-width:100%` : "max-width:100%";
+      return `<div style="text-align:${align};margin:1rem 0"><img src="${url}" alt="${caption ?? ""}" style="${widthStyle};border-radius:0.75rem;display:inline-block" />${caption ? `<figcaption style="font-size:0.875rem;color:#71717a;margin-top:0.25rem">${esc(caption)}</figcaption>` : ""}</div>`;
     }
     return [sec.heading ? renderBlock(sec.heading) : "", renderBlocks(sec.blocks)].join("\n");
   }).join("\n");

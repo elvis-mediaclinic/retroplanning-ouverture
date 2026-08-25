@@ -130,11 +130,12 @@ export default async function AnnoncePage({
                 if (section.kind === "image") {
                   const url = section.block.props?.url as string | undefined;
                   const caption = section.block.props?.caption as string | undefined;
-                  const width = section.block.props?.width as number | undefined;
+                  const previewWidth = section.block.props?.previewWidth as number | undefined;
+                  const align = (section.block.props?.textAlignment as string | undefined) ?? "center";
                   if (!url) return null;
                   return (
-                    <figure key={i} className="flex flex-col items-center gap-2">
-                      <img src={url} alt={caption ?? ""} style={{ maxWidth: width ? `${width}px` : "100%", width: "100%", borderRadius: "0.75rem" }} />
+                    <figure key={i} className="flex flex-col gap-2" style={{ alignItems: align === "left" ? "flex-start" : align === "right" ? "flex-end" : "center" }}>
+                      <img src={url} alt={caption ?? ""} style={{ width: previewWidth ? `${previewWidth}px` : "100%", maxWidth: "100%", borderRadius: "0.75rem" }} />
                       {caption && <figcaption className="text-sm text-zinc-400 text-center">{caption}</figcaption>}
                     </figure>
                   );
