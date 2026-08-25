@@ -302,14 +302,15 @@ export function renderStoredSections(list: StoredSection[], keyPrefix: string) {
     if (row.kind === "group") {
       return (
         <div key={`${keyPrefix}-${ri}`} className={GROUP_GRID[row.cols]}>
-          {row.pair.map((s) => {
+          {row.pair.map((s, idx) => {
             const bleu = (s as { bleu?: boolean }).bleu ?? false;
             const titreCentre = (s as { titreCentre?: boolean }).titreCentre ?? false;
             const carte = (s as { carte?: boolean }).carte ?? true;
             const separateurDroite = (s as { separateurDroite?: boolean }).separateurDroite ?? false;
+            const prevSeparateurDroite = idx > 0 && ((row.pair[idx - 1] as { separateurDroite?: boolean }).separateurDroite ?? false);
             const { titre, bodyHtml } = renderTextSection(s as Extract<StoredSection, { type?: "texte" }>);
             const cls = !carte
-              ? `py-4 ${separateurDroite ? "pr-4 sm:pr-6 border-r border-zinc-200" : ""}`
+              ? `py-4 ${separateurDroite ? "pr-4 sm:pr-6 border-r border-zinc-200" : ""} ${prevSeparateurDroite ? "pl-4 sm:pl-6" : ""}`
               : `${bleu ? bleuCardCls : colCardCls} ${separateurDroite ? "border-r-2 border-r-zinc-200" : ""}`;
             return (
               <div key={s.id} className={cls}>
