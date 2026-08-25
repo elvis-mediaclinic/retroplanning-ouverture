@@ -307,11 +307,15 @@ export function renderStoredSections(list: StoredSection[], keyPrefix: string) {
       const bleu = s.bleu ?? false;
       const titreCentre = s.titreCentre ?? false;
       const carte = s.carte ?? false;
+      // Bases calculées pour tenir compte du gap-x-4 (1rem) dans un flex-wrap :
+      // avec des fractions simples (1/n), la somme basis + gaps dépasse 100% et fait sauter une colonne.
+      // Classes littérales (nécessaire pour que le scanner Tailwind les génère).
       const ITEM_BASIS: Record<number, string> = {
-        2: "basis-1/2 sm:basis-1/2",
-        3: "basis-1/2 sm:basis-1/3",
-        4: "basis-1/2 sm:basis-1/4",
+        2: "basis-[calc((100%_-_1rem)/2)] sm:basis-[calc((100%_-_1rem)/2)]",
+        3: "basis-[calc((100%_-_1rem)/2)] sm:basis-[calc((100%_-_2rem)/3)]",
+        4: "basis-[calc((100%_-_1rem)/2)] sm:basis-[calc((100%_-_3rem)/4)]",
       };
+      const itemBasisCls = ITEM_BASIS[cols] ?? ITEM_BASIS[3];
       return (
         <div key={`${keyPrefix}-${ri}`} className={bleu ? bleuCardCls : "py-2"}>
           {s.titre && (
@@ -322,7 +326,7 @@ export function renderStoredSections(list: StoredSection[], keyPrefix: string) {
           )}
           <div className="flex flex-wrap justify-center gap-x-4 gap-y-8">
             {s.membres.map((membre) => (
-              <div key={membre.id} className={`${ITEM_BASIS[cols] ?? ITEM_BASIS[3]} min-w-0 px-2`}>
+              <div key={membre.id} className={`${itemBasisCls} shrink-0 grow-0 min-w-0 px-2`}>
                 <div className={`flex flex-col items-center text-center gap-3 h-full ${
                   carte
                     ? bleu
