@@ -46,7 +46,7 @@ export default function CguPage() {
 
             <h2>Éditeur</h2>
             <p>
-              SAS MEDIACLINIC — 9 rue Michael Faraday, 49070 Beaucouzé.
+              SAS MEDIACLINIC — 35 rue du Nid de Pie, 49000 Angers.
             </p>
 
             <h2>Candidatures et données personnelles</h2>
