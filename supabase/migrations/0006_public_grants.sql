@@ -8,6 +8,6 @@ create policy "villes_public_select" on public.villes
   using (
     exists (
       select 1 from public.annonces
-      where ville_id = id and actif = true
+      where annonces.ville_id = villes.id and annonces.actif = true
     )
   );
