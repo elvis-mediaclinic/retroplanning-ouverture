@@ -7,9 +7,9 @@ export const metadata = { title: "Conditions générales d'utilisation — Media
 
 export default function CguPage() {
   return (
-    <div className="min-h-dvh flex flex-col">
+    <div className="min-h-dvh flex flex-col bg-zinc-100">
       <style>{`
-        body { background: #f4f4f5; }
+        body { background: #0089bd; }
       `}</style>
 
       <PublicNavbar />

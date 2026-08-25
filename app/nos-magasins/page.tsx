@@ -95,9 +95,9 @@ export default async function NosMagasinsPage() {
   }
 
   return (
-    <div className="min-h-dvh flex flex-col">
+    <div className="min-h-dvh flex flex-col bg-zinc-100">
       <style>{`
-        body { background: #f4f4f5; }
+        body { background: #0089bd; }
       `}</style>
 
       <PublicNavbar active="magasins" />
