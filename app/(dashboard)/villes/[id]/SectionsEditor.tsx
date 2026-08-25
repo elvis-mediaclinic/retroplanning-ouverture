@@ -18,6 +18,57 @@ export type Section =
 
 function uid() { return Math.random().toString(36).slice(2); }
 
+function makeSection(type: "texte" | "stats" | "titre"): Section {
+  if (type === "stats") {
+    return { id: uid(), type: "stats", titre: "", stats: [{ id: uid(), valeur: "", label: "" }], colonnes: 3 };
+  }
+  if (type === "titre") {
+    return { id: uid(), type: "titre", titre: "" };
+  }
+  return { id: uid(), type: "texte", titre: "", contenu_json: "" };
+}
+
+function InsertRow({ onInsert }: { onInsert: (type: "texte" | "stats" | "titre") => void }) {
+  const [open, setOpen] = useState(false);
+
+  if (!open) {
+    return (
+      <div className="group relative h-2 flex items-center justify-center">
+        <div className="absolute inset-x-0 top-1/2 h-px bg-transparent group-hover:bg-zinc-200 transition-colors" />
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="relative z-10 opacity-0 group-hover:opacity-100 rounded-full border border-zinc-300 bg-white w-5 h-5 flex items-center justify-center text-xs text-zinc-400 hover:text-brand hover:border-brand transition-all"
+          title="Insérer une section ici"
+        >
+          +
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex gap-2">
+      <button type="button" onClick={() => { onInsert("texte"); setOpen(false); }}
+        className="flex-1 rounded-lg border border-dashed border-zinc-300 py-1.5 text-xs text-zinc-500 hover:border-zinc-400 hover:text-zinc-700 transition-colors">
+        + Texte
+      </button>
+      <button type="button" onClick={() => { onInsert("stats"); setOpen(false); }}
+        className="flex-1 rounded-lg border border-dashed border-amber-300 py-1.5 text-xs text-amber-600 hover:border-amber-400 hover:text-amber-700 transition-colors">
+        + Chiffres clés
+      </button>
+      <button type="button" onClick={() => { onInsert("titre"); setOpen(false); }}
+        className="flex-1 rounded-lg border border-dashed border-violet-300 py-1.5 text-xs text-violet-600 hover:border-violet-400 hover:text-violet-700 transition-colors">
+        + Titre
+      </button>
+      <button type="button" onClick={() => setOpen(false)}
+        className="rounded-lg border border-zinc-200 px-2 text-xs text-zinc-400 hover:text-zinc-600">
+        ✕
+      </button>
+    </div>
+  );
+}
+
 function StatsEditor({ section, onUpdate }: { section: Extract<Section, { type: "stats" }>; onUpdate: (patch: Partial<Extract<Section, { type: "stats" }>>) => void }) {
   return (
     <div className="space-y-3">
@@ -97,6 +148,8 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
     defaultSections ?? [{ id: uid(), type: "texte", titre: "", contenu_json: "" }]
   );
   const [iconOpenIds, setIconOpenIds] = useState<Set<string>>(new Set());
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   function toggleIconEditor(id: string) {
     setIconOpenIds((prev) => {
@@ -124,27 +177,43 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
     setSections((prev) => prev.filter((s) => s.id !== id));
   }
 
-  function addTexte() {
-    setSections((prev) => [...prev, { id: uid(), type: "texte", titre: "", contenu_json: "" }]);
+  function insertAt(index: number, type: "texte" | "stats" | "titre") {
+    setSections((prev) => {
+      const next = [...prev];
+      next.splice(index, 0, makeSection(type));
+      return next;
+    });
   }
 
-  function addStats() {
-    setSections((prev) => [...prev, {
-      id: uid(),
-      type: "stats",
-      titre: "",
-      stats: [{ id: uid(), valeur: "", label: "" }],
-      colonnes: 3,
-    }]);
+  function duplicate(index: number) {
+    setSections((prev) => {
+      const original = prev[index];
+      const clone: Section = {
+        ...original,
+        id: uid(),
+        ...(original.type === "stats" ? { stats: original.stats.map((s) => ({ ...s, id: uid() })) } : {}),
+      };
+      const next = [...prev];
+      next.splice(index + 1, 0, clone);
+      return next;
+    });
   }
 
-  function addTitre() {
-    setSections((prev) => [...prev, { id: uid(), type: "titre", titre: "" }]);
+  function reorder(from: number, to: number) {
+    if (from === to) return;
+    setSections((prev) => {
+      const next = [...prev];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
+      return next;
+    });
   }
 
   return (
     <div className="space-y-4">
       <input type="hidden" name="sections" id={inputId} value={JSON.stringify(sections)} />
+
+      <InsertRow onInsert={(type) => insertAt(0, type)} />
 
       {sections.map((section, i) => {
         const isStats = section.type === "stats";
@@ -152,9 +221,31 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
         const disposition = !isStats && !isTitre ? (section as { disposition?: string }).disposition : undefined;
 
         return (
-          <div key={section.id} className={`rounded-lg border p-4 space-y-3 ${isStats ? "border-amber-200 bg-amber-50/40" : isTitre ? "border-violet-200 bg-violet-50/40" : "border-zinc-200 bg-zinc-50"}`}>
+          <div key={section.id}>
+          <div
+            onDragOver={(e) => { e.preventDefault(); setDragOverIndex(i); }}
+            onDragLeave={() => setDragOverIndex((v) => (v === i ? null : v))}
+            onDrop={(e) => {
+              e.preventDefault();
+              if (dragIndex !== null) reorder(dragIndex, i);
+              setDragIndex(null);
+              setDragOverIndex(null);
+            }}
+            className={`rounded-lg border p-4 space-y-3 transition-colors ${isStats ? "border-amber-200 bg-amber-50/40" : isTitre ? "border-violet-200 bg-violet-50/40" : "border-zinc-200 bg-zinc-50"} ${
+              dragOverIndex === i && dragIndex !== null && dragIndex !== i ? "ring-2 ring-brand" : ""
+            } ${dragIndex === i ? "opacity-40" : ""}`}
+          >
             {/* Header */}
             <div className="flex items-center gap-2">
+              <span
+                draggable
+                onDragStart={() => setDragIndex(i)}
+                onDragEnd={() => { setDragIndex(null); setDragOverIndex(null); }}
+                title="Glisser pour déplacer"
+                className="shrink-0 cursor-grab active:cursor-grabbing text-zinc-300 hover:text-zinc-500 select-none px-0.5"
+              >
+                ⠿
+              </span>
               <div className="flex items-center gap-1.5 shrink-0">
                 <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${isStats ? "bg-amber-100 text-amber-700" : isTitre ? "bg-violet-100 text-violet-700" : "bg-zinc-200 text-zinc-500"}`}>
                   {isStats ? "Stats" : isTitre ? "Titre" : "Texte"}
@@ -229,6 +320,8 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
                   className="rounded border border-zinc-300 bg-white px-2 py-1 text-xs text-zinc-500 hover:bg-zinc-50 disabled:opacity-30">↑</button>
                 <button type="button" onClick={() => move(i, 1)} disabled={i === sections.length - 1} title="Descendre"
                   className="rounded border border-zinc-300 bg-white px-2 py-1 text-xs text-zinc-500 hover:bg-zinc-50 disabled:opacity-30">↓</button>
+                <button type="button" onClick={() => duplicate(i)} title="Dupliquer"
+                  className="rounded border border-zinc-300 bg-white px-2 py-1 text-xs text-zinc-500 hover:bg-zinc-50">⧉</button>
                 {sections.length > 1 && (
                   <button type="button" onClick={() => remove(section.id)} title="Supprimer"
                     className="rounded border border-red-200 bg-white px-2 py-1 text-xs text-red-500 hover:bg-red-50">✕</button>
@@ -285,19 +378,21 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
               />
             )}
           </div>
+          <InsertRow onInsert={(type) => insertAt(i + 1, type)} />
+          </div>
         );
       })}
 
       <div className="flex gap-2">
-        <button type="button" onClick={addTexte}
+        <button type="button" onClick={() => insertAt(sections.length, "texte")}
           className="flex-1 rounded-lg border border-dashed border-zinc-300 py-2.5 text-sm text-zinc-500 hover:border-zinc-400 hover:text-zinc-700 transition-colors">
           + Texte
         </button>
-        <button type="button" onClick={addStats}
+        <button type="button" onClick={() => insertAt(sections.length, "stats")}
           className="flex-1 rounded-lg border border-dashed border-amber-300 py-2.5 text-sm text-amber-600 hover:border-amber-400 hover:text-amber-700 transition-colors">
           + Chiffres clés
         </button>
-        <button type="button" onClick={addTitre}
+        <button type="button" onClick={() => insertAt(sections.length, "titre")}
           className="flex-1 rounded-lg border border-dashed border-violet-300 py-2.5 text-sm text-violet-600 hover:border-violet-400 hover:text-violet-700 transition-colors">
           + Titre
         </button>
