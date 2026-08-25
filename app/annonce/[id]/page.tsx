@@ -10,6 +10,7 @@ import {
   renderBlocks,
   cardCls,
   contentCls,
+  colCardCls,
   type LegacySection,
 } from "@/components/StoredSectionsRenderer";
 import { CandidatureForm } from "./CandidatureForm";
@@ -70,7 +71,6 @@ export default async function AnnoncePage({
         [data-text-color="pink"]   { color: #ad1a72 !important; }
         [data-text-color] [data-style-type="textColor"][data-value="rgb(0, 0, 0)"] { color: inherit !important; }
         .card-heading h1, .card-heading h2, .card-heading h3 { font-size: 1.5rem; font-weight: 700; margin: 0; }
-        .col-card { background: #fff; border: 1px solid #e4e4e7; border-left: 2px solid #0ea5e9; border-radius: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
       `}</style>
 
       <PublicSidebar active="opportunites" />
@@ -118,7 +118,7 @@ export default async function AnnoncePage({
                         const headingHtml = headingBlock ? renderBlock(headingBlock) : null;
                         const bodyHtml = renderBlocks(bodyBlocks);
                         return (
-                          <div key={j} className="col-card px-8 py-8 sm:px-10 sm:py-10">
+                          <div key={j} className={`${colCardCls} sm:px-10 sm:py-10`}>
                             {headingHtml && <div className="card-heading mb-4" dangerouslySetInnerHTML={{ __html: headingHtml }} />}
                             <div className={contentCls} dangerouslySetInnerHTML={{ __html: bodyHtml }} />
                           </div>

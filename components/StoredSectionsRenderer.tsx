@@ -173,6 +173,8 @@ export const contentClsDark =
 
 export const bleuCardCls = "rounded-2xl bg-gradient-to-br from-[#00729e] to-[#0089bd] shadow-sm px-4 py-4 sm:px-6 sm:py-6";
 
+export const colCardCls = "rounded-2xl bg-white border border-zinc-200 border-l-2 border-l-[#0ea5e9] shadow-sm px-4 py-4 sm:px-6 sm:py-6";
+
 // ── Types de sections stockées ───────────────────────────────────────────────
 
 export type StatItem = { id: string; valeur: string; label: string };
@@ -286,7 +288,7 @@ export function renderStoredSections(list: StoredSection[], keyPrefix: string) {
             const bleu = (s as { bleu?: boolean }).bleu ?? false;
             const { titre, bodyHtml } = renderTextSection(s as Extract<StoredSection, { type?: "texte" }>);
             return (
-              <div key={s.id} className={bleu ? bleuCardCls : "col-card px-4 py-4 sm:px-6 sm:py-6"}>
+              <div key={s.id} className={bleu ? bleuCardCls : colCardCls}>
                 {titre && (
                   <h2 className={`flex items-center gap-2 text-2xl font-bold mb-4 ${bleu ? "text-white" : "text-[#0089bd]"}`}>
                     <SectionIcon svg={(s as { icone?: string }).icone} />
