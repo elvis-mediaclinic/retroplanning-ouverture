@@ -309,7 +309,7 @@ export function renderStoredSections(list: StoredSection[], keyPrefix: string) {
             const separateurDroite = (s as { separateurDroite?: boolean }).separateurDroite ?? false;
             const { titre, bodyHtml } = renderTextSection(s as Extract<StoredSection, { type?: "texte" }>);
             const cls = !carte
-              ? `px-4 py-4 sm:px-6 sm:py-6 ${separateurDroite ? "border-r border-zinc-200" : ""}`
+              ? `py-4 ${separateurDroite ? "pr-4 sm:pr-6 border-r border-zinc-200" : ""}`
               : `${bleu ? bleuCardCls : colCardCls} ${separateurDroite ? "border-r-2 border-r-zinc-200" : ""}`;
             return (
               <div key={s.id} className={cls}>
