@@ -85,7 +85,7 @@ export default async function AnnoncePage({
         )}
 
         {/* Header automatique — logo + fil d'ariane "Opportunité de franchise — ville" */}
-        <div className="text-center mb-10">
+        <div className="text-center mt-10">
           <div className="flex justify-center mb-6">
             <Image
               src="/Logo-MediaClinic-Noir.png"
@@ -99,6 +99,8 @@ export default async function AnnoncePage({
             Opportunité de franchise{ville?.nom ? ` — ${ville.nom}` : ""}
           </p>
         </div>
+
+        <hr className="border-t border-zinc-200 my-12" />
 
         {/* Hero — titre + accroche */}
         <div className={`${!annonce.hero_carte ? "" : annonce.hero_bleu
