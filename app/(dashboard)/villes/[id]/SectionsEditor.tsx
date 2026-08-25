@@ -28,6 +28,38 @@ function makeSection(type: "texte" | "stats" | "titre"): Section {
   return { id: uid(), type: "texte", titre: "", contenu_json: "" };
 }
 
+type Row = { kind: "full"; index: number } | { kind: "group"; cols: 2 | 3; indices: number[] };
+
+function computeRows(sections: Section[]): Row[] {
+  const rows: Row[] = [];
+  let i = 0;
+  while (i < sections.length) {
+    const s = sections[i];
+    const disp = s.type !== "stats" && s.type !== "titre" ? s.disposition : undefined;
+    if (disp === "moitie" || disp === "tiers") {
+      const maxCols = disp === "moitie" ? 2 : 3;
+      const indices = [i];
+      while (indices.length < maxCols) {
+        const next = sections[i + 1];
+        if (next && next.type !== "stats" && next.type !== "titre" && next.disposition === disp) {
+          indices.push(i + 1);
+          i++;
+        } else break;
+      }
+      rows.push({ kind: "group", cols: maxCols as 2 | 3, indices });
+    } else {
+      rows.push({ kind: "full", index: i });
+    }
+    i++;
+  }
+  return rows;
+}
+
+const GROUP_GRID: Record<2 | 3, string> = {
+  2: "grid grid-cols-1 sm:grid-cols-2 gap-3",
+  3: "grid grid-cols-1 sm:grid-cols-3 gap-3",
+};
+
 function InsertRow({ onInsert }: { onInsert: (type: "texte" | "stats" | "titre") => void }) {
   const [open, setOpen] = useState(false);
 
@@ -148,11 +180,23 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
     defaultSections ?? [{ id: uid(), type: "texte", titre: "", contenu_json: "" }]
   );
   const [iconOpenIds, setIconOpenIds] = useState<Set<string>>(new Set());
+  // Toutes les sections existantes démarrent repliées ; les nouvelles s'ouvrent automatiquement.
+  const [collapsedIds, setCollapsedIds] = useState<Set<string>>(
+    () => new Set((defaultSections ?? []).map((s) => s.id))
+  );
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   function toggleIconEditor(id: string) {
     setIconOpenIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }
+
+  function toggleCollapsed(id: string) {
+    setCollapsedIds((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id); else next.add(id);
       return next;
@@ -209,125 +253,131 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
     });
   }
 
-  return (
-    <div className="space-y-4">
-      <input type="hidden" name="sections" id={inputId} value={JSON.stringify(sections)} />
+  function renderCard(section: Section, i: number) {
+    const isStats = section.type === "stats";
+    const isTitre = section.type === "titre";
+    const disposition = !isStats && !isTitre ? (section as { disposition?: string }).disposition : undefined;
+    const collapsed = collapsedIds.has(section.id);
 
-      <InsertRow onInsert={(type) => insertAt(0, type)} />
-
-      {sections.map((section, i) => {
-        const isStats = section.type === "stats";
-        const isTitre = section.type === "titre";
-        const disposition = !isStats && !isTitre ? (section as { disposition?: string }).disposition : undefined;
-
-        return (
-          <div key={section.id}>
-          <div
-            onDragOver={(e) => { e.preventDefault(); setDragOverIndex(i); }}
-            onDragLeave={() => setDragOverIndex((v) => (v === i ? null : v))}
-            onDrop={(e) => {
-              e.preventDefault();
-              if (dragIndex !== null) reorder(dragIndex, i);
-              setDragIndex(null);
-              setDragOverIndex(null);
-            }}
-            className={`rounded-lg border p-4 space-y-3 transition-colors ${isStats ? "border-amber-200 bg-amber-50/40" : isTitre ? "border-violet-200 bg-violet-50/40" : "border-zinc-200 bg-zinc-50"} ${
-              dragOverIndex === i && dragIndex !== null && dragIndex !== i ? "ring-2 ring-brand" : ""
-            } ${dragIndex === i ? "opacity-40" : ""}`}
+    return (
+      <div
+        key={section.id}
+        onDragOver={(e) => { e.preventDefault(); setDragOverIndex(i); }}
+        onDragLeave={() => setDragOverIndex((v) => (v === i ? null : v))}
+        onDrop={(e) => {
+          e.preventDefault();
+          if (dragIndex !== null) reorder(dragIndex, i);
+          setDragIndex(null);
+          setDragOverIndex(null);
+        }}
+        className={`rounded-lg border p-4 space-y-3 transition-colors ${isStats ? "border-amber-200 bg-amber-50/40" : isTitre ? "border-violet-200 bg-violet-50/40" : "border-zinc-200 bg-zinc-50"} ${
+          dragOverIndex === i && dragIndex !== null && dragIndex !== i ? "ring-2 ring-brand" : ""
+        } ${dragIndex === i ? "opacity-40" : ""}`}
+      >
+        {/* Header */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <span
+            draggable
+            onDragStart={() => setDragIndex(i)}
+            onDragEnd={() => { setDragIndex(null); setDragOverIndex(null); }}
+            title="Glisser pour déplacer"
+            className="shrink-0 cursor-grab active:cursor-grabbing text-zinc-300 hover:text-zinc-500 select-none px-0.5"
           >
-            {/* Header */}
-            <div className="flex items-center gap-2">
-              <span
-                draggable
-                onDragStart={() => setDragIndex(i)}
-                onDragEnd={() => { setDragIndex(null); setDragOverIndex(null); }}
-                title="Glisser pour déplacer"
-                className="shrink-0 cursor-grab active:cursor-grabbing text-zinc-300 hover:text-zinc-500 select-none px-0.5"
-              >
-                ⠿
-              </span>
-              <div className="flex items-center gap-1.5 shrink-0">
-                <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${isStats ? "bg-amber-100 text-amber-700" : isTitre ? "bg-violet-100 text-violet-700" : "bg-zinc-200 text-zinc-500"}`}>
-                  {isStats ? "Stats" : isTitre ? "Titre" : "Texte"}
-                </span>
-              </div>
-              <input
-                type="text"
-                value={section.titre}
-                onChange={(e) => update(section.id, { titre: e.target.value })}
-                placeholder="Titre de la section (optionnel)"
-                className="flex-1 rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm font-medium"
-              />
-              <div className="flex items-center gap-1 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => toggleIconEditor(section.id)}
-                  title="Icône SVG (optionnelle)"
-                  className={`flex items-center gap-1 rounded border px-2 py-1 text-xs font-medium ${
-                    iconOpenIds.has(section.id) || (section as { icone?: string }).icone
-                      ? "border-brand bg-brand/10 text-brand"
-                      : "border-zinc-300 bg-white text-zinc-400 hover:text-zinc-600"
-                  }`}
-                >
-                  {(section as { icone?: string }).icone ? (
-                    <span
-                      className="w-3.5 h-3.5 [&_svg]:w-full [&_svg]:h-full"
-                      dangerouslySetInnerHTML={{ __html: svgUseCurrentColor((section as { icone?: string }).icone!) }}
-                    />
-                  ) : null}
-                  Icône
-                </button>
-                {!isTitre && (
-                  <label className="flex items-center gap-1 rounded border border-zinc-300 bg-white px-2 py-1 text-xs font-medium text-zinc-500 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={(section as { bleu?: boolean }).bleu ?? false}
-                      onChange={(e) => update(section.id, { bleu: e.target.checked } as Partial<Section>)}
-                      className="h-3 w-3 accent-brand"
-                    />
-                    Fond bleu
-                  </label>
-                )}
-                {annonceToggle && (
-                  <label className="flex items-center gap-1 rounded border border-violet-300 bg-violet-50 px-2 py-1 text-xs font-medium text-violet-600 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={(section as { dansAnnonces?: boolean }).dansAnnonces ?? false}
-                      onChange={(e) => update(section.id, { dansAnnonces: e.target.checked } as Partial<Section>)}
-                      className="h-3 w-3 accent-violet-600"
-                    />
-                    Dans les annonces
-                  </label>
-                )}
-                {!isStats && (
-                  <>
-                    {(["pleine", "moitie", "tiers"] as const).map((d) => (
-                      <button
-                        key={d}
-                        type="button"
-                        title={{ pleine: "Pleine largeur", moitie: "½ largeur (2 colonnes)", tiers: "⅓ largeur (3 colonnes)" }[d]}
-                        onClick={() => update(section.id, { disposition: d } as Partial<Section>)}
-                        className={`rounded border px-2 py-1 text-xs font-medium transition-colors ${
-                          (disposition ?? "pleine") === d ? "border-brand bg-brand/10 text-brand" : "border-zinc-300 bg-white text-zinc-400 hover:text-zinc-600"
-                        }`}
-                      >
-                        {{ pleine: "▬", moitie: "½", tiers: "⅓" }[d]}
-                      </button>
-                    ))}
-                  </>
-                )}
-                <button type="button" onClick={() => move(i, -1)} disabled={i === 0} title="Monter"
-                  className="rounded border border-zinc-300 bg-white px-2 py-1 text-xs text-zinc-500 hover:bg-zinc-50 disabled:opacity-30">↑</button>
-                <button type="button" onClick={() => move(i, 1)} disabled={i === sections.length - 1} title="Descendre"
-                  className="rounded border border-zinc-300 bg-white px-2 py-1 text-xs text-zinc-500 hover:bg-zinc-50 disabled:opacity-30">↓</button>
-                <button type="button" onClick={() => duplicate(i)} title="Dupliquer"
-                  className="rounded border border-zinc-300 bg-white px-2 py-1 text-xs text-zinc-500 hover:bg-zinc-50">⧉</button>
-                {sections.length > 1 && (
-                  <button type="button" onClick={() => remove(section.id)} title="Supprimer"
-                    className="rounded border border-red-200 bg-white px-2 py-1 text-xs text-red-500 hover:bg-red-50">✕</button>
-                )}
-              </div>
-            </div>
+            ⠿
+          </span>
+          <button
+            type="button"
+            onClick={() => toggleCollapsed(section.id)}
+            title={collapsed ? "Déployer" : "Replier"}
+            className="shrink-0 text-zinc-400 hover:text-zinc-700 w-4 text-xs"
+          >
+            {collapsed ? "▶" : "▼"}
+          </button>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${isStats ? "bg-amber-100 text-amber-700" : isTitre ? "bg-violet-100 text-violet-700" : "bg-zinc-200 text-zinc-500"}`}>
+              {isStats ? "Stats" : isTitre ? "Titre" : "Texte"}
+            </span>
+          </div>
+          <input
+            type="text"
+            value={section.titre}
+            onChange={(e) => update(section.id, { titre: e.target.value })}
+            placeholder="Titre de la section (optionnel)"
+            className="flex-1 min-w-[140px] rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm font-medium"
+          />
+          <div className="flex items-center gap-1 shrink-0 flex-wrap">
+            <button
+              type="button"
+              onClick={() => toggleIconEditor(section.id)}
+              title="Icône SVG (optionnelle)"
+              className={`flex items-center gap-1 rounded border px-2 py-1 text-xs font-medium ${
+                iconOpenIds.has(section.id) || (section as { icone?: string }).icone
+                  ? "border-brand bg-brand/10 text-brand"
+                  : "border-zinc-300 bg-white text-zinc-400 hover:text-zinc-600"
+              }`}
+            >
+              {(section as { icone?: string }).icone ? (
+                <span
+                  className="w-3.5 h-3.5 [&_svg]:w-full [&_svg]:h-full"
+                  dangerouslySetInnerHTML={{ __html: svgUseCurrentColor((section as { icone?: string }).icone!) }}
+                />
+              ) : null}
+              Icône
+            </button>
+            {!isTitre && (
+              <label className="flex items-center gap-1 rounded border border-zinc-300 bg-white px-2 py-1 text-xs font-medium text-zinc-500 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={(section as { bleu?: boolean }).bleu ?? false}
+                  onChange={(e) => update(section.id, { bleu: e.target.checked } as Partial<Section>)}
+                  className="h-3 w-3 accent-brand"
+                />
+                Fond bleu
+              </label>
+            )}
+            {annonceToggle && (
+              <label className="flex items-center gap-1 rounded border border-violet-300 bg-violet-50 px-2 py-1 text-xs font-medium text-violet-600 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={(section as { dansAnnonces?: boolean }).dansAnnonces ?? false}
+                  onChange={(e) => update(section.id, { dansAnnonces: e.target.checked } as Partial<Section>)}
+                  className="h-3 w-3 accent-violet-600"
+                />
+                Dans les annonces
+              </label>
+            )}
+            {!isStats && (
+              <>
+                {(["pleine", "moitie", "tiers"] as const).map((d) => (
+                  <button
+                    key={d}
+                    type="button"
+                    title={{ pleine: "Pleine largeur", moitie: "½ largeur (2 colonnes)", tiers: "⅓ largeur (3 colonnes)" }[d]}
+                    onClick={() => update(section.id, { disposition: d } as Partial<Section>)}
+                    className={`rounded border px-2 py-1 text-xs font-medium transition-colors ${
+                      (disposition ?? "pleine") === d ? "border-brand bg-brand/10 text-brand" : "border-zinc-300 bg-white text-zinc-400 hover:text-zinc-600"
+                    }`}
+                  >
+                    {{ pleine: "▬", moitie: "½", tiers: "⅓" }[d]}
+                  </button>
+                ))}
+              </>
+            )}
+            <button type="button" onClick={() => move(i, -1)} disabled={i === 0} title="Monter"
+              className="rounded border border-zinc-300 bg-white px-2 py-1 text-xs text-zinc-500 hover:bg-zinc-50 disabled:opacity-30">↑</button>
+            <button type="button" onClick={() => move(i, 1)} disabled={i === sections.length - 1} title="Descendre"
+              className="rounded border border-zinc-300 bg-white px-2 py-1 text-xs text-zinc-500 hover:bg-zinc-50 disabled:opacity-30">↓</button>
+            <button type="button" onClick={() => duplicate(i)} title="Dupliquer"
+              className="rounded border border-zinc-300 bg-white px-2 py-1 text-xs text-zinc-500 hover:bg-zinc-50">⧉</button>
+            {sections.length > 1 && (
+              <button type="button" onClick={() => remove(section.id)} title="Supprimer"
+                className="rounded border border-red-200 bg-white px-2 py-1 text-xs text-red-500 hover:bg-red-50">✕</button>
+            )}
+          </div>
+        </div>
+
+        {!collapsed && (
+          <>
             {!isStats && disposition === "moitie" && (
               <p className="text-xs text-brand/70">½ largeur — se positionne côte à côte avec la section adjacente en ½</p>
             )}
@@ -377,8 +427,32 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
                 onJsonChange={(json) => update(section.id, { contenu_json: json } as Partial<Section>)}
               />
             )}
-          </div>
-          <InsertRow onInsert={(type) => insertAt(i + 1, type)} />
+          </>
+        )}
+      </div>
+    );
+  }
+
+  const rows = computeRows(sections);
+
+  return (
+    <div className="space-y-4">
+      <input type="hidden" name="sections" id={inputId} value={JSON.stringify(sections)} />
+
+      <InsertRow onInsert={(type) => insertAt(0, type)} />
+
+      {rows.map((row, ri) => {
+        const lastIndex = row.kind === "full" ? row.index : row.indices[row.indices.length - 1];
+        return (
+          <div key={ri} className="space-y-4">
+            {row.kind === "full" ? (
+              renderCard(sections[row.index], row.index)
+            ) : (
+              <div className={GROUP_GRID[row.cols]}>
+                {row.indices.map((idx) => renderCard(sections[idx], idx))}
+              </div>
+            )}
+            <InsertRow onInsert={(type) => insertAt(lastIndex + 1, type)} />
           </div>
         );
       })}
