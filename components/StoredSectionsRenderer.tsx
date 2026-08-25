@@ -316,10 +316,13 @@ export function renderStoredSections(list: StoredSection[], keyPrefix: string) {
         4: "basis-[calc((100%_-_1rem)/2)] sm:basis-[calc((100%_-_3rem)/4)]",
       };
       const itemBasisCls = ITEM_BASIS[cols] ?? ITEM_BASIS[3];
+      // Le fond bleu ne s'applique qu'aux cartes individuelles (si "carte" est coché),
+      // jamais à toute la section.
+      const carteBleu = carte && bleu;
       return (
-        <div key={`${keyPrefix}-${ri}`} className={bleu ? bleuCardCls : "py-2"}>
+        <div key={`${keyPrefix}-${ri}`} className="py-2">
           {s.titre && (
-            <h2 className={`flex items-center gap-2 text-2xl font-bold mb-6 ${bleu ? "text-white" : "text-[#0089bd]"} ${titreCentre ? "justify-center text-center" : ""}`}>
+            <h2 className={`flex items-center gap-2 text-2xl font-bold mb-6 text-[#0089bd] ${titreCentre ? "justify-center text-center" : ""}`}>
               <SectionIcon svg={s.icone} />
               {s.titre}
             </h2>
@@ -329,25 +332,25 @@ export function renderStoredSections(list: StoredSection[], keyPrefix: string) {
               <div key={membre.id} className={`${itemBasisCls} shrink-0 grow-0 min-w-0 px-2`}>
                 <div className={`flex flex-col items-center text-center gap-3 h-full ${
                   carte
-                    ? bleu
-                      ? "rounded-2xl bg-white/10 px-4 py-6"
+                    ? carteBleu
+                      ? bleuCardCls
                       : "rounded-2xl bg-white border border-zinc-200 shadow-sm px-4 py-6"
                     : ""
                 }`}>
-                  <div className={`h-28 w-28 rounded-full overflow-hidden shrink-0 ${bleu ? "ring-2 ring-white/30" : "ring-2 ring-zinc-200"}`}>
+                  <div className={`h-28 w-28 rounded-full overflow-hidden shrink-0 ${carteBleu ? "ring-2 ring-white/30" : "ring-2 ring-zinc-200"}`}>
                     {membre.photo ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={membre.photo} alt={membre.nom} className="h-full w-full object-cover" />
                     ) : (
-                      <div className={`h-full w-full flex items-center justify-center text-2xl font-bold ${bleu ? "bg-white/10 text-white/50" : "bg-zinc-100 text-zinc-400"}`}>
+                      <div className={`h-full w-full flex items-center justify-center text-2xl font-bold ${carteBleu ? "bg-white/10 text-white/50" : "bg-zinc-100 text-zinc-400"}`}>
                         {membre.nom.charAt(0).toUpperCase()}
                       </div>
                     )}
                   </div>
                   <div>
-                    <p className={`font-semibold ${bleu ? "text-white" : "text-zinc-900"}`}>{membre.nom}</p>
+                    <p className={`font-semibold ${carteBleu ? "text-white" : "text-zinc-900"}`}>{membre.nom}</p>
                     {membre.texte && (
-                      <p className={`text-sm mt-1 ${bleu ? "text-white/80" : "text-zinc-500"}`}>{membre.texte}</p>
+                      <p className={`text-sm mt-1 ${carteBleu ? "text-white/80" : "text-zinc-500"}`}>{membre.texte}</p>
                     )}
                   </div>
                 </div>
