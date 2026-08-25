@@ -15,7 +15,7 @@ export type Section =
   | { id: string; type?: "texte"; titre: string; contenu_json: string; disposition?: "pleine" | "moitie" | "tiers"; bleu?: boolean; icone?: string; dansAnnonces?: boolean; titreCentre?: boolean; carte?: boolean; separateurDroite?: boolean }
   | { id: string; type: "stats"; titre: string; stats: Stat[]; colonnes: 2 | 3 | 4; alignement?: "gauche" | "centre"; bleu?: boolean; icone?: string; dansAnnonces?: boolean; separateurs?: boolean }
   | { id: string; type: "titre"; titre: string; icone?: string; dansAnnonces?: boolean }
-  | { id: string; type: "separateur"; espacement?: "petit" | "moyen" | "grand" };
+  | { id: string; type: "separateur"; espacement?: "petit" | "moyen" | "grand"; dansAnnonces?: boolean };
 
 function uid() { return Math.random().toString(36).slice(2); }
 
@@ -306,6 +306,17 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
             Séparateur
           </span>
           <div className="flex-1 h-px bg-zinc-300" />
+          {annonceToggle && (
+            <label className="flex items-center gap-1 rounded border border-violet-300 bg-violet-50 px-2 py-1 text-xs font-medium text-violet-600 cursor-pointer shrink-0">
+              <input
+                type="checkbox"
+                checked={(section as { dansAnnonces?: boolean }).dansAnnonces ?? false}
+                onChange={(e) => update(section.id, { dansAnnonces: e.target.checked } as Partial<Section>)}
+                className="h-3 w-3 accent-violet-600"
+              />
+              Dans les annonces
+            </label>
+          )}
           <div className="flex items-center gap-1 shrink-0">
             <label className="text-xs text-zinc-500 shrink-0">Marges :</label>
             {(["petit", "moyen", "grand"] as const).map((e) => (
