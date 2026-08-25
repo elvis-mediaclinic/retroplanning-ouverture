@@ -186,7 +186,7 @@ export type StatItem = { id: string; valeur: string; label: string };
 
 export type StoredSection =
   | { id: string; type?: "texte"; titre: string; contenu_json: string; disposition?: "pleine" | "moitie" | "tiers"; bleu?: boolean; icone?: string; dansAnnonces?: boolean; titreCentre?: boolean; carte?: boolean; separateurDroite?: boolean }
-  | { id: string; type: "stats"; titre: string; stats: StatItem[]; colonnes: 2 | 3 | 4; alignement?: "gauche" | "centre"; bleu?: boolean; icone?: string; dansAnnonces?: boolean }
+  | { id: string; type: "stats"; titre: string; stats: StatItem[]; colonnes: 2 | 3 | 4; alignement?: "gauche" | "centre"; bleu?: boolean; icone?: string; dansAnnonces?: boolean; separateurs?: boolean }
   | { id: string; type: "titre"; titre: string; icone?: string; dansAnnonces?: boolean }
   | { id: string; type: "separateur" };
 
@@ -283,12 +283,17 @@ export function renderStoredSections(list: StoredSection[], keyPrefix: string) {
             </h2>
           )}
           <div className={STATS_GRID[cols] ?? STATS_GRID[3]}>
-            {s.stats.map((stat) => (
-              <div key={stat.id} className={`flex flex-col gap-1 px-4 sm:px-6 ${centré ? "items-center text-center" : ""}`}>
-                <span className={`text-base leading-snug ${bleu ? "text-white/80" : "text-zinc-600"}`}>{stat.label}</span>
-                <span className={`text-5xl font-extrabold leading-none ${bleu ? "text-white" : "text-[#0089bd]"}`}>{stat.valeur}</span>
-              </div>
-            ))}
+            {s.stats.map((stat, idx) => {
+              const borderCls = s.separateurs
+                ? `${idx % 2 !== 0 ? "border-l" : ""} ${cols !== 2 ? (idx % cols !== 0 ? "sm:border-l" : "sm:border-l-0") : ""} ${bleu ? "border-white/20" : "border-zinc-200"}`
+                : "";
+              return (
+                <div key={stat.id} className={`flex flex-col gap-1 px-4 sm:px-6 ${centré ? "items-center text-center" : ""} ${borderCls}`}>
+                  <span className={`text-base leading-snug ${bleu ? "text-white/80" : "text-zinc-600"}`}>{stat.label}</span>
+                  <span className={`text-5xl font-extrabold leading-none ${bleu ? "text-white" : "text-[#0089bd]"}`}>{stat.valeur}</span>
+                </div>
+              );
+            })}
           </div>
         </div>
       );

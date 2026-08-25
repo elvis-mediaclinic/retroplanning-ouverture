@@ -13,7 +13,7 @@ export type Stat = { id: string; valeur: string; label: string };
 
 export type Section =
   | { id: string; type?: "texte"; titre: string; contenu_json: string; disposition?: "pleine" | "moitie" | "tiers"; bleu?: boolean; icone?: string; dansAnnonces?: boolean; titreCentre?: boolean; carte?: boolean; separateurDroite?: boolean }
-  | { id: string; type: "stats"; titre: string; stats: Stat[]; colonnes: 2 | 3 | 4; alignement?: "gauche" | "centre"; bleu?: boolean; icone?: string; dansAnnonces?: boolean }
+  | { id: string; type: "stats"; titre: string; stats: Stat[]; colonnes: 2 | 3 | 4; alignement?: "gauche" | "centre"; bleu?: boolean; icone?: string; dansAnnonces?: boolean; separateurs?: boolean }
   | { id: string; type: "titre"; titre: string; icone?: string; dansAnnonces?: boolean }
   | { id: string; type: "separateur" };
 
@@ -139,6 +139,15 @@ function StatsEditor({ section, onUpdate }: { section: Extract<Section, { type: 
             </button>
           ))}
         </div>
+        <label className="flex items-center gap-1 rounded border border-zinc-300 bg-white px-2 py-1 text-xs font-medium text-zinc-500 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={section.separateurs ?? false}
+            onChange={(e) => onUpdate({ separateurs: e.target.checked })}
+            className="h-3 w-3 accent-brand"
+          />
+          Séparateurs entre les chiffres
+        </label>
       </div>
       <div className="space-y-2">
         {section.stats.map((stat, i) => (
