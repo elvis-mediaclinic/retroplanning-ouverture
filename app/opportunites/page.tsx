@@ -49,10 +49,7 @@ export default async function AnnoncesPage() {
         <hr className="border-t border-zinc-200 my-12" />
 
         <div className="text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold text-zinc-900 leading-tight">
-            Ouvrez votre Mediaclinic
-          </h2>
-          <p className="mt-3 text-lg text-zinc-500 max-w-2xl mx-auto">
+          <p className="text-lg text-zinc-500 max-w-2xl mx-auto">
             Découvrez les villes où Mediaclinic recherche un franchisé pour ouvrir un magasin spécialisé dans le multimédia reconditionné.
           </p>
         </div>
