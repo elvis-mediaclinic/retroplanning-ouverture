@@ -15,6 +15,12 @@ const MagasinsMap = dynamic(() => import("./MagasinsMap").then((m) => m.Magasins
 // laissant les lignes complètes s'étirer naturellement jusqu'au bord.
 const FILLERS = Array.from({ length: 12 });
 
+// Hauteur fixe de chaque ligne (px) : les éléments espacés par justify-between
+// ne se touchent plus, donc une bordure par élément ne trace qu'un trait
+// partiel. Un fond en dégradé répété toutes les ROW_HEIGHT px dessine à la
+// place un séparateur continu sur toute la largeur, entre chaque ligne.
+const ROW_HEIGHT = 64;
+
 function JustifiedList<T>({
   items,
   keyFn,
@@ -33,7 +39,14 @@ function JustifiedList<T>({
   emptyLabel: string;
 }) {
   return (
-    <div className="flex flex-wrap justify-between">
+    <div
+      className="flex flex-wrap justify-between"
+      style={{
+        backgroundImage: "linear-gradient(to bottom, transparent calc(100% - 1px), #f4f4f5 100%)",
+        backgroundSize: `100% ${ROW_HEIGHT}px`,
+        backgroundRepeat: "repeat-y",
+      }}
+    >
       {items.map((item) => {
         const id = keyFn(item);
         return (
@@ -41,7 +54,8 @@ function JustifiedList<T>({
             key={id}
             type="button"
             onClick={() => onSelect(id)}
-            className={`whitespace-nowrap text-left px-4 py-3 border-b border-zinc-100 transition-colors ${
+            style={{ height: ROW_HEIGHT }}
+            className={`flex flex-col justify-center whitespace-nowrap text-left px-4 transition-colors ${
               selectedId === id ? selectedClass : "hover:bg-zinc-50"
             }`}
           >
