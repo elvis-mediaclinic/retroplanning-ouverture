@@ -2,9 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireMC } from "@/lib/dal";
 import { createClient } from "@/lib/supabase/server";
-import { updateCandidat, inviteCandidat } from "../actions";
+import { updateCandidat } from "../actions";
 import { CandidatForm } from "../CandidatForm";
-import { InviteButton } from "./InviteButton";
 import { InteractionTimeline } from "./InteractionTimeline";
 import type { CandidatInteraction } from "@/lib/types";
 
@@ -13,7 +12,7 @@ export default async function EditCandidatPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const profile = await requireMC();
+  await requireMC();
   const { id } = await params;
   const supabase = await createClient();
 
@@ -29,7 +28,6 @@ export default async function EditCandidatPage({
   const selectedVilleIds = (candidatVilles ?? []).map((cv) => cv.ville_id);
 
   const action = updateCandidat.bind(null, id);
-  const invite = inviteCandidat.bind(null, id);
 
   return (
     <div className="space-y-6">
@@ -37,9 +35,6 @@ export default async function EditCandidatPage({
         <h1 className="text-2xl font-bold uppercase text-white">
           {candidat.prenom} {candidat.nom}
         </h1>
-        {profile.role === "admin" && !candidat.profil_id && (
-          <InviteButton action={invite} />
-        )}
         {candidat.profil_id && (
           <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
             ✓ Compte actif

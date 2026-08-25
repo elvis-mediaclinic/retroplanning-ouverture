@@ -3,9 +3,8 @@
 import * as z from "zod";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireMC, requireRole } from "@/lib/dal";
+import { requireMC } from "@/lib/dal";
 import { createClient } from "@/lib/supabase/server";
-import { createServiceClient } from "@/lib/supabase/service";
 
 const CandidatSchema = z.object({
   nom: z.string().min(1, { error: "Nom requis." }),
@@ -118,56 +117,4 @@ export async function updateCandidat(
 
   revalidatePath("/candidats");
   redirect("/candidats");
-}
-
-export async function inviteCandidat(
-  candidatId: string
-): Promise<{ error?: string }> {
-  await requireRole("admin");
-
-  if (!process.env.SUPABASE_SECRET_KEY) {
-    return { error: "SUPABASE_SECRET_KEY manquante." };
-  }
-
-  const supabase = await createClient();
-  const { data: candidat, error: fetchError } = await supabase
-    .from("candidats")
-    .select("id, nom, prenom, email, profil_id")
-    .eq("id", candidatId)
-    .single();
-
-  if (fetchError || !candidat) return { error: "Candidat introuvable." };
-  if (candidat.profil_id) return { error: "Ce candidat a déjà un compte." };
-
-  const service = createServiceClient();
-
-  const { data: invited, error: inviteError } =
-    await service.auth.admin.inviteUserByEmail(candidat.email);
-
-  if (inviteError || !invited.user) {
-    return { error: `Invitation impossible : ${inviteError?.message ?? "erreur inconnue"}.` };
-  }
-
-  const { error: profileError } = await service.from("profiles").insert({
-    id: invited.user.id,
-    role: "franchise",
-    nom: candidat.nom,
-    prenom: candidat.prenom,
-    email: candidat.email,
-  });
-
-  if (profileError) {
-    return { error: `Profil non créé : ${profileError.message}.` };
-  }
-
-  const { error: linkError } = await supabase
-    .from("candidats")
-    .update({ profil_id: invited.user.id, statut: "signe" })
-    .eq("id", candidatId);
-
-  if (linkError) return { error: linkError.message };
-
-  revalidatePath("/candidats");
-  revalidatePath(`/candidats/${candidatId}`);
-  return {};
 }
