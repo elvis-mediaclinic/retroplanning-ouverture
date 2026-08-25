@@ -185,9 +185,10 @@ export const colCardCls = "rounded-2xl bg-white border border-zinc-200 border-l-
 export type StatItem = { id: string; valeur: string; label: string };
 
 export type StoredSection =
-  | { id: string; type?: "texte"; titre: string; contenu_json: string; disposition?: "pleine" | "moitie" | "tiers"; bleu?: boolean; icone?: string; dansAnnonces?: boolean; titreCentre?: boolean }
+  | { id: string; type?: "texte"; titre: string; contenu_json: string; disposition?: "pleine" | "moitie" | "tiers"; bleu?: boolean; icone?: string; dansAnnonces?: boolean; titreCentre?: boolean; carte?: boolean; separateurDroite?: boolean }
   | { id: string; type: "stats"; titre: string; stats: StatItem[]; colonnes: 2 | 3 | 4; alignement?: "gauche" | "centre"; bleu?: boolean; icone?: string; dansAnnonces?: boolean }
-  | { id: string; type: "titre"; titre: string; icone?: string; dansAnnonces?: boolean };
+  | { id: string; type: "titre"; titre: string; icone?: string; dansAnnonces?: boolean }
+  | { id: string; type: "separateur" };
 
 function SectionIcon({ svg, className }: { svg?: string; className?: string }) {
   if (!svg) return null;
@@ -229,14 +230,14 @@ export function renderStoredSections(list: StoredSection[], keyPrefix: string) {
   let i = 0;
   while (i < list.length) {
     const s = list[i];
-    const disp = (s.type !== "stats" && s.type !== "titre") ? s.disposition : undefined;
+    const disp = (s.type !== "stats" && s.type !== "titre" && s.type !== "separateur") ? s.disposition : undefined;
     if (disp === "moitie" || disp === "tiers") {
       const targetDisp = disp;
       const maxCols = disp === "moitie" ? 2 : 3;
       const group: StoredSection[] = [s];
       while (group.length < maxCols) {
         const next = list[i + 1];
-        if (next && next.type !== "stats" && next.type !== "titre" && next.disposition === targetDisp) {
+        if (next && next.type !== "stats" && next.type !== "titre" && next.type !== "separateur" && next.disposition === targetDisp) {
           group.push(next); i++;
         } else break;
       }
@@ -253,6 +254,10 @@ export function renderStoredSections(list: StoredSection[], keyPrefix: string) {
   };
 
   return rows.map((row, ri) => {
+    if (row.kind === "full" && row.s.type === "separateur") {
+      return <hr key={`${keyPrefix}-${ri}`} className="border-t border-zinc-200 my-2" />;
+    }
+
     if (row.kind === "full" && row.s.type === "titre") {
       return (
         <div key={`${keyPrefix}-${ri}`} className="text-center py-2">
@@ -294,16 +299,21 @@ export function renderStoredSections(list: StoredSection[], keyPrefix: string) {
           {row.pair.map((s) => {
             const bleu = (s as { bleu?: boolean }).bleu ?? false;
             const titreCentre = (s as { titreCentre?: boolean }).titreCentre ?? false;
+            const carte = (s as { carte?: boolean }).carte ?? true;
+            const separateurDroite = (s as { separateurDroite?: boolean }).separateurDroite ?? false;
             const { titre, bodyHtml } = renderTextSection(s as Extract<StoredSection, { type?: "texte" }>);
+            const cls = !carte
+              ? `px-4 py-4 sm:px-6 sm:py-6 ${separateurDroite ? "border-r border-zinc-200" : ""}`
+              : `${bleu ? bleuCardCls : colCardCls} ${separateurDroite ? "border-r-2 border-r-zinc-200" : ""}`;
             return (
-              <div key={s.id} className={bleu ? bleuCardCls : colCardCls}>
+              <div key={s.id} className={cls}>
                 {titre && (
-                  <h2 className={`flex items-center gap-2 text-2xl font-bold mb-4 ${bleu ? "text-white" : "text-[#0089bd]"} ${titreCentre ? "justify-center text-center" : ""}`}>
+                  <h2 className={`flex items-center gap-2 text-2xl font-bold mb-4 ${bleu && carte ? "text-white" : "text-[#0089bd]"} ${titreCentre ? "justify-center text-center" : ""}`}>
                     <SectionIcon svg={(s as { icone?: string }).icone} />
                     {titre}
                   </h2>
                 )}
-                {bodyHtml.trim() && <div className={bleu ? contentClsDark : contentCls} dangerouslySetInnerHTML={{ __html: bodyHtml }} />}
+                {bodyHtml.trim() && <div className={bleu && carte ? contentClsDark : contentCls} dangerouslySetInnerHTML={{ __html: bodyHtml }} />}
               </div>
             );
           })}
@@ -313,16 +323,17 @@ export function renderStoredSections(list: StoredSection[], keyPrefix: string) {
     {
       const bleu = (row.s as { bleu?: boolean }).bleu ?? false;
       const titreCentre = (row.s as { titreCentre?: boolean }).titreCentre ?? false;
+      const carte = (row.s as { carte?: boolean }).carte ?? true;
       const { titre, bodyHtml } = renderTextSection(row.s as Extract<StoredSection, { type?: "texte" }>);
       return (
-        <div key={`${keyPrefix}-${ri}`} className={bleu ? bleuCardCls : cardCls}>
+        <div key={`${keyPrefix}-${ri}`} className={!carte ? "" : bleu ? bleuCardCls : cardCls}>
           {titre && (
-            <h2 className={`flex items-center gap-2 text-2xl font-bold mb-4 ${bleu ? "text-white" : "text-[#0089bd]"} ${titreCentre ? "justify-center text-center" : ""}`}>
+            <h2 className={`flex items-center gap-2 text-2xl font-bold mb-4 ${bleu && carte ? "text-white" : "text-[#0089bd]"} ${titreCentre ? "justify-center text-center" : ""}`}>
               <SectionIcon svg={(row.s as { icone?: string }).icone} />
               {titre}
             </h2>
           )}
-          {bodyHtml.trim() && <div className={bleu ? contentClsDark : contentCls} dangerouslySetInnerHTML={{ __html: bodyHtml }} />}
+          {bodyHtml.trim() && <div className={bleu && carte ? contentClsDark : contentCls} dangerouslySetInnerHTML={{ __html: bodyHtml }} />}
         </div>
       );
     }

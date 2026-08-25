@@ -46,7 +46,7 @@ export default async function AnnoncePage({
 
   // Sections concept global — seulement celles cochées "Afficher dans les annonces"
   const conceptSections = (parseStoredSections(conceptPage?.sections) ?? [])
-    .filter((s) => s.dansAnnonces);
+    .filter((s) => "dansAnnonces" in s && s.dansAnnonces);
 
   // Fallback : ancien format plat
   let legacySections: LegacySection[] = [];

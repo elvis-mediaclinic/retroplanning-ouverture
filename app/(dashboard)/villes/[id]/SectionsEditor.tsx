@@ -12,18 +12,22 @@ const BlockEditor = dynamic(() => import("./BlockEditor").then((m) => m.BlockEdi
 export type Stat = { id: string; valeur: string; label: string };
 
 export type Section =
-  | { id: string; type?: "texte"; titre: string; contenu_json: string; disposition?: "pleine" | "moitie" | "tiers"; bleu?: boolean; icone?: string; dansAnnonces?: boolean; titreCentre?: boolean }
+  | { id: string; type?: "texte"; titre: string; contenu_json: string; disposition?: "pleine" | "moitie" | "tiers"; bleu?: boolean; icone?: string; dansAnnonces?: boolean; titreCentre?: boolean; carte?: boolean; separateurDroite?: boolean }
   | { id: string; type: "stats"; titre: string; stats: Stat[]; colonnes: 2 | 3 | 4; alignement?: "gauche" | "centre"; bleu?: boolean; icone?: string; dansAnnonces?: boolean }
-  | { id: string; type: "titre"; titre: string; icone?: string; dansAnnonces?: boolean };
+  | { id: string; type: "titre"; titre: string; icone?: string; dansAnnonces?: boolean }
+  | { id: string; type: "separateur" };
 
 function uid() { return Math.random().toString(36).slice(2); }
 
-function makeSection(type: "texte" | "stats" | "titre"): Section {
+function makeSection(type: "texte" | "stats" | "titre" | "separateur"): Section {
   if (type === "stats") {
     return { id: uid(), type: "stats", titre: "", stats: [{ id: uid(), valeur: "", label: "" }], colonnes: 3 };
   }
   if (type === "titre") {
     return { id: uid(), type: "titre", titre: "" };
+  }
+  if (type === "separateur") {
+    return { id: uid(), type: "separateur" };
   }
   return { id: uid(), type: "texte", titre: "", contenu_json: "" };
 }
@@ -35,13 +39,13 @@ function computeRows(sections: Section[]): Row[] {
   let i = 0;
   while (i < sections.length) {
     const s = sections[i];
-    const disp = s.type !== "stats" && s.type !== "titre" ? s.disposition : undefined;
+    const disp = s.type !== "stats" && s.type !== "titre" && s.type !== "separateur" ? s.disposition : undefined;
     if (disp === "moitie" || disp === "tiers") {
       const maxCols = disp === "moitie" ? 2 : 3;
       const indices = [i];
       while (indices.length < maxCols) {
         const next = sections[i + 1];
-        if (next && next.type !== "stats" && next.type !== "titre" && next.disposition === disp) {
+        if (next && next.type !== "stats" && next.type !== "titre" && next.type !== "separateur" && next.disposition === disp) {
           indices.push(i + 1);
           i++;
         } else break;
@@ -60,7 +64,7 @@ const GROUP_GRID: Record<2 | 3, string> = {
   3: "grid grid-cols-1 sm:grid-cols-3 gap-3",
 };
 
-function InsertRow({ onInsert }: { onInsert: (type: "texte" | "stats" | "titre") => void }) {
+function InsertRow({ onInsert }: { onInsert: (type: "texte" | "stats" | "titre" | "separateur") => void }) {
   const [open, setOpen] = useState(false);
 
   if (!open) {
@@ -92,6 +96,10 @@ function InsertRow({ onInsert }: { onInsert: (type: "texte" | "stats" | "titre")
       <button type="button" onClick={() => { onInsert("titre"); setOpen(false); }}
         className="flex-1 rounded-lg border border-dashed border-violet-300 py-1.5 text-xs text-violet-600 hover:border-violet-400 hover:text-violet-700 transition-colors">
         + Titre
+      </button>
+      <button type="button" onClick={() => { onInsert("separateur"); setOpen(false); }}
+        className="flex-1 rounded-lg border border-dashed border-zinc-400 py-1.5 text-xs text-zinc-600 hover:border-zinc-500 hover:text-zinc-800 transition-colors">
+        + Séparateur
       </button>
       <button type="button" onClick={() => setOpen(false)}
         className="rounded-lg border border-zinc-200 px-2 text-xs text-zinc-400 hover:text-zinc-600">
@@ -221,7 +229,7 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
     setSections((prev) => prev.filter((s) => s.id !== id));
   }
 
-  function insertAt(index: number, type: "texte" | "stats" | "titre") {
+  function insertAt(index: number, type: "texte" | "stats" | "titre" | "separateur") {
     setSections((prev) => {
       const next = [...prev];
       next.splice(index, 0, makeSection(type));
@@ -256,8 +264,54 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
   function renderCard(section: Section, i: number) {
     const isStats = section.type === "stats";
     const isTitre = section.type === "titre";
-    const disposition = !isStats && !isTitre ? (section as { disposition?: string }).disposition : undefined;
+    const isSeparateur = section.type === "separateur";
+    const disposition = !isStats && !isTitre && !isSeparateur ? (section as { disposition?: string }).disposition : undefined;
     const collapsed = collapsedIds.has(section.id);
+
+    if (isSeparateur) {
+      return (
+        <div
+          key={section.id}
+          onDragOver={(e) => { e.preventDefault(); setDragOverIndex(i); }}
+          onDragLeave={() => setDragOverIndex((v) => (v === i ? null : v))}
+          onDrop={(e) => {
+            e.preventDefault();
+            if (dragIndex !== null) reorder(dragIndex, i);
+            setDragIndex(null);
+            setDragOverIndex(null);
+          }}
+          className={`flex items-center gap-2 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 transition-colors ${
+            dragOverIndex === i && dragIndex !== null && dragIndex !== i ? "ring-2 ring-brand" : ""
+          } ${dragIndex === i ? "opacity-40" : ""}`}
+        >
+          <span
+            draggable
+            onDragStart={() => setDragIndex(i)}
+            onDragEnd={() => { setDragIndex(null); setDragOverIndex(null); }}
+            title="Glisser pour déplacer"
+            className="shrink-0 cursor-grab active:cursor-grabbing text-zinc-300 hover:text-zinc-500 select-none px-0.5"
+          >
+            ⠿
+          </span>
+          <span className="rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide bg-zinc-200 text-zinc-500 shrink-0">
+            Séparateur
+          </span>
+          <div className="flex-1 h-px bg-zinc-300" />
+          <div className="flex items-center gap-1 shrink-0">
+            <button type="button" onClick={() => move(i, -1)} disabled={i === 0} title="Monter"
+              className="rounded border border-zinc-300 bg-white px-2 py-1 text-xs text-zinc-500 hover:bg-zinc-50 disabled:opacity-30">↑</button>
+            <button type="button" onClick={() => move(i, 1)} disabled={i === sections.length - 1} title="Descendre"
+              className="rounded border border-zinc-300 bg-white px-2 py-1 text-xs text-zinc-500 hover:bg-zinc-50 disabled:opacity-30">↓</button>
+            <button type="button" onClick={() => duplicate(i)} title="Dupliquer"
+              className="rounded border border-zinc-300 bg-white px-2 py-1 text-xs text-zinc-500 hover:bg-zinc-50">⧉</button>
+            {sections.length > 1 && (
+              <button type="button" onClick={() => remove(section.id)} title="Supprimer"
+                className="rounded border border-red-200 bg-white px-2 py-1 text-xs text-red-500 hover:bg-red-50">✕</button>
+            )}
+          </div>
+        </div>
+      );
+    }
 
     return (
       <div
@@ -346,6 +400,28 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
                   className="h-3 w-3 accent-brand"
                 />
                 Titre centré
+              </label>
+            )}
+            {!isStats && !isTitre && (
+              <label className="flex items-center gap-1 rounded border border-zinc-300 bg-white px-2 py-1 text-xs font-medium text-zinc-500 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={(section as { carte?: boolean }).carte ?? true}
+                  onChange={(e) => update(section.id, { carte: e.target.checked } as Partial<Section>)}
+                  className="h-3 w-3 accent-brand"
+                />
+                Carte
+              </label>
+            )}
+            {!isStats && !isTitre && (disposition === "moitie" || disposition === "tiers") && (
+              <label className="flex items-center gap-1 rounded border border-zinc-300 bg-white px-2 py-1 text-xs font-medium text-zinc-500 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={(section as { separateurDroite?: boolean }).separateurDroite ?? false}
+                  onChange={(e) => update(section.id, { separateurDroite: e.target.checked } as Partial<Section>)}
+                  className="h-3 w-3 accent-brand"
+                />
+                Séparateur à droite
               </label>
             )}
             {annonceToggle && (
@@ -482,6 +558,10 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
         <button type="button" onClick={() => insertAt(sections.length, "titre")}
           className="flex-1 rounded-lg border border-dashed border-violet-300 py-2.5 text-sm text-violet-600 hover:border-violet-400 hover:text-violet-700 transition-colors">
           + Titre
+        </button>
+        <button type="button" onClick={() => insertAt(sections.length, "separateur")}
+          className="flex-1 rounded-lg border border-dashed border-zinc-400 py-2.5 text-sm text-zinc-600 hover:border-zinc-500 hover:text-zinc-800 transition-colors">
+          + Séparateur
         </button>
       </div>
     </div>
