@@ -101,7 +101,7 @@ export default async function AnnoncePage({
         </div>
 
         {/* Hero — titre + accroche */}
-        <div className={`${!annonce.hero_carte ? "px-4 py-6 sm:px-6 sm:py-8" : annonce.hero_bleu
+        <div className={`${!annonce.hero_carte ? "" : annonce.hero_bleu
           ? "rounded-2xl bg-gradient-to-br from-[#00729e] to-[#0089bd] shadow-sm px-6 py-8 sm:px-10 sm:py-10"
           : `${cardCls} py-8 sm:py-10`
         }`}>
