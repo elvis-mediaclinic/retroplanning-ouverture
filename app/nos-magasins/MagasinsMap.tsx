@@ -112,7 +112,12 @@ export function MagasinsMap({
           </Marker>
         ))}
         {villesEnEtude.map((v) => (
-          <Marker key={v.id} position={[v.lat, v.lng]} icon={ICON_EN_ETUDE}>
+          <Marker
+            key={v.id}
+            position={[v.lat, v.lng]}
+            icon={ICON_EN_ETUDE}
+            ref={(m) => { if (m) markersRef.current[v.id] = m; }}
+          >
             <Popup>
               <span className="font-semibold">{v.nom}</span>
               {v.departement && <span className="text-xs text-zinc-500"> ({v.departement})</span>}
