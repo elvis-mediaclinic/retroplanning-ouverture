@@ -22,13 +22,13 @@ export function MagasinsExplorer({
     <div className="space-y-6">
       {/* Liste des magasins ouverts */}
       <div className="max-h-64 overflow-y-auto rounded-2xl border border-zinc-200 bg-white shadow-sm">
-        <div className="flex flex-wrap">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))]">
           {points.map((m) => (
             <button
               key={m.id}
               type="button"
               onClick={() => setSelectedId(m.id)}
-              className={`text-left px-4 py-3 border-r border-b border-zinc-100 transition-colors ${
+              className={`w-full h-full text-left px-4 py-3 border-r border-b border-zinc-100 transition-colors ${
                 selectedId === m.id ? "bg-[#0089bd]/10" : "hover:bg-zinc-50"
               }`}
             >
@@ -61,13 +61,13 @@ export function MagasinsExplorer({
         <div>
           <h3 className="text-sm font-semibold text-zinc-900 mb-3">Villes en étude — opportunités à pourvoir</h3>
           <div className="max-h-64 overflow-y-auto rounded-2xl border border-zinc-200 bg-white shadow-sm">
-            <div className="flex flex-wrap">
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))]">
               {villesEnEtude.map((v) => (
                 <button
                   key={v.id}
                   type="button"
                   onClick={() => setSelectedId(v.id)}
-                  className={`text-left px-4 py-3 border-r border-b border-zinc-100 transition-colors ${
+                  className={`w-full h-full text-left px-4 py-3 border-r border-b border-zinc-100 transition-colors ${
                     selectedId === v.id ? "bg-amber-50" : "hover:bg-zinc-50"
                   }`}
                 >
