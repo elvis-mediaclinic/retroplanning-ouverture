@@ -190,7 +190,7 @@ export type StoredSection =
   | { id: string; type: "stats"; titre: string; stats: StatItem[]; colonnes: 2 | 3 | 4; alignement?: "gauche" | "centre"; bleu?: boolean; icone?: string; dansAnnonces?: boolean; separateurs?: boolean }
   | { id: string; type: "titre"; titre: string; icone?: string; dansAnnonces?: boolean }
   | { id: string; type: "separateur"; espacement?: "petit" | "moyen" | "grand"; dansAnnonces?: boolean }
-  | { id: string; type: "equipe"; titre: string; membres: MembreItem[]; colonnes?: 2 | 3 | 4; bleu?: boolean; icone?: string; dansAnnonces?: boolean; titreCentre?: boolean };
+  | { id: string; type: "equipe"; titre: string; membres: MembreItem[]; colonnes?: 2 | 3 | 4; bleu?: boolean; icone?: string; dansAnnonces?: boolean; titreCentre?: boolean; carte?: boolean };
 
 function SectionIcon({ svg, className }: { svg?: string; className?: string }) {
   if (!svg) return null;
@@ -306,6 +306,12 @@ export function renderStoredSections(list: StoredSection[], keyPrefix: string) {
       const cols = s.colonnes ?? 3;
       const bleu = s.bleu ?? false;
       const titreCentre = s.titreCentre ?? false;
+      const carte = s.carte ?? false;
+      const ITEM_BASIS: Record<number, string> = {
+        2: "basis-1/2 sm:basis-1/2",
+        3: "basis-1/2 sm:basis-1/3",
+        4: "basis-1/2 sm:basis-1/4",
+      };
       return (
         <div key={`${keyPrefix}-${ri}`} className={bleu ? bleuCardCls : "py-2"}>
           {s.titre && (
@@ -314,24 +320,32 @@ export function renderStoredSections(list: StoredSection[], keyPrefix: string) {
               {s.titre}
             </h2>
           )}
-          <div className={`${STATS_GRID[cols] ?? STATS_GRID[3]} gap-x-4 gap-y-8`}>
+          <div className="flex flex-wrap justify-center gap-x-4 gap-y-8">
             {s.membres.map((membre) => (
-              <div key={membre.id} className="flex flex-col items-center text-center gap-3 px-4">
-                <div className={`h-28 w-28 rounded-full overflow-hidden shrink-0 ${bleu ? "ring-2 ring-white/30" : "ring-2 ring-zinc-200"}`}>
-                  {membre.photo ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={membre.photo} alt={membre.nom} className="h-full w-full object-cover" />
-                  ) : (
-                    <div className={`h-full w-full flex items-center justify-center text-2xl font-bold ${bleu ? "bg-white/10 text-white/50" : "bg-zinc-100 text-zinc-400"}`}>
-                      {membre.nom.charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                </div>
-                <div>
-                  <p className={`font-semibold ${bleu ? "text-white" : "text-zinc-900"}`}>{membre.nom}</p>
-                  {membre.texte && (
-                    <p className={`text-sm mt-1 ${bleu ? "text-white/80" : "text-zinc-500"}`}>{membre.texte}</p>
-                  )}
+              <div key={membre.id} className={`${ITEM_BASIS[cols] ?? ITEM_BASIS[3]} min-w-0 px-2`}>
+                <div className={`flex flex-col items-center text-center gap-3 h-full ${
+                  carte
+                    ? bleu
+                      ? "rounded-2xl bg-white/10 px-4 py-6"
+                      : "rounded-2xl bg-white border border-zinc-200 shadow-sm px-4 py-6"
+                    : ""
+                }`}>
+                  <div className={`h-28 w-28 rounded-full overflow-hidden shrink-0 ${bleu ? "ring-2 ring-white/30" : "ring-2 ring-zinc-200"}`}>
+                    {membre.photo ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={membre.photo} alt={membre.nom} className="h-full w-full object-cover" />
+                    ) : (
+                      <div className={`h-full w-full flex items-center justify-center text-2xl font-bold ${bleu ? "bg-white/10 text-white/50" : "bg-zinc-100 text-zinc-400"}`}>
+                        {membre.nom.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <p className={`font-semibold ${bleu ? "text-white" : "text-zinc-900"}`}>{membre.nom}</p>
+                    {membre.texte && (
+                      <p className={`text-sm mt-1 ${bleu ? "text-white/80" : "text-zinc-500"}`}>{membre.texte}</p>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
