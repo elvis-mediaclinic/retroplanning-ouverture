@@ -3,6 +3,7 @@
 import { useId, useState } from "react";
 import dynamic from "next/dynamic";
 import { svgUseCurrentColor } from "@/lib/utils";
+import { MediaPicker } from "./MediaPicker";
 
 const BlockEditor = dynamic(() => import("./BlockEditor").then((m) => m.BlockEditor), {
   ssr: false,
@@ -10,16 +11,18 @@ const BlockEditor = dynamic(() => import("./BlockEditor").then((m) => m.BlockEdi
 });
 
 export type Stat = { id: string; valeur: string; label: string };
+export type Membre = { id: string; photo?: string; nom: string; texte?: string };
 
 export type Section =
   | { id: string; type?: "texte"; titre: string; contenu_json: string; disposition?: "pleine" | "moitie" | "tiers"; bleu?: boolean; icone?: string; dansAnnonces?: boolean; titreCentre?: boolean; carte?: boolean; separateurDroite?: boolean }
   | { id: string; type: "stats"; titre: string; stats: Stat[]; colonnes: 2 | 3 | 4; alignement?: "gauche" | "centre"; bleu?: boolean; icone?: string; dansAnnonces?: boolean; separateurs?: boolean }
   | { id: string; type: "titre"; titre: string; icone?: string; dansAnnonces?: boolean }
-  | { id: string; type: "separateur"; espacement?: "petit" | "moyen" | "grand"; dansAnnonces?: boolean };
+  | { id: string; type: "separateur"; espacement?: "petit" | "moyen" | "grand"; dansAnnonces?: boolean }
+  | { id: string; type: "equipe"; titre: string; membres: Membre[]; colonnes?: 2 | 3 | 4; bleu?: boolean; icone?: string; dansAnnonces?: boolean; titreCentre?: boolean };
 
 function uid() { return Math.random().toString(36).slice(2); }
 
-function makeSection(type: "texte" | "stats" | "titre" | "separateur"): Section {
+function makeSection(type: "texte" | "stats" | "titre" | "separateur" | "equipe"): Section {
   if (type === "stats") {
     return { id: uid(), type: "stats", titre: "", stats: [{ id: uid(), valeur: "", label: "" }], colonnes: 3 };
   }
@@ -28,6 +31,9 @@ function makeSection(type: "texte" | "stats" | "titre" | "separateur"): Section 
   }
   if (type === "separateur") {
     return { id: uid(), type: "separateur" };
+  }
+  if (type === "equipe") {
+    return { id: uid(), type: "equipe", titre: "", membres: [{ id: uid(), nom: "", texte: "" }], colonnes: 3 };
   }
   return { id: uid(), type: "texte", titre: "", contenu_json: "" };
 }
@@ -39,13 +45,13 @@ function computeRows(sections: Section[]): Row[] {
   let i = 0;
   while (i < sections.length) {
     const s = sections[i];
-    const disp = s.type !== "stats" && s.type !== "titre" && s.type !== "separateur" ? s.disposition : undefined;
+    const disp = s.type !== "stats" && s.type !== "titre" && s.type !== "separateur" && s.type !== "equipe" ? s.disposition : undefined;
     if (disp === "moitie" || disp === "tiers") {
       const maxCols = disp === "moitie" ? 2 : 3;
       const indices = [i];
       while (indices.length < maxCols) {
         const next = sections[i + 1];
-        if (next && next.type !== "stats" && next.type !== "titre" && next.type !== "separateur" && next.disposition === disp) {
+        if (next && next.type !== "stats" && next.type !== "titre" && next.type !== "separateur" && next.type !== "equipe" && next.disposition === disp) {
           indices.push(i + 1);
           i++;
         } else break;
@@ -64,7 +70,7 @@ const GROUP_GRID: Record<2 | 3, string> = {
   3: "grid grid-cols-1 sm:grid-cols-3 gap-3",
 };
 
-function InsertRow({ onInsert }: { onInsert: (type: "texte" | "stats" | "titre" | "separateur") => void }) {
+function InsertRow({ onInsert }: { onInsert: (type: "texte" | "stats" | "titre" | "separateur" | "equipe") => void }) {
   const [open, setOpen] = useState(false);
 
   if (!open) {
@@ -84,7 +90,7 @@ function InsertRow({ onInsert }: { onInsert: (type: "texte" | "stats" | "titre" 
   }
 
   return (
-    <div className="flex gap-2">
+    <div className="flex gap-2 flex-wrap">
       <button type="button" onClick={() => { onInsert("texte"); setOpen(false); }}
         className="flex-1 rounded-lg border border-dashed border-zinc-300 py-1.5 text-xs text-zinc-500 hover:border-zinc-400 hover:text-zinc-700 transition-colors">
         + Texte
@@ -96,6 +102,10 @@ function InsertRow({ onInsert }: { onInsert: (type: "texte" | "stats" | "titre" 
       <button type="button" onClick={() => { onInsert("titre"); setOpen(false); }}
         className="flex-1 rounded-lg border border-dashed border-violet-300 py-1.5 text-xs text-violet-600 hover:border-violet-400 hover:text-violet-700 transition-colors">
         + Titre
+      </button>
+      <button type="button" onClick={() => { onInsert("equipe"); setOpen(false); }}
+        className="flex-1 rounded-lg border border-dashed border-emerald-300 py-1.5 text-xs text-emerald-600 hover:border-emerald-400 hover:text-emerald-700 transition-colors">
+        + Équipe
       </button>
       <button type="button" onClick={() => { onInsert("separateur"); setOpen(false); }}
         className="flex-1 rounded-lg border border-dashed border-zinc-400 py-1.5 text-xs text-zinc-600 hover:border-zinc-500 hover:text-zinc-800 transition-colors">
@@ -191,6 +201,93 @@ function StatsEditor({ section, onUpdate }: { section: Extract<Section, { type: 
   );
 }
 
+function EquipeEditor({ section, onUpdate }: { section: Extract<Section, { type: "equipe" }>; onUpdate: (patch: Partial<Extract<Section, { type: "equipe" }>>) => void }) {
+  const [photoPickerId, setPhotoPickerId] = useState<string | null>(null);
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <label className="text-xs text-zinc-500">Colonnes :</label>
+        {([2, 3, 4] as const).map((n) => (
+          <button
+            key={n}
+            type="button"
+            onClick={() => onUpdate({ colonnes: n })}
+            className={`rounded border px-2 py-0.5 text-xs font-medium ${(section.colonnes ?? 3) === n ? "border-brand bg-brand/10 text-brand" : "border-zinc-300 bg-white text-zinc-500"}`}
+          >
+            {n}
+          </button>
+        ))}
+      </div>
+      <div className="space-y-3">
+        {section.membres.map((membre, i) => (
+          <div key={membre.id} className="flex items-start gap-3 rounded-md border border-zinc-200 bg-white p-3">
+            <button
+              type="button"
+              onClick={() => setPhotoPickerId(membre.id)}
+              title="Choisir une photo"
+              className="shrink-0 h-16 w-16 rounded-full overflow-hidden border border-zinc-300 bg-zinc-100 flex items-center justify-center text-zinc-400 hover:border-brand"
+            >
+              {membre.photo ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={membre.photo} alt={membre.nom} className="h-full w-full object-cover" />
+              ) : (
+                <span className="text-[10px]">Photo</span>
+              )}
+            </button>
+            <div className="flex-1 space-y-2">
+              <input
+                value={membre.nom}
+                onChange={(e) => {
+                  const next = [...section.membres];
+                  next[i] = { ...membre, nom: e.target.value };
+                  onUpdate({ membres: next });
+                }}
+                placeholder="Nom de la personne"
+                className="w-full rounded-md border border-zinc-300 bg-white px-2 py-1 text-sm font-medium"
+              />
+              <textarea
+                value={membre.texte ?? ""}
+                onChange={(e) => {
+                  const next = [...section.membres];
+                  next[i] = { ...membre, texte: e.target.value };
+                  onUpdate({ membres: next });
+                }}
+                placeholder="Fonction, description…"
+                rows={2}
+                className="w-full rounded-md border border-zinc-300 bg-white px-2 py-1 text-sm"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => onUpdate({ membres: section.membres.filter((_, j) => j !== i) })}
+              className="text-xs text-red-400 hover:text-red-600 shrink-0"
+            >✕</button>
+          </div>
+        ))}
+      </div>
+      <button
+        type="button"
+        onClick={() => onUpdate({ membres: [...section.membres, { id: uid(), nom: "", texte: "" }] })}
+        className="text-xs text-brand hover:text-brand-dark"
+      >
+        + Ajouter une personne
+      </button>
+
+      {photoPickerId && (
+        <MediaPicker
+          onSelect={(url) => {
+            const next = section.membres.map((m) => (m.id === photoPickerId ? { ...m, photo: url } : m));
+            onUpdate({ membres: next });
+            setPhotoPickerId(null);
+          }}
+          onClose={() => setPhotoPickerId(null)}
+        />
+      )}
+    </div>
+  );
+}
+
 export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSections?: Section[]; annonceToggle?: boolean }) {
   const inputId = useId();
   const [sections, setSections] = useState<Section[]>(
@@ -238,7 +335,7 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
     setSections((prev) => prev.filter((s) => s.id !== id));
   }
 
-  function insertAt(index: number, type: "texte" | "stats" | "titre" | "separateur") {
+  function insertAt(index: number, type: "texte" | "stats" | "titre" | "separateur" | "equipe") {
     setSections((prev) => {
       const next = [...prev];
       next.splice(index, 0, makeSection(type));
@@ -253,6 +350,7 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
         ...original,
         id: uid(),
         ...(original.type === "stats" ? { stats: original.stats.map((s) => ({ ...s, id: uid() })) } : {}),
+        ...(original.type === "equipe" ? { membres: original.membres.map((m) => ({ ...m, id: uid() })) } : {}),
       };
       const next = [...prev];
       next.splice(index + 1, 0, clone);
@@ -274,7 +372,8 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
     const isStats = section.type === "stats";
     const isTitre = section.type === "titre";
     const isSeparateur = section.type === "separateur";
-    const disposition = !isStats && !isTitre && !isSeparateur ? (section as { disposition?: string }).disposition : undefined;
+    const isEquipe = section.type === "equipe";
+    const disposition = !isStats && !isTitre && !isSeparateur && !isEquipe ? (section as { disposition?: string }).disposition : undefined;
     const collapsed = collapsedIds.has(section.id);
 
     if (isSeparateur) {
@@ -360,7 +459,7 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
           setDragIndex(null);
           setDragOverIndex(null);
         }}
-        className={`rounded-lg border p-4 space-y-3 transition-colors ${isStats ? "border-amber-200 bg-amber-50/40" : isTitre ? "border-violet-200 bg-violet-50/40" : "border-zinc-200 bg-zinc-50"} ${
+        className={`rounded-lg border p-4 space-y-3 transition-colors ${isStats ? "border-amber-200 bg-amber-50/40" : isTitre ? "border-violet-200 bg-violet-50/40" : isEquipe ? "border-emerald-200 bg-emerald-50/40" : "border-zinc-200 bg-zinc-50"} ${
           dragOverIndex === i && dragIndex !== null && dragIndex !== i ? "ring-2 ring-brand" : ""
         } ${dragIndex === i ? "opacity-40" : ""}`}
       >
@@ -385,8 +484,8 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
               {collapsed ? "▶" : "▼"}
             </button>
             <div className="flex items-center gap-1.5 shrink-0">
-              <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${isStats ? "bg-amber-100 text-amber-700" : isTitre ? "bg-violet-100 text-violet-700" : "bg-zinc-200 text-zinc-500"}`}>
-                {isStats ? "Stats" : isTitre ? "Titre" : "Texte"}
+              <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${isStats ? "bg-amber-100 text-amber-700" : isTitre ? "bg-violet-100 text-violet-700" : isEquipe ? "bg-emerald-100 text-emerald-700" : "bg-zinc-200 text-zinc-500"}`}>
+                {isStats ? "Stats" : isTitre ? "Titre" : isEquipe ? "Équipe" : "Texte"}
               </span>
             </div>
             <input
@@ -438,7 +537,7 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
                 Titre centré
               </label>
             )}
-            {!isStats && !isTitre && (
+            {!isStats && !isTitre && !isEquipe && (
               <label className="flex items-center gap-1 rounded border border-zinc-300 bg-white px-2 py-1 text-xs font-medium text-zinc-500 cursor-pointer">
                 <input
                   type="checkbox"
@@ -449,7 +548,7 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
                 Carte
               </label>
             )}
-            {!isStats && !isTitre && (disposition === "moitie" || disposition === "tiers") && (
+            {!isStats && !isTitre && !isEquipe && (disposition === "moitie" || disposition === "tiers") && (
               <label className="flex items-center gap-1 rounded border border-zinc-300 bg-white px-2 py-1 text-xs font-medium text-zinc-500 cursor-pointer">
                 <input
                   type="checkbox"
@@ -471,7 +570,7 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
                 Dans les annonces
               </label>
             )}
-            {!isStats && (
+            {!isStats && !isEquipe && (
               <>
                 {(["pleine", "moitie", "tiers"] as const).map((d) => (
                   <button
@@ -503,10 +602,10 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
 
         {!collapsed && (
           <>
-            {!isStats && disposition === "moitie" && (
+            {!isStats && !isEquipe && disposition === "moitie" && (
               <p className="text-xs text-brand/70">½ largeur — se positionne côte à côte avec la section adjacente en ½</p>
             )}
-            {!isStats && disposition === "tiers" && (
+            {!isStats && !isEquipe && disposition === "tiers" && (
               <p className="text-xs text-brand/70">⅓ largeur — se regroupe avec les sections adjacentes en ⅓ (max 3)</p>
             )}
 
@@ -542,6 +641,11 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
             {isStats ? (
               <StatsEditor
                 section={section as Extract<Section, { type: "stats" }>}
+                onUpdate={(patch) => update(section.id, patch as Partial<Section>)}
+              />
+            ) : isEquipe ? (
+              <EquipeEditor
+                section={section as Extract<Section, { type: "equipe" }>}
                 onUpdate={(patch) => update(section.id, patch as Partial<Section>)}
               />
             ) : isTitre ? (
@@ -582,7 +686,7 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
         );
       })}
 
-      <div className="flex gap-2">
+      <div className="flex gap-2 flex-wrap">
         <button type="button" onClick={() => insertAt(sections.length, "texte")}
           className="flex-1 rounded-lg border border-dashed border-zinc-300 py-2.5 text-sm text-zinc-500 hover:border-zinc-400 hover:text-zinc-700 transition-colors">
           + Texte
@@ -594,6 +698,10 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
         <button type="button" onClick={() => insertAt(sections.length, "titre")}
           className="flex-1 rounded-lg border border-dashed border-violet-300 py-2.5 text-sm text-violet-600 hover:border-violet-400 hover:text-violet-700 transition-colors">
           + Titre
+        </button>
+        <button type="button" onClick={() => insertAt(sections.length, "equipe")}
+          className="flex-1 rounded-lg border border-dashed border-emerald-300 py-2.5 text-sm text-emerald-600 hover:border-emerald-400 hover:text-emerald-700 transition-colors">
+          + Équipe
         </button>
         <button type="button" onClick={() => insertAt(sections.length, "separateur")}
           className="flex-1 rounded-lg border border-dashed border-zinc-400 py-2.5 text-sm text-zinc-600 hover:border-zinc-500 hover:text-zinc-800 transition-colors">

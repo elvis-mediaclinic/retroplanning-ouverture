@@ -183,12 +183,14 @@ export const colCardCls = "rounded-2xl bg-white border border-zinc-200 border-l-
 // ── Types de sections stockées ───────────────────────────────────────────────
 
 export type StatItem = { id: string; valeur: string; label: string };
+export type MembreItem = { id: string; photo?: string; nom: string; texte?: string };
 
 export type StoredSection =
   | { id: string; type?: "texte"; titre: string; contenu_json: string; disposition?: "pleine" | "moitie" | "tiers"; bleu?: boolean; icone?: string; dansAnnonces?: boolean; titreCentre?: boolean; carte?: boolean; separateurDroite?: boolean }
   | { id: string; type: "stats"; titre: string; stats: StatItem[]; colonnes: 2 | 3 | 4; alignement?: "gauche" | "centre"; bleu?: boolean; icone?: string; dansAnnonces?: boolean; separateurs?: boolean }
   | { id: string; type: "titre"; titre: string; icone?: string; dansAnnonces?: boolean }
-  | { id: string; type: "separateur"; espacement?: "petit" | "moyen" | "grand"; dansAnnonces?: boolean };
+  | { id: string; type: "separateur"; espacement?: "petit" | "moyen" | "grand"; dansAnnonces?: boolean }
+  | { id: string; type: "equipe"; titre: string; membres: MembreItem[]; colonnes?: 2 | 3 | 4; bleu?: boolean; icone?: string; dansAnnonces?: boolean; titreCentre?: boolean };
 
 function SectionIcon({ svg, className }: { svg?: string; className?: string }) {
   if (!svg) return null;
@@ -230,14 +232,14 @@ export function renderStoredSections(list: StoredSection[], keyPrefix: string) {
   let i = 0;
   while (i < list.length) {
     const s = list[i];
-    const disp = (s.type !== "stats" && s.type !== "titre" && s.type !== "separateur") ? s.disposition : undefined;
+    const disp = (s.type !== "stats" && s.type !== "titre" && s.type !== "separateur" && s.type !== "equipe") ? s.disposition : undefined;
     if (disp === "moitie" || disp === "tiers") {
       const targetDisp = disp;
       const maxCols = disp === "moitie" ? 2 : 3;
       const group: StoredSection[] = [s];
       while (group.length < maxCols) {
         const next = list[i + 1];
-        if (next && next.type !== "stats" && next.type !== "titre" && next.type !== "separateur" && next.disposition === targetDisp) {
+        if (next && next.type !== "stats" && next.type !== "titre" && next.type !== "separateur" && next.type !== "equipe" && next.disposition === targetDisp) {
           group.push(next); i++;
         } else break;
       }
@@ -295,6 +297,44 @@ export function renderStoredSections(list: StoredSection[], keyPrefix: string) {
                 </div>
               );
             })}
+          </div>
+        </div>
+      );
+    }
+    if (row.kind === "full" && row.s.type === "equipe") {
+      const s = row.s as Extract<StoredSection, { type: "equipe" }>;
+      const cols = s.colonnes ?? 3;
+      const bleu = s.bleu ?? false;
+      const titreCentre = s.titreCentre ?? false;
+      return (
+        <div key={`${keyPrefix}-${ri}`} className={bleu ? bleuCardCls : "py-2"}>
+          {s.titre && (
+            <h2 className={`flex items-center gap-2 text-2xl font-bold mb-6 ${bleu ? "text-white" : "text-[#0089bd]"} ${titreCentre ? "justify-center text-center" : ""}`}>
+              <SectionIcon svg={s.icone} />
+              {s.titre}
+            </h2>
+          )}
+          <div className={`${STATS_GRID[cols] ?? STATS_GRID[3]} gap-x-4 gap-y-8`}>
+            {s.membres.map((membre) => (
+              <div key={membre.id} className="flex flex-col items-center text-center gap-3 px-4">
+                <div className={`h-28 w-28 rounded-full overflow-hidden shrink-0 ${bleu ? "ring-2 ring-white/30" : "ring-2 ring-zinc-200"}`}>
+                  {membre.photo ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={membre.photo} alt={membre.nom} className="h-full w-full object-cover" />
+                  ) : (
+                    <div className={`h-full w-full flex items-center justify-center text-2xl font-bold ${bleu ? "bg-white/10 text-white/50" : "bg-zinc-100 text-zinc-400"}`}>
+                      {membre.nom.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <p className={`font-semibold ${bleu ? "text-white" : "text-zinc-900"}`}>{membre.nom}</p>
+                  {membre.texte && (
+                    <p className={`text-sm mt-1 ${bleu ? "text-white/80" : "text-zinc-500"}`}>{membre.texte}</p>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       );
