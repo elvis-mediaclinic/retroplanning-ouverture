@@ -21,8 +21,9 @@ export default async function NosMagasinsPage() {
       .order("nom"),
     service
       .from("villes")
-      .select("id, nom, departement, latitude, longitude")
+      .select("id, nom, departement, latitude, longitude, annonces!inner(id, titre)")
       .eq("statut", "en_etude")
+      .eq("annonces.actif", true)
       .order("nom"),
   ]);
 
@@ -75,7 +76,19 @@ export default async function NosMagasinsPage() {
     }
 
     if (lat !== null && lng !== null) {
-      villesEnEtude.push({ id: v.id, nom: v.nom, departement: v.departement, lat, lng });
+      const annonceRaw = v.annonces as unknown;
+      const annonce = Array.isArray(annonceRaw) ? annonceRaw[0] : annonceRaw;
+      if (annonce) {
+        villesEnEtude.push({
+          id: v.id,
+          nom: v.nom,
+          departement: v.departement,
+          annonceId: annonce.id,
+          annonceTitre: annonce.titre,
+          lat,
+          lng,
+        });
+      }
     }
   }
 

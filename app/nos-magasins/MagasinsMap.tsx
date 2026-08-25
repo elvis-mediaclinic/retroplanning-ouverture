@@ -53,6 +53,8 @@ export type VilleEnEtudePoint = {
   id: string;
   nom: string;
   departement: string | null;
+  annonceId?: string;
+  annonceTitre?: string;
   lat: number;
   lng: number;
 };
@@ -116,6 +118,14 @@ export function MagasinsMap({
               {v.departement && <span className="text-xs text-zinc-500"> ({v.departement})</span>}
               <br />
               <span className="text-xs text-amber-600">Ville en étude</span>
+              {v.annonceId && (
+                <>
+                  <br />
+                  <a href={`/annonce/${v.annonceId}`} className="text-xs font-medium text-[#0089bd] hover:underline">
+                    {v.annonceTitre} →
+                  </a>
+                </>
+              )}
             </Popup>
           </Marker>
         ))}
