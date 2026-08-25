@@ -84,38 +84,6 @@ export function MagasinsExplorer({
 
   return (
     <div className="space-y-6">
-      {/* Liste des magasins ouverts */}
-      <div className="max-h-64 overflow-y-auto rounded-2xl border border-zinc-200 bg-white shadow-sm">
-        <JustifiedList
-          items={points}
-          keyFn={(m) => m.id}
-          selectedId={selectedId}
-          onSelect={setSelectedId}
-          selectedClass="bg-[#0089bd]/10"
-          emptyLabel="Aucun magasin ouvert pour le moment."
-          renderItem={(m) => (
-            <>
-              <div className="flex items-center gap-2">
-                <span
-                  className={`inline-block w-2 h-2 rounded-full shrink-0 ${
-                    m.type === "integre" ? "bg-[#7c3aed]" : "bg-[#0089bd]"
-                  }`}
-                />
-                <p className="text-sm font-semibold text-zinc-900">{m.nom}</p>
-              </div>
-              <p className="mt-0.5 text-xs text-zinc-500 pl-4">
-                {[m.codePostal, m.ville].filter(Boolean).join(" ") || "—"}
-              </p>
-            </>
-          )}
-        />
-      </div>
-
-      {/* Carte */}
-      <div className="h-96 sm:h-[500px]">
-        <MagasinsMap points={points} villesEnEtude={villesEnEtude} selectedId={selectedId} />
-      </div>
-
       {/* Liste des villes en étude (annonce active) */}
       {villesEnEtude.length > 0 && (
         <div>
@@ -143,6 +111,38 @@ export function MagasinsExplorer({
           </div>
         </div>
       )}
+
+      {/* Carte */}
+      <div className="h-[500px] sm:h-[650px]">
+        <MagasinsMap points={points} villesEnEtude={villesEnEtude} selectedId={selectedId} />
+      </div>
+
+      {/* Liste des magasins ouverts */}
+      <div className="max-h-64 overflow-y-auto rounded-2xl border border-zinc-200 bg-white shadow-sm">
+        <JustifiedList
+          items={points}
+          keyFn={(m) => m.id}
+          selectedId={selectedId}
+          onSelect={setSelectedId}
+          selectedClass="bg-[#0089bd]/10"
+          emptyLabel="Aucun magasin ouvert pour le moment."
+          renderItem={(m) => (
+            <>
+              <div className="flex items-center gap-2">
+                <span
+                  className={`inline-block w-2 h-2 rounded-full shrink-0 ${
+                    m.type === "integre" ? "bg-[#7c3aed]" : "bg-[#0089bd]"
+                  }`}
+                />
+                <p className="text-sm font-semibold text-zinc-900">{m.nom}</p>
+              </div>
+              <p className="mt-0.5 text-xs text-zinc-500 pl-4">
+                {[m.codePostal, m.ville].filter(Boolean).join(" ") || "—"}
+              </p>
+            </>
+          )}
+        />
+      </div>
     </div>
   );
 }
