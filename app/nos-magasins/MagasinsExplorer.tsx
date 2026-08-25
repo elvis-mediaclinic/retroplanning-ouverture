@@ -21,15 +21,15 @@ export function MagasinsExplorer({
   return (
     <div className="space-y-6">
       {/* Liste des magasins ouverts */}
-      <div className="max-h-64 overflow-y-auto rounded-2xl border border-zinc-200 bg-white shadow-sm p-3">
-        <div className="flex flex-wrap gap-2">
+      <div className="max-h-64 overflow-y-auto rounded-2xl border border-zinc-200 bg-white shadow-sm">
+        <div className="flex flex-wrap">
           {points.map((m) => (
             <button
               key={m.id}
               type="button"
               onClick={() => setSelectedId(m.id)}
-              className={`text-left rounded-lg border px-3 py-2 transition-colors ${
-                selectedId === m.id ? "border-[#0089bd] bg-[#0089bd]/10" : "border-zinc-200 hover:bg-zinc-50"
+              className={`text-left px-4 py-3 border-r border-b border-zinc-100 transition-colors ${
+                selectedId === m.id ? "bg-[#0089bd]/10" : "hover:bg-zinc-50"
               }`}
             >
               <div className="flex items-center gap-2">
@@ -46,7 +46,7 @@ export function MagasinsExplorer({
             </button>
           ))}
           {points.length === 0 && (
-            <p className="px-1 py-2 text-sm text-zinc-400">Aucun magasin ouvert pour le moment.</p>
+            <p className="px-4 py-3 text-sm text-zinc-400">Aucun magasin ouvert pour le moment.</p>
           )}
         </div>
       </div>
@@ -60,15 +60,15 @@ export function MagasinsExplorer({
       {villesEnEtude.length > 0 && (
         <div>
           <h3 className="text-sm font-semibold text-zinc-900 mb-3">Villes en étude — opportunités à pourvoir</h3>
-          <div className="max-h-64 overflow-y-auto rounded-2xl border border-zinc-200 bg-white shadow-sm p-3">
-            <div className="flex flex-wrap gap-2">
+          <div className="max-h-64 overflow-y-auto rounded-2xl border border-zinc-200 bg-white shadow-sm">
+            <div className="flex flex-wrap">
               {villesEnEtude.map((v) => (
                 <button
                   key={v.id}
                   type="button"
                   onClick={() => setSelectedId(v.id)}
-                  className={`text-left rounded-lg border px-3 py-2 transition-colors ${
-                    selectedId === v.id ? "border-amber-400 bg-amber-50" : "border-zinc-200 hover:bg-zinc-50"
+                  className={`text-left px-4 py-3 border-r border-b border-zinc-100 transition-colors ${
+                    selectedId === v.id ? "bg-amber-50" : "hover:bg-zinc-50"
                   }`}
                 >
                   <div className="flex items-center gap-2">
