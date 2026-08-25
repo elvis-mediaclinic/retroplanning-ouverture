@@ -20,6 +20,9 @@ type Annonce = {
   sections: string | null;
   actif: boolean;
   hero_bleu?: boolean;
+  hero_carte?: boolean;
+  hero_titre_centre?: boolean;
+  hero_accroche_centre?: boolean;
 };
 
 export function AnnonceEditor({
@@ -37,6 +40,9 @@ export function AnnonceEditor({
   const [accroche, setAccroche] = useState(annonce?.accroche ?? "");
   const accrocheRef = useRef<HTMLTextAreaElement>(null);
   const [heroBleu, setHeroBleu] = useState(annonce?.hero_bleu ?? true);
+  const [heroCarte, setHeroCarte] = useState(annonce?.hero_carte ?? true);
+  const [heroTitreCentre, setHeroTitreCentre] = useState(annonce?.hero_titre_centre ?? false);
+  const [heroAccrocheCentre, setHeroAccrocheCentre] = useState(annonce?.hero_accroche_centre ?? false);
   const [copied, setCopied] = useState(false);
   const [open, setOpen] = useState(true);
 
@@ -178,20 +184,58 @@ export function AnnonceEditor({
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
-            <input
-              id="hero_bleu_checkbox"
-              type="checkbox"
-              checked={heroBleu}
-              onChange={(e) => setHeroBleu(e.target.checked)}
-              className="h-4 w-4 accent-brand"
-            />
-            <input type="hidden" name="hero_bleu" value={heroBleu ? "true" : "false"} />
-            <label htmlFor="hero_bleu_checkbox" className="text-sm font-medium text-zinc-700">
-              Carte titre en fond bleu
+          <div className="flex flex-wrap items-center gap-4">
+            <label htmlFor="hero_carte_checkbox" className="flex items-center gap-2 cursor-pointer">
+              <input
+                id="hero_carte_checkbox"
+                type="checkbox"
+                checked={heroCarte}
+                onChange={(e) => setHeroCarte(e.target.checked)}
+                className="h-4 w-4 accent-brand"
+              />
+              <input type="hidden" name="hero_carte" value={heroCarte ? "true" : "false"} />
+              <span className="text-sm font-medium text-zinc-700">Carte</span>
             </label>
-            <span className="text-xs text-zinc-400">(décoché = fond clair)</span>
+
+            {heroCarte && (
+              <label htmlFor="hero_bleu_checkbox" className="flex items-center gap-2 cursor-pointer">
+                <input
+                  id="hero_bleu_checkbox"
+                  type="checkbox"
+                  checked={heroBleu}
+                  onChange={(e) => setHeroBleu(e.target.checked)}
+                  className="h-4 w-4 accent-brand"
+                />
+                <input type="hidden" name="hero_bleu" value={heroBleu ? "true" : "false"} />
+                <span className="text-sm font-medium text-zinc-700">Fond bleu</span>
+              </label>
+            )}
+
+            <label htmlFor="hero_titre_centre_checkbox" className="flex items-center gap-2 cursor-pointer">
+              <input
+                id="hero_titre_centre_checkbox"
+                type="checkbox"
+                checked={heroTitreCentre}
+                onChange={(e) => setHeroTitreCentre(e.target.checked)}
+                className="h-4 w-4 accent-brand"
+              />
+              <input type="hidden" name="hero_titre_centre" value={heroTitreCentre ? "true" : "false"} />
+              <span className="text-sm font-medium text-zinc-700">Titre centré</span>
+            </label>
+
+            <label htmlFor="hero_accroche_centre_checkbox" className="flex items-center gap-2 cursor-pointer">
+              <input
+                id="hero_accroche_centre_checkbox"
+                type="checkbox"
+                checked={heroAccrocheCentre}
+                onChange={(e) => setHeroAccrocheCentre(e.target.checked)}
+                className="h-4 w-4 accent-brand"
+              />
+              <input type="hidden" name="hero_accroche_centre" value={heroAccrocheCentre ? "true" : "false"} />
+              <span className="text-sm font-medium text-zinc-700">Accroche centrée</span>
+            </label>
           </div>
+          <p className="text-xs text-zinc-400 -mt-2">Décochez « Carte » pour afficher le titre directement sur le fond de page, sans encadré.</p>
 
           <div className="space-y-2">
             <label className="text-sm font-medium text-zinc-700">Sections</label>

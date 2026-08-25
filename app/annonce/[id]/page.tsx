@@ -27,7 +27,7 @@ export default async function AnnoncePage({
   const [{ data: annonce }, { data: conceptPage }, { data: { user } }] = await Promise.all([
     supabase
       .from("annonces")
-      .select("id, titre, accroche, contenu, contenu_json, sections, actif, hero_bleu, villes(id, nom)")
+      .select("id, titre, accroche, contenu, contenu_json, sections, actif, hero_bleu, hero_carte, hero_titre_centre, hero_accroche_centre, villes(id, nom)")
       .eq("id", id)
       .single(),
     supabase.from("pages").select("sections").eq("key", "concept").maybeSingle(),
@@ -84,18 +84,18 @@ export default async function AnnoncePage({
         )}
 
         {/* Hero — titre + accroche */}
-        <div className={annonce.hero_bleu
+        <div className={!annonce.hero_carte ? "" : annonce.hero_bleu
           ? "rounded-2xl bg-gradient-to-br from-[#00729e] to-[#0089bd] shadow-sm px-4 py-4 sm:px-6 sm:py-6"
           : cardCls
         }>
-          <p className={`text-xs font-semibold uppercase tracking-widest mb-4 ${annonce.hero_bleu ? "text-white/70" : "text-[#0089bd]"}`}>
+          <p className={`text-xs font-semibold uppercase tracking-widest mb-4 ${annonce.hero_titre_centre ? "text-center" : ""} ${annonce.hero_carte && annonce.hero_bleu ? "text-white/70" : "text-[#0089bd]"}`}>
             Opportunité de franchise
           </p>
-          <h1 className={`text-3xl sm:text-4xl font-bold leading-tight ${annonce.hero_bleu ? "text-white" : "text-zinc-900"}`}>
+          <h1 className={`text-3xl sm:text-4xl font-bold leading-tight ${annonce.hero_titre_centre ? "text-center" : ""} ${annonce.hero_carte && annonce.hero_bleu ? "text-white" : "text-zinc-900"}`}>
             {annonce.titre}
           </h1>
           {annonce.accroche && (
-            <p className={`mt-4 text-lg sm:text-xl leading-relaxed ${annonce.hero_bleu ? "text-white/80" : "text-zinc-500"}`}>
+            <p className={`mt-4 text-lg sm:text-xl leading-relaxed ${annonce.hero_accroche_centre ? "text-center" : ""} ${annonce.hero_carte && annonce.hero_bleu ? "text-white/80" : "text-zinc-500"}`}>
               <BoldText text={annonce.accroche} />
             </p>
           )}

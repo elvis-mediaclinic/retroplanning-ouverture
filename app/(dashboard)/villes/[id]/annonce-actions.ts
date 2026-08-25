@@ -23,6 +23,9 @@ export async function upsertAnnonce(
     sections: sectionsRaw ? JSON.parse(sectionsRaw) : null,
     actif: formData.get("actif") === "true",
     hero_bleu: formData.get("hero_bleu") === "true",
+    hero_carte: formData.get("hero_carte") === "true",
+    hero_titre_centre: formData.get("hero_titre_centre") === "true",
+    hero_accroche_centre: formData.get("hero_accroche_centre") === "true",
     updated_at: new Date().toISOString(),
   };
 
