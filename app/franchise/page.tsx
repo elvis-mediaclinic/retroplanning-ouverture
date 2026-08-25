@@ -18,14 +18,14 @@ export default async function FranchisePage() {
   const conceptSections = parseStoredSections(conceptPage?.sections) ?? [];
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen flex flex-col">
       <style>{`
         body { background: #f4f4f5; }
       `}</style>
 
       <PublicNavbar active="franchise" />
 
-      <main className="mx-auto w-full max-w-[1600px] px-6 pt-3 pb-8 space-y-6">
+      <main className="flex-1 mx-auto w-full max-w-[1600px] px-6 pt-3 pb-8 space-y-6">
         {/* Header automatique — logo + "La franchise" */}
         <div className="text-center mt-10">
           <div className="flex justify-center mb-6">

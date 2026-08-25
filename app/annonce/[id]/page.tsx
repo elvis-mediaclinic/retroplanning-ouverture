@@ -60,7 +60,7 @@ export default async function AnnoncePage({
   }
 
   return (
-    <div className="min-h-screen bg-zinc-100">
+    <div className="min-h-screen flex flex-col bg-zinc-100">
       <style>{`
         [data-text-color="gray"]   { color: #9b9a97 !important; }
         [data-text-color="brown"]  { color: #64473a !important; }
@@ -77,7 +77,7 @@ export default async function AnnoncePage({
 
       <PublicNavbar active="opportunites" />
 
-      <main className="mx-auto w-full max-w-[1600px] px-6 pt-3 pb-8 space-y-6">
+      <main className="flex-1 mx-auto w-full max-w-[1600px] px-6 pt-3 pb-8 space-y-6">
 
         {!annonce.actif && (
           <div className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
