@@ -3,6 +3,7 @@ import { requireMC, getProfile } from "@/lib/dal";
 import { createClient } from "@/lib/supabase/server";
 import { STATUT_VILLE_LABELS } from "@/lib/types";
 import { STATUT_VILLE_COLORS } from "@/lib/utils";
+import { PropositionActions } from "./PropositionActions";
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://retroplanning-ouverture.vercel.app";
 
@@ -124,6 +125,7 @@ export default async function VillesPage() {
 
   const villes = ((data ?? []) as Ville[]);
 
+  const propositions = villes.filter((v) => v.statut === "proposition");
   const enEtude = villes.filter((v) => v.statut === "en_etude");
   const validees = villes.filter((v) => v.statut === "validee");
 
@@ -138,6 +140,7 @@ export default async function VillesPage() {
         <div>
           <h1 className="text-2xl font-bold uppercase text-white">Villes</h1>
           <p className="mt-1 text-sm text-white/70">
+            {propositions.length > 0 && `${propositions.length} proposition${propositions.length !== 1 ? "s" : ""} à valider · `}
             {enEtude.length} en étude · {validees.length} validée{validees.length !== 1 ? "s" : ""}
           </p>
         </div>
@@ -147,6 +150,33 @@ export default async function VillesPage() {
           </Link>
         )}
       </div>
+
+      {/* Propositions à valider — soumises via un intérêt spontané */}
+      {canEdit && propositions.length > 0 && (
+        <section>
+          <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-violet-500">
+            Propositions à valider ({propositions.length})
+          </h2>
+          <div className="overflow-hidden rounded-lg border border-violet-200 bg-white shadow-sm divide-y divide-violet-100">
+            {propositions.map((v) => (
+              <div key={v.id} className="flex items-center justify-between px-4 py-3">
+                <div>
+                  <p className="text-sm font-medium text-zinc-900">{v.nom}</p>
+                  <p className="text-xs text-zinc-400">
+                    {[v.departement, v.region].filter(Boolean).join(" · ") || "—"}
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Link href={`/villes/${v.id}`} className="text-xs text-zinc-500 hover:text-zinc-900">
+                    Voir
+                  </Link>
+                  <PropositionActions villeId={v.id} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Validées — projet en cours */}
       {validees.length > 0 && (

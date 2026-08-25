@@ -20,7 +20,7 @@ export type FormatMagasin =
   | "kiosque"
   | "shop_in_shop";
 
-export type StatutVille = "en_etude" | "validee" | "abandonnee";
+export type StatutVille = "en_etude" | "validee" | "abandonnee" | "proposition";
 
 export type StatutCandidat =
   | "prospect"
@@ -252,6 +252,7 @@ export const STATUT_VILLE_LABELS: Record<StatutVille, string> = {
   en_etude: "En étude",
   validee: "Validée",
   abandonnee: "Abandonnée",
+  proposition: "Proposition à valider",
 };
 
 export const STATUT_CANDIDAT_LABELS: Record<StatutCandidat, string> = {

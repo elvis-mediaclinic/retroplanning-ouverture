@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useActionState } from "react";
 import Link from "next/link";
 import { BoldText } from "@/components/BoldText";
+import { VilleAutocomplete } from "@/components/VilleAutocomplete";
 import { submitInteretSpontane, type InteretSpontaneState } from "./actions";
 
 type Annonce = {
@@ -79,9 +80,13 @@ function InteretSpontaneModal() {
                       <input name="telephone" type="tel" className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm" />
                     </div>
                   </div>
-                  <div className="space-y-1">
-                    <label className="text-sm font-medium text-zinc-700">Ville souhaitée</label>
-                    <input name="ville" required placeholder="Ex : Clermont-Ferrand" className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm" />
+                  <div className="grid grid-cols-2 gap-4">
+                    <VilleAutocomplete
+                      villeName="ville"
+                      villeLabel="Ville souhaitée *"
+                      departementName="departement"
+                      regionName="region"
+                    />
                   </div>
                   <div className="space-y-1">
                     <label className="text-sm font-medium text-zinc-700">Message (optionnel)</label>

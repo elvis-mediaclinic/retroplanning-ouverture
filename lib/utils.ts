@@ -35,6 +35,7 @@ export const STATUT_VILLE_COLORS: Record<StatutVille, string> = {
   en_etude: "bg-amber-100 text-amber-700",
   validee: "bg-green-100 text-green-700",
   abandonnee: "bg-red-100 text-red-700",
+  proposition: "bg-violet-100 text-violet-700",
 };
 
 export const STATUT_CANDIDAT_COLORS: Record<StatutCandidat, string> = {

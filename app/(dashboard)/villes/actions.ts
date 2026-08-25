@@ -11,7 +11,7 @@ const VilleSchema = z.object({
   departement: z.string().optional(),
   region: z.string().optional(),
   zone_chalandise: z.string().optional(),
-  statut: z.enum(["en_etude", "validee", "abandonnee"]),
+  statut: z.enum(["proposition", "en_etude", "validee", "abandonnee"]),
   notes: z.string().optional(),
 });
 
@@ -89,4 +89,12 @@ export async function updateVille(
 
   revalidatePath("/villes");
   redirect("/villes");
+}
+
+export async function reviewPropositionVille(id: string, decision: "valider" | "refuser") {
+  await requireMarketing();
+  const supabase = await createClient();
+  const statut = decision === "valider" ? "en_etude" : "abandonnee";
+  await supabase.from("villes").update({ statut }).eq("id", id);
+  revalidatePath("/villes");
 }
