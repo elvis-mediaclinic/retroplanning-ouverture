@@ -37,7 +37,7 @@ export function PublicFooter() {
           </nav>
 
           <div className="flex flex-col items-center gap-2 text-sm text-white/70 sm:w-56">
-            <p>© Mediaclinic {new Date().getFullYear()} — Réseau de franchise</p>
+            <p>© Mediaclinic {new Date().getFullYear()}</p>
             <Link href="/cgu" className="hover:text-white">
               Conditions générales d&apos;utilisation
             </Link>
