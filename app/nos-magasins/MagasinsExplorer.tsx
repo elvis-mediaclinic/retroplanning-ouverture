@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import dynamic from "next/dynamic";
 import type { MagasinPoint, VilleEnEtudePoint } from "./MagasinsMap";
 
@@ -8,6 +8,56 @@ const MagasinsMap = dynamic(() => import("./MagasinsMap").then((m) => m.Magasins
   ssr: false,
   loading: () => <div className="h-full w-full rounded-2xl border border-zinc-200 bg-zinc-100 animate-pulse" />,
 });
+
+// Nombre d'éléments "de remplissage" invisibles ajoutés après la liste : ils
+// absorbent l'espace libre de la dernière ligne (incomplète) pour que
+// justify-between n'espace pas ses quelques éléments jusqu'aux bords, tout en
+// laissant les lignes complètes s'étirer naturellement jusqu'au bord.
+const FILLERS = Array.from({ length: 12 });
+
+function JustifiedList<T>({
+  items,
+  keyFn,
+  selectedId,
+  onSelect,
+  renderItem,
+  selectedClass,
+  emptyLabel,
+}: {
+  items: T[];
+  keyFn: (item: T) => string;
+  selectedId: string | null;
+  onSelect: (id: string) => void;
+  renderItem: (item: T) => ReactNode;
+  selectedClass: string;
+  emptyLabel: string;
+}) {
+  return (
+    <div className="flex flex-wrap justify-between">
+      {items.map((item) => {
+        const id = keyFn(item);
+        return (
+          <button
+            key={id}
+            type="button"
+            onClick={() => onSelect(id)}
+            className={`whitespace-nowrap text-left px-4 py-3 border-b border-zinc-100 transition-colors ${
+              selectedId === id ? selectedClass : "hover:bg-zinc-50"
+            }`}
+          >
+            {renderItem(item)}
+          </button>
+        );
+      })}
+      {items.length === 0 && (
+        <p className="px-4 py-3 text-sm text-zinc-400">{emptyLabel}</p>
+      )}
+      {FILLERS.map((_, i) => (
+        <span key={`filler-${i}`} aria-hidden className="h-0 w-[200px]" />
+      ))}
+    </div>
+  );
+}
 
 export function MagasinsExplorer({
   points,
@@ -22,16 +72,15 @@ export function MagasinsExplorer({
     <div className="space-y-6">
       {/* Liste des magasins ouverts */}
       <div className="max-h-64 overflow-y-auto rounded-2xl border border-zinc-200 bg-white shadow-sm">
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))]">
-          {points.map((m) => (
-            <button
-              key={m.id}
-              type="button"
-              onClick={() => setSelectedId(m.id)}
-              className={`w-full h-full text-left px-4 py-3 border-r border-b border-zinc-100 transition-colors ${
-                selectedId === m.id ? "bg-[#0089bd]/10" : "hover:bg-zinc-50"
-              }`}
-            >
+        <JustifiedList
+          items={points}
+          keyFn={(m) => m.id}
+          selectedId={selectedId}
+          onSelect={setSelectedId}
+          selectedClass="bg-[#0089bd]/10"
+          emptyLabel="Aucun magasin ouvert pour le moment."
+          renderItem={(m) => (
+            <>
               <div className="flex items-center gap-2">
                 <span
                   className={`inline-block w-2 h-2 rounded-full shrink-0 ${
@@ -43,12 +92,9 @@ export function MagasinsExplorer({
               <p className="mt-0.5 text-xs text-zinc-500 pl-4">
                 {[m.codePostal, m.ville].filter(Boolean).join(" ") || "—"}
               </p>
-            </button>
-          ))}
-          {points.length === 0 && (
-            <p className="px-4 py-3 text-sm text-zinc-400">Aucun magasin ouvert pour le moment.</p>
+            </>
           )}
-        </div>
+        />
       </div>
 
       {/* Carte */}
@@ -61,16 +107,15 @@ export function MagasinsExplorer({
         <div>
           <h3 className="text-sm font-semibold text-zinc-900 mb-3">Villes en étude — opportunités à pourvoir</h3>
           <div className="max-h-64 overflow-y-auto rounded-2xl border border-zinc-200 bg-white shadow-sm">
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))]">
-              {villesEnEtude.map((v) => (
-                <button
-                  key={v.id}
-                  type="button"
-                  onClick={() => setSelectedId(v.id)}
-                  className={`w-full h-full text-left px-4 py-3 border-r border-b border-zinc-100 transition-colors ${
-                    selectedId === v.id ? "bg-amber-50" : "hover:bg-zinc-50"
-                  }`}
-                >
+            <JustifiedList
+              items={villesEnEtude}
+              keyFn={(v) => v.id}
+              selectedId={selectedId}
+              onSelect={setSelectedId}
+              selectedClass="bg-amber-50"
+              emptyLabel="Aucune ville en étude pour le moment."
+              renderItem={(v) => (
+                <>
                   <div className="flex items-center gap-2">
                     <span className="inline-block w-2 h-2 rounded-full shrink-0 bg-amber-500" />
                     <p className="text-sm font-semibold text-zinc-900">{v.nom}</p>
@@ -78,9 +123,9 @@ export function MagasinsExplorer({
                   {v.departement && (
                     <p className="mt-0.5 text-xs text-zinc-500 pl-4">{v.departement}</p>
                   )}
-                </button>
-              ))}
-            </div>
+                </>
+              )}
+            />
           </div>
         </div>
       )}
