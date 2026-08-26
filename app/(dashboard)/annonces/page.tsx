@@ -328,6 +328,12 @@ export default async function AnnoncesAdminPage() {
                         )}
                       </span>
                     </td>
+                    <td className="py-3 px-4 text-right">
+                      <VoirArticleLink
+                        href={`${baseUrl}/annonce/${a.id}`}
+                        className="text-xs text-zinc-400 hover:text-zinc-700"
+                      />
+                    </td>
                   </AnnonceRow>
                 ))}
               </tbody>
