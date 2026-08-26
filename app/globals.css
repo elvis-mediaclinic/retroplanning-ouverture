@@ -74,7 +74,7 @@ textarea {
      prioritaire sur ce layer components) remet margin-top à 0 sur tous ses
      enfants sauf le dernier — y compris le premier, ce header. */
   .page-header {
-    margin-top: calc(var(--spacing) * 6) !important;
+    margin-top: calc(var(--spacing) * 4) !important;
   }
   .page-header-title {
     @apply text-2xl font-bold uppercase text-[#0089bd];
