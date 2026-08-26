@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { STATUT_CANDIDAT_LABELS } from "@/lib/types";
 import { STATUT_CANDIDAT_COLORS } from "@/lib/utils";
+import { CopyEmail } from "./CopyEmail";
 
 type Candidat = {
   id: string;
@@ -40,7 +41,10 @@ export function CandidatRow({ c, showProjet }: { c: Candidat; showProjet?: boole
         <span className="font-medium text-zinc-900">{c.prenom} {c.nom}</span>
         {c.profil_id && <div className="text-xs text-green-600 mt-0.5">✓ Compte actif</div>}
       </td>
-      <td className="py-2 px-4 text-zinc-500">{c.email}</td>
+      <td className="py-2 px-4 text-zinc-500">
+        <CopyEmail email={c.email} />
+      </td>
+      <td className="py-2 px-4 text-zinc-500">{c.telephone ?? "—"}</td>
       <td className="py-2 px-4 text-zinc-500">{getVilles(c)}</td>
       <td className="py-2 px-4 text-zinc-500">
         {c.apport_personnel ? `${c.apport_personnel.toLocaleString("fr-FR")} €` : "—"}

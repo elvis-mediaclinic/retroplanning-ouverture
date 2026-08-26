@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { STATUT_CANDIDAT_LABELS } from "@/lib/types";
 import { STATUT_CANDIDAT_COLORS } from "@/lib/utils";
 import { CandidatRow } from "./CandidatRow";
+import { CopyEmail } from "./CopyEmail";
 
 type Candidat = {
   id: string;
@@ -41,7 +42,10 @@ function CandidatCard({ c, showProjet }: { c: Candidat; showProjet?: boolean }) 
         </span>
       </div>
       {c.profil_id && <p className="text-xs text-green-600 mt-0.5">✓ Compte actif</p>}
-      <p className="mt-0.5 text-xs text-zinc-500">{c.email}</p>
+      <p className="mt-0.5 text-xs text-zinc-500">
+        <CopyEmail email={c.email} />
+        {c.telephone && ` · ${c.telephone}`}
+      </p>
       <p className="mt-1 text-xs text-zinc-500">
         {getVilles(c)}
         {c.apport_personnel ? ` · ${c.apport_personnel.toLocaleString("fr-FR")} €` : ""}
@@ -76,6 +80,7 @@ function CandidatTable({ candidats, empty, showProjet }: { candidats: Candidat[]
           <tr className="bg-gradient-to-br from-[#00729e] to-[#0089bd] text-left">
             <th className="py-2 px-4 font-medium text-white">Nom</th>
             <th className="py-2 px-4 font-medium text-white">Email</th>
+            <th className="py-2 px-4 font-medium text-white">Téléphone</th>
             <th className="py-2 px-4 font-medium text-white">Ville</th>
             <th className="py-2 px-4 font-medium text-white">Apport</th>
             {showProjet && <th className="py-2 px-4 font-medium text-white">Projet</th>}
