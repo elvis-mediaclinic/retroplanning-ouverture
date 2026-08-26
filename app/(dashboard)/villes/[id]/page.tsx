@@ -66,7 +66,6 @@ export default async function EditVillePage({
 
       {/* Infos ville */}
       <section className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
-        <h2 className="text-sm font-semibold text-zinc-900 mb-4">Informations</h2>
         <VilleInfoPanel ville={ville} action={action} canEdit={canEdit} />
       </section>
 

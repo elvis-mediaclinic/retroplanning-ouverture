@@ -30,16 +30,16 @@ export function VilleInfoPanel({
 
   return (
     <div className="space-y-4">
-      {canEdit && (
-        <div className="flex justify-end">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-zinc-900">{ville.nom}</h2>
+        {canEdit && (
           <button type="button" onClick={() => setEditing(true)} className="btn-secondary text-sm">
             Modifier
           </button>
-        </div>
-      )}
+        )}
+      </div>
       <dl className="grid grid-cols-2 gap-4 sm:grid-cols-3 text-sm">
         {[
-          { label: "Ville", value: ville.nom },
           { label: "Département", value: ville.departement ?? "—" },
           { label: "Région", value: ville.region ?? "—" },
           { label: "Zone de chalandise", value: ville.zone_chalandise ?? "—" },
