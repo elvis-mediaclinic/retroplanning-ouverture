@@ -2,10 +2,35 @@
 
 import { useMemo, useState } from "react";
 import { useActionState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { BoldText } from "@/components/BoldText";
 import { VilleAutocomplete } from "@/components/VilleAutocomplete";
 import { submitInteretSpontane, type InteretSpontaneState } from "./actions";
+
+function CopyLienButton({ annonceId, consultantId }: { annonceId: string; consultantId: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const url = `${window.location.origin}/annonce/${annonceId}?c=${consultantId}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch { /* ignore */ }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={handleClick}
+      className="mt-4 inline-flex items-center gap-1 rounded-md bg-white/15 px-2.5 py-1 text-xs font-medium text-white hover:bg-white/25 transition-colors"
+    >
+      {copied ? "Lien copié !" : "Copier mon lien"}
+    </button>
+  );
+}
 
 type Annonce = {
   id: string;
@@ -113,8 +138,9 @@ function InteretSpontaneModal() {
   );
 }
 
-export function OpportunitesExplorer({ annonces }: { annonces: Annonce[] }) {
+export function OpportunitesExplorer({ annonces, consultantId }: { annonces: Annonce[]; consultantId?: string | null }) {
   const [search, setSearch] = useState("");
+  const router = useRouter();
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
@@ -155,10 +181,13 @@ export function OpportunitesExplorer({ annonces }: { annonces: Annonce[] }) {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map((a) => (
-            <Link
+            <div
               key={a.id}
-              href={`/annonce/${a.id}`}
-              className="block rounded-2xl bg-gradient-to-br from-[#00729e] to-[#0089bd] p-6 shadow-sm hover:brightness-110 transition-all"
+              role="link"
+              tabIndex={0}
+              onClick={() => router.push(`/annonce/${a.id}`)}
+              onKeyDown={(e) => { if (e.key === "Enter") router.push(`/annonce/${a.id}`); }}
+              className="block rounded-2xl bg-gradient-to-br from-[#00729e] to-[#0089bd] p-6 shadow-sm hover:brightness-110 transition-all cursor-pointer"
             >
               <div className="flex items-center justify-between gap-2 mb-2">
                 {a.ville ? (
@@ -183,7 +212,8 @@ export function OpportunitesExplorer({ annonces }: { annonces: Annonce[] }) {
               <span className="mt-4 inline-block text-sm font-medium text-white">
                 En savoir plus →
               </span>
-            </Link>
+              {consultantId && <CopyLienButton annonceId={a.id} consultantId={consultantId} />}
+            </div>
           ))}
         </div>
       )}

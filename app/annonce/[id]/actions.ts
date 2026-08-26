@@ -32,6 +32,7 @@ export async function submitCandidature(
   annonceId: string,
   villeId: string,
   magasinId: string,
+  consultantId: string,
   _state: CandidatureState,
   formData: FormData
 ): Promise<CandidatureState> {
@@ -54,6 +55,7 @@ export async function submitCandidature(
     annonce_id: annonceId,
     ville_id: villeId || null,
     magasin_id: magasinId || null,
+    consultant_id: consultantId || null,
     ...parsed.data,
     telephone: parsed.data.telephone ?? null,
     apport_personnel: parsed.data.apport_personnel ?? null,
@@ -82,9 +84,21 @@ export async function submitCandidature(
       ? (magasinRaw[0] as { nom: string } | undefined)?.nom
       : (magasinRaw as { nom: string } | null)?.nom;
 
+    // Consultant apporteur (lien de parrainage), pour la traçabilité des commissions
+    let consultantNom: string | null = null;
+    if (consultantId) {
+      const { data: consultantProfile } = await service
+        .from("profiles")
+        .select("prenom, nom")
+        .eq("id", consultantId)
+        .maybeSingle();
+      if (consultantProfile) consultantNom = `${consultantProfile.prenom} ${consultantProfile.nom}`;
+    }
+
     const dateStr = new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" });
     const notes = [
       `Candidature sur l'annonce "${annonceData?.titre ?? annonceId}" le ${dateStr}`,
+      consultantNom ? `Apportée par le consultant ${consultantNom}` : null,
       parsed.data.message ?? null,
     ].filter(Boolean).join("\n");
 
@@ -214,6 +228,10 @@ export async function submitCandidature(
                 <tr style="border-top:1px solid #f4f4f5">
                   <td style="padding:8px 0;color:#71717a">Annonce</td>
                   <td style="padding:8px 0">${annonceData?.titre ?? ""}</td>
+                </tr>
+                <tr style="border-top:1px solid #f4f4f5">
+                  <td style="padding:8px 0;color:#71717a">Origine</td>
+                  <td style="padding:8px 0">${consultantNom ? `Consultant — ${consultantNom}` : "Lien direct"}</td>
                 </tr>
               </table>
               <div style="margin-top:24px">

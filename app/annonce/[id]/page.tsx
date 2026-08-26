@@ -21,10 +21,13 @@ import { ViewTracker } from "./ViewTracker";
 
 export default async function AnnoncePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ c?: string }>;
 }) {
   const { id } = await params;
+  const { c: consultantParam } = await searchParams;
   const supabase = await createClient();
 
   const [{ data: annonce }, { data: conceptPage }, { data: { user } }] = await Promise.all([
@@ -58,6 +61,20 @@ export default async function AnnoncePage({
       .eq("id", annonce.magasin_id)
       .maybeSingle();
     magasin = data;
+  }
+
+  // Lien de parrainage consultant (?c=<profile_id>) : on ne fait confiance
+  // qu'à un id qui correspond bien à un profil du rôle "consultant".
+  let consultantId: string | null = null;
+  if (consultantParam) {
+    const service = createServiceClient();
+    const { data: consultantProfile } = await service
+      .from("profiles")
+      .select("id")
+      .eq("id", consultantParam)
+      .eq("role", "consultant")
+      .maybeSingle();
+    consultantId = consultantProfile?.id ?? null;
   }
 
   // Sections structurées (nouveau format) ou fallback sur l'ancien contenu_json
@@ -222,7 +239,12 @@ export default async function AnnoncePage({
           <p className="text-sm text-zinc-500 mb-6">
             Remplissez ce formulaire et l&apos;équipe Mediaclinic vous recontactera rapidement.
           </p>
-          <CandidatureForm annonceId={annonce.id} villeId={ville?.id ?? ""} magasinId={annonce.magasin_id ?? ""} />
+          <CandidatureForm
+            annonceId={annonce.id}
+            villeId={ville?.id ?? ""}
+            magasinId={annonce.magasin_id ?? ""}
+            consultantId={consultantId ?? ""}
+          />
         </div>
       </main>
 

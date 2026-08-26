@@ -7,12 +7,14 @@ export function CandidatureForm({
   annonceId,
   villeId,
   magasinId,
+  consultantId,
 }: {
   annonceId: string;
   villeId: string;
   magasinId?: string;
+  consultantId?: string;
 }) {
-  const action = submitCandidature.bind(null, annonceId, villeId, magasinId ?? "");
+  const action = submitCandidature.bind(null, annonceId, villeId, magasinId ?? "", consultantId ?? "");
   const [state, formAction, pending] = useActionState(action, undefined);
 
   if (state?.success) {

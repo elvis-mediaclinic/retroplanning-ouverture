@@ -10,11 +10,25 @@ export const metadata = { title: "Opportunités de franchise — Mediaclinic" };
 export default async function AnnoncesPage() {
   const supabase = await createClient();
 
-  const { data } = await supabase
-    .from("annonces")
-    .select("id, titre, accroche, type_annonce, magasin_id, villes(nom, departement, region)")
-    .eq("actif", true)
-    .order("created_at", { ascending: false });
+  const [{ data }, { data: { user } }] = await Promise.all([
+    supabase
+      .from("annonces")
+      .select("id, titre, accroche, type_annonce, magasin_id, villes(nom, departement, region)")
+      .eq("actif", true)
+      .order("created_at", { ascending: false }),
+    supabase.auth.getUser(),
+  ]);
+
+  // Lien de parrainage : uniquement proposé aux comptes du rôle "consultant"
+  let consultantId: string | null = null;
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("id, role")
+      .eq("id", user.id)
+      .maybeSingle();
+    if (profile?.role === "consultant") consultantId = profile.id;
+  }
 
   const rows = data ?? [];
 
@@ -79,7 +93,7 @@ export default async function AnnoncesPage() {
           </p>
         </div>
 
-        <OpportunitesExplorer annonces={annonces} />
+        <OpportunitesExplorer annonces={annonces} consultantId={consultantId} />
       </main>
 
       <PublicFooter />

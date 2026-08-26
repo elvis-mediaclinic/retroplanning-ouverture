@@ -22,7 +22,7 @@ export default async function EditVillePage({
     supabase.from("annonces").select("id, actif").eq("ville_id", id).maybeSingle(),
     supabase
       .from("candidatures")
-      .select("id, prenom, nom, email, telephone, apport_personnel, message, traite, created_at")
+      .select("id, prenom, nom, email, telephone, apport_personnel, message, traite, created_at, consultant_id, consultant:profiles(prenom, nom)")
       .eq("ville_id", id)
       .order("created_at", { ascending: false }),
     supabase.from("ville_concurrents").select("*").eq("ville_id", id),
@@ -125,14 +125,31 @@ export default async function EditVillePage({
                       )}
                     </div>
                     <div className="space-y-2">
-                      {msgs!.map((m) => (
-                        <div key={m.id} className="rounded-md bg-zinc-50 px-3 py-2 text-xs text-zinc-500">
-                          <span className="text-zinc-400 mr-2">
-                            {new Date(m.created_at).toLocaleDateString("fr-FR")}
-                          </span>
-                          {m.message ? m.message : <span className="italic">Aucun message</span>}
-                        </div>
-                      ))}
+                      {msgs!.map((m) => {
+                        const consultantRaw = m.consultant as unknown;
+                        const consultant = Array.isArray(consultantRaw)
+                          ? (consultantRaw[0] as { prenom: string; nom: string } | undefined)
+                          : (consultantRaw as { prenom: string; nom: string } | null);
+                        return (
+                          <div key={m.id} className="rounded-md bg-zinc-50 px-3 py-2 text-xs text-zinc-500">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-zinc-400">
+                                {new Date(m.created_at).toLocaleDateString("fr-FR")}
+                              </span>
+                              {consultant ? (
+                                <span className="rounded-full bg-brand/10 px-2 py-0.5 text-[10px] font-medium text-brand">
+                                  Consultant — {consultant.prenom} {consultant.nom}
+                                </span>
+                              ) : (
+                                <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-[10px] font-medium text-zinc-400">
+                                  Lien direct
+                                </span>
+                              )}
+                            </div>
+                            {m.message ? m.message : <span className="italic">Aucun message</span>}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 );
