@@ -86,13 +86,58 @@ function VilleRow({ v, canEdit }: { v: Ville; canEdit: boolean }) {
   );
 }
 
+function VilleCard({ v, canEdit }: { v: Ville; canEdit: boolean }) {
+  const annonce = v.annonces?.[0] ?? null;
+  const nbCandidatures = v.candidatures?.length ?? 0;
+  const projetsActifs = (v.projets ?? []).filter((p) =>
+    ["prospection", "en_cours"].includes(p.statut)
+  );
+
+  return (
+    <Link href={`/villes/${v.id}`} className="block px-4 py-3 hover:bg-zinc-50">
+      <div className="flex items-center justify-between gap-2">
+        <p className="font-medium text-zinc-900">{v.nom}</p>
+        {annonce && (
+          <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
+            annonce.actif ? "bg-green-100 text-green-700" : "bg-zinc-100 text-zinc-500"
+          }`}>
+            {annonce.actif ? "Publiée" : "Brouillon"}
+          </span>
+        )}
+      </div>
+      <p className="mt-0.5 text-xs text-zinc-400">
+        {[v.departement, v.region].filter(Boolean).join(" · ") || "—"}
+        {v.zone_chalandise && ` · ${v.zone_chalandise}`}
+      </p>
+      <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+        {projetsActifs.length > 0 && (
+          <span className="rounded-full bg-brand/10 px-2 py-0.5 text-xs font-medium text-brand">
+            {projetsActifs.length} projet{projetsActifs.length > 1 ? "s" : ""}
+          </span>
+        )}
+        {nbCandidatures > 0 && (
+          <span className="rounded-full bg-brand/10 px-2 py-0.5 text-xs font-medium text-brand">
+            {nbCandidatures} candidature{nbCandidatures > 1 ? "s" : ""}
+          </span>
+        )}
+      </div>
+    </Link>
+  );
+}
+
 function VilleTable({ villes, canEdit, empty }: { villes: Ville[]; canEdit: boolean; empty: string }) {
   if (villes.length === 0) {
     return <p className="text-sm text-zinc-400 py-3">{empty}</p>;
   }
   return (
     <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm">
-      <table className="w-full text-sm">
+      {/* Mobile : cartes */}
+      <div className="sm:hidden divide-y divide-zinc-100">
+        {villes.map((v) => <VilleCard key={v.id} v={v} canEdit={canEdit} />)}
+      </div>
+
+      {/* Desktop : tableau */}
+      <table className="hidden sm:table w-full text-sm">
         <thead>
           <tr className="bg-gradient-to-br from-[#00729e] to-[#0089bd] text-left">
             <th className="py-2 px-4 font-medium text-white">Ville</th>

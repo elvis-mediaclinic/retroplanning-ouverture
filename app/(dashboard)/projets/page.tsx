@@ -55,7 +55,60 @@ export default async function ProjetsPage() {
       </div>
 
       <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm">
-        <table className="w-full text-sm">
+        {/* Mobile : cartes */}
+        <div className="sm:hidden divide-y divide-zinc-100">
+          {(projets ?? []).map((p) => {
+            const villeRaw = p.villes as unknown;
+            const ville = Array.isArray(villeRaw) ? (villeRaw[0] as { nom: string } | undefined) ?? null : (villeRaw as { nom: string } | null);
+            const candidatRaw = p.candidats as unknown;
+            const candidat = Array.isArray(candidatRaw) ? (candidatRaw[0] as { nom: string; prenom: string } | undefined) ?? null : (candidatRaw as { nom: string; prenom: string } | null);
+            const { progression, total, retard, aFaire } = statsForProjet(p.id);
+
+            return (
+              <Link key={p.id} href={`/projets/${p.id}`} className="block px-4 py-3 hover:bg-zinc-50">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="font-medium text-zinc-900">{p.nom}</p>
+                  <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${STATUT_PROJET_COLORS[p.statut as keyof typeof STATUT_PROJET_COLORS]}`}>
+                    {STATUT_PROJET_LABELS[p.statut as keyof typeof STATUT_PROJET_LABELS]}
+                  </span>
+                </div>
+                <p className="mt-0.5 text-xs text-zinc-400">
+                  {TYPE_LABELS[p.type_magasin as keyof typeof TYPE_LABELS]} · {FORMAT_LABELS[p.format_magasin as keyof typeof FORMAT_LABELS]}
+                </p>
+                <p className="mt-1.5 text-xs text-zinc-500">
+                  {ville?.nom ?? "—"} · {candidat ? `${candidat.prenom} ${candidat.nom}` : "—"} · {formatDate(p.date_cible_ouverture)}
+                </p>
+                <div className="mt-2 flex items-center gap-3">
+                  {total > 0 ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-16 h-1.5 rounded-full bg-zinc-100 overflow-hidden">
+                        <div className="h-1.5 rounded-full bg-green-500" style={{ width: `${progression}%` }} />
+                      </div>
+                      <span className="text-xs text-zinc-500">{progression}%</span>
+                    </div>
+                  ) : (
+                    <span className="text-zinc-300 text-xs">—</span>
+                  )}
+                  {aFaire > 0 && <span className="text-xs text-zinc-600">{aFaire} à faire</span>}
+                  {retard > 0 && (
+                    <span className="rounded-full bg-red-100 text-red-700 px-2 py-0.5 text-xs font-semibold">
+                      ⚠️ {retard} en retard
+                    </span>
+                  )}
+                </div>
+              </Link>
+            );
+          })}
+          {(projets ?? []).length === 0 && (
+            <p className="py-6 px-4 text-center text-zinc-400">
+              Aucun projet.{" "}
+              <Link href="/projets/new" className="text-zinc-600 underline">Créer le premier</Link>
+            </p>
+          )}
+        </div>
+
+        {/* Desktop : tableau */}
+        <table className="hidden sm:table w-full text-sm">
           <thead>
             <tr className="bg-gradient-to-br from-[#00729e] to-[#0089bd] text-left">
               <th className="py-2 px-4 font-medium text-white">Projet</th>

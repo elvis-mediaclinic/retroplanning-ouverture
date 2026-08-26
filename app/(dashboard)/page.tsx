@@ -293,48 +293,75 @@ export default async function DashboardPage() {
           </Link>
         </div>
 
-        <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-gradient-to-br from-[#00729e] to-[#0089bd] text-left">
-                <th className="py-2 px-4 font-medium text-white">Projet</th>
-                <th className="py-2 px-4 font-medium text-white">Format</th>
-                <th className="py-2 px-4 font-medium text-white">Statut</th>
-                <th className="py-2 px-4 font-medium text-white">Ouverture cible</th>
-              </tr>
-            </thead>
-            <tbody>
-              {(projets ?? [])
-                .filter((p) => p.statut !== "abandonne")
-                .map((p) => (
-                  <tr key={p.id} className="border-b border-zinc-100 last:border-0">
-                    <td className="py-2 px-4">
-                      <Link href={`/projets/${p.id}`} className="font-medium text-zinc-900 hover:underline">
-                        {p.nom}
-                      </Link>
-                    </td>
-                    <td className="py-2 px-4 text-zinc-600">
-                      {FORMAT_LABELS[p.format_magasin as keyof typeof FORMAT_LABELS]}
-                    </td>
-                    <td className="py-2 px-4">
-                      <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${COLORS[p.statut as keyof typeof COLORS]}`}>
+        {(() => {
+          const ouvertures = (projets ?? []).filter((p) => p.statut !== "abandonne");
+          return (
+            <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm">
+              {/* Mobile : cartes */}
+              <div className="sm:hidden divide-y divide-zinc-100">
+                {ouvertures.map((p) => (
+                  <Link key={p.id} href={`/projets/${p.id}`} className="block px-4 py-3 hover:bg-zinc-50">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="font-medium text-zinc-900">{p.nom}</p>
+                      <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${COLORS[p.statut as keyof typeof COLORS]}`}>
                         {STATUT_PROJET_LABELS[p.statut as keyof typeof STATUT_PROJET_LABELS]}
                       </span>
-                    </td>
-                    <td className="py-2 px-4 text-zinc-500">{formatDate(p.date_cible_ouverture)}</td>
-                  </tr>
+                    </div>
+                    <p className="mt-1 text-xs text-zinc-500">
+                      {FORMAT_LABELS[p.format_magasin as keyof typeof FORMAT_LABELS]} · {formatDate(p.date_cible_ouverture)}
+                    </p>
+                  </Link>
                 ))}
-              {(projets ?? []).filter((p) => p.statut !== "abandonne").length === 0 && (
-                <tr>
-                  <td colSpan={4} className="py-6 px-4 text-center text-zinc-400">
+                {ouvertures.length === 0 && (
+                  <p className="py-6 px-4 text-center text-zinc-400">
                     Aucun projet.{" "}
                     <Link href="/projets/new" className="text-zinc-600 underline">Créer le premier</Link>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+                  </p>
+                )}
+              </div>
+
+              {/* Desktop : tableau */}
+              <table className="hidden sm:table w-full text-sm">
+                <thead>
+                  <tr className="bg-gradient-to-br from-[#00729e] to-[#0089bd] text-left">
+                    <th className="py-2 px-4 font-medium text-white">Projet</th>
+                    <th className="py-2 px-4 font-medium text-white">Format</th>
+                    <th className="py-2 px-4 font-medium text-white">Statut</th>
+                    <th className="py-2 px-4 font-medium text-white">Ouverture cible</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {ouvertures.map((p) => (
+                    <tr key={p.id} className="border-b border-zinc-100 last:border-0">
+                      <td className="py-2 px-4">
+                        <Link href={`/projets/${p.id}`} className="font-medium text-zinc-900 hover:underline">
+                          {p.nom}
+                        </Link>
+                      </td>
+                      <td className="py-2 px-4 text-zinc-600">
+                        {FORMAT_LABELS[p.format_magasin as keyof typeof FORMAT_LABELS]}
+                      </td>
+                      <td className="py-2 px-4">
+                        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${COLORS[p.statut as keyof typeof COLORS]}`}>
+                          {STATUT_PROJET_LABELS[p.statut as keyof typeof STATUT_PROJET_LABELS]}
+                        </span>
+                      </td>
+                      <td className="py-2 px-4 text-zinc-500">{formatDate(p.date_cible_ouverture)}</td>
+                    </tr>
+                  ))}
+                  {ouvertures.length === 0 && (
+                    <tr>
+                      <td colSpan={4} className="py-6 px-4 text-center text-zinc-400">
+                        Aucun projet.{" "}
+                        <Link href="/projets/new" className="text-zinc-600 underline">Créer le premier</Link>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          );
+        })()}
       </section>
     </div>
   );

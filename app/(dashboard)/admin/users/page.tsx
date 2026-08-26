@@ -26,7 +26,24 @@ type Profile = {
 function UserTable({ profiles }: { profiles: Profile[] }) {
   return (
     <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm">
-      <table className="w-full text-sm">
+      {/* Mobile : cartes */}
+      <div className="sm:hidden divide-y divide-zinc-100">
+        {profiles.map((p) => (
+          <div key={p.id} className="flex items-center justify-between gap-2 px-4 py-3">
+            <div className="min-w-0">
+              <p className="font-medium text-zinc-900 truncate">{p.prenom} {p.nom}</p>
+              <p className="text-xs text-zinc-500 truncate">{p.email}</p>
+              {p.fonction && <p className="text-xs text-zinc-400 truncate">{p.fonction}</p>}
+            </div>
+            <div className="shrink-0">
+              <EditUserForm profile={p} />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop : tableau */}
+      <table className="hidden sm:table w-full text-sm">
         <thead>
           <tr className="bg-gradient-to-br from-[#00729e] to-[#0089bd] text-left">
             <th className="py-2 px-4 font-medium text-white">Nom</th>

@@ -95,7 +95,49 @@ export default async function AnnoncesAdminPage() {
             Publiées
           </h2>
           <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm">
-            <table className="w-full text-sm">
+            {/* Mobile : cartes */}
+            <div className="sm:hidden divide-y divide-zinc-100">
+              {publiees.map((a) => {
+                const ville = getVille(a);
+                const s = statsFor(a.id);
+                return (
+                  <div key={a.id} className="px-4 py-3">
+                    <p className="font-medium text-zinc-900">{a.titre}</p>
+                    <p className="mt-0.5 text-xs text-zinc-500">
+                      {ville ? `${ville.nom}${ville.departement ? ` (${ville.departement})` : ""}` : "—"}
+                    </p>
+                    <div className="mt-1.5 flex items-center gap-3 text-xs text-zinc-600">
+                      <span>{s.total} vue{s.total !== 1 ? "s" : ""}</span>
+                      <span>{s.unique} visiteur{s.unique !== 1 ? "s" : ""}</span>
+                      <span className={s.contacts > 0 ? "font-semibold text-brand" : "text-zinc-400"}>
+                        {s.contacts} contact{s.contacts !== 1 ? "s" : ""}
+                      </span>
+                    </div>
+                    <div className="mt-2 flex items-center gap-3">
+                      <a
+                        href={`${baseUrl}/annonce/${a.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-zinc-400 hover:text-zinc-700"
+                      >
+                        Voir ↗
+                      </a>
+                      {ville && (
+                        <Link
+                          href={`/villes/${ville.id}`}
+                          className="text-xs text-zinc-500 hover:text-zinc-900 hover:underline"
+                        >
+                          Modifier
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Desktop : tableau */}
+            <table className="hidden sm:table w-full text-sm">
               <thead>
                 <tr className="bg-gradient-to-br from-[#00729e] to-[#0089bd] text-left">
                   <th className="py-2 px-4 font-medium text-white">Ville</th>
@@ -168,7 +210,33 @@ export default async function AnnoncesAdminPage() {
             Brouillons
           </h2>
           <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm">
-            <table className="w-full text-sm">
+            {/* Mobile : cartes */}
+            <div className="sm:hidden divide-y divide-zinc-100">
+              {brouillons.map((a) => {
+                const ville = getVille(a);
+                return (
+                  <div key={a.id} className="flex items-center justify-between gap-2 px-4 py-3 opacity-70">
+                    <div className="min-w-0">
+                      <p className="text-zinc-700 truncate">{a.titre || <span className="italic text-zinc-400">Sans titre</span>}</p>
+                      <p className="text-xs text-zinc-500 truncate">
+                        {ville ? `${ville.nom}${ville.departement ? ` (${ville.departement})` : ""}` : "—"}
+                      </p>
+                    </div>
+                    {ville && (
+                      <Link
+                        href={`/villes/${ville.id}`}
+                        className="shrink-0 text-xs text-zinc-500 hover:text-zinc-900 hover:underline"
+                      >
+                        Éditer
+                      </Link>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Desktop : tableau */}
+            <table className="hidden sm:table w-full text-sm">
               <thead>
                 <tr className="bg-gradient-to-br from-[#00729e] to-[#0089bd] text-left">
                   <th className="py-2 px-4 font-medium text-white">Ville</th>
