@@ -12,6 +12,7 @@ export default async function AnnoncesAdminPage() {
 
   const [
     { data: annonces },
+    { data: cessionAnnonces },
     { data: allViews },
     { data: allCandidatures },
     { data: toutesVilles },
@@ -21,12 +22,55 @@ export default async function AnnoncesAdminPage() {
       .select("id, titre, actif, ville_id, villes(id, nom, departement)")
       .eq("type_annonce", "ouverture")
       .order("created_at", { ascending: false }),
+    supabase
+      .from("annonces")
+      .select("id, titre, actif, magasin_id, magasins(id, nom, ville, code_postal)")
+      .eq("type_annonce", "cession")
+      .order("created_at", { ascending: false }),
     supabase.from("annonce_views").select("annonce_id, visitor_id"),
     supabase.from("candidatures").select("annonce_id"),
     supabase.from("villes").select("id, nom, departement").order("nom"),
   ]);
 
-  const annonceList = annonces ?? [];
+  function getVille(a: { villes: unknown }) {
+    const raw = a.villes;
+    return Array.isArray(raw)
+      ? (raw[0] as { id: string; nom: string; departement?: string } | undefined)
+      : (raw as { id: string; nom: string; departement?: string } | null);
+  }
+
+  function getMagasin(a: { magasins: unknown }) {
+    const raw = a.magasins;
+    return Array.isArray(raw)
+      ? (raw[0] as { id: string; nom: string; ville: string | null; code_postal: string | null } | undefined)
+      : (raw as { id: string; nom: string; ville: string | null; code_postal: string | null } | null);
+  }
+
+  // Fusionne ouvertures et cessions dans une forme commune pour l'affichage
+  const annonceList = [
+    ...(annonces ?? []).map((a) => ({
+      id: a.id,
+      titre: a.titre,
+      actif: a.actif,
+      isCession: false as const,
+      lieu: getVille(a),
+      href: getVille(a) ? `/villes/${getVille(a)!.id}` : null,
+      sousTitre: null as string | null,
+    })),
+    ...(cessionAnnonces ?? []).map((a) => {
+      const magasin = getMagasin(a);
+      return {
+        id: a.id,
+        titre: a.titre,
+        actif: a.actif,
+        isCession: true as const,
+        lieu: magasin ? { id: magasin.id, nom: magasin.nom, departement: undefined } : null,
+        href: magasin ? `/reseau/${magasin.id}/cession` : null,
+        sousTitre: magasin ? [magasin.code_postal, magasin.ville].filter(Boolean).join(" ") : null,
+      };
+    }),
+  ];
+
   const views = allViews ?? [];
   const candidatures = allCandidatures ?? [];
 
@@ -48,16 +92,9 @@ export default async function AnnoncesAdminPage() {
   const totalUnique = new Set(views.map((v) => v.visitor_id)).size;
   const totalContacts = candidatures.length;
 
-  // Villes disponibles (sans annonce)
-  const villesAvecAnnonce = new Set(annonceList.map((a) => a.ville_id));
+  // Villes disponibles (sans annonce d'ouverture)
+  const villesAvecAnnonce = new Set((annonces ?? []).map((a) => a.ville_id));
   const villesDisponibles = (toutesVilles ?? []).filter((v) => !villesAvecAnnonce.has(v.id));
-
-  function getVille(a: typeof annonceList[number]) {
-    const raw = a.villes as unknown;
-    return Array.isArray(raw)
-      ? (raw[0] as { id: string; nom: string; departement?: string } | undefined)
-      : (raw as { id: string; nom: string; departement?: string } | null);
-  }
 
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://retroplanning-ouverture.vercel.app";
 
@@ -100,13 +137,20 @@ export default async function AnnoncesAdminPage() {
             {/* Mobile : cartes */}
             <div className="sm:hidden divide-y divide-zinc-100">
               {publiees.map((a) => {
-                const ville = getVille(a);
                 const s = statsFor(a.id);
                 return (
                   <div key={a.id} className="px-4 py-3">
-                    <p className="font-medium text-zinc-900">{a.titre}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium text-zinc-900">{a.titre}</p>
+                      {a.isCession && (
+                        <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700">
+                          Cession
+                        </span>
+                      )}
+                    </div>
                     <p className="mt-0.5 text-xs text-zinc-500">
-                      {ville ? `${ville.nom}${ville.departement ? ` (${ville.departement})` : ""}` : "—"}
+                      {a.lieu ? `${a.lieu.nom}${a.lieu.departement ? ` (${a.lieu.departement})` : ""}` : "—"}
+                      {a.sousTitre && ` · ${a.sousTitre}`}
                     </p>
                     <div className="mt-1.5 flex items-center gap-3 text-xs text-zinc-600">
                       <span>{s.total} vue{s.total !== 1 ? "s" : ""}</span>
@@ -124,9 +168,9 @@ export default async function AnnoncesAdminPage() {
                       >
                         Voir l&apos;article ↗
                       </a>
-                      {ville && (
+                      {a.href && (
                         <Link
-                          href={`/villes/${ville.id}`}
+                          href={a.href}
                           className="text-xs text-zinc-500 hover:text-zinc-900 hover:underline"
                         >
                           Modifier
@@ -142,7 +186,7 @@ export default async function AnnoncesAdminPage() {
             <table className="hidden sm:table w-full text-sm">
               <thead>
                 <tr className="bg-gradient-to-br from-[#00729e] to-[#0089bd] text-left">
-                  <th className="py-2 px-4 font-medium text-white">Ville</th>
+                  <th className="py-2 px-4 font-medium text-white">Ville / Magasin</th>
                   <th className="py-2 px-4 font-medium text-white">Titre</th>
                   <th className="py-2 px-4 font-medium text-white text-right">Vues</th>
                   <th className="py-2 px-4 font-medium text-white text-right">Visiteurs</th>
@@ -152,21 +196,32 @@ export default async function AnnoncesAdminPage() {
               </thead>
               <tbody className="divide-y divide-zinc-100">
                 {publiees.map((a) => {
-                  const ville = getVille(a);
                   const s = statsFor(a.id);
                   return (
-                    <AnnonceRow key={a.id} ville={ville ?? null}>
+                    <AnnonceRow key={a.id} href={a.href}>
                       <td className="py-3 px-4 text-zinc-600">
-                        {ville ? (
+                        {a.lieu ? (
                           <span>
-                            {ville.nom}
-                            {ville.departement && (
-                              <span className="ml-1 text-zinc-400 text-xs">({ville.departement})</span>
+                            {a.lieu.nom}
+                            {a.lieu.departement && (
+                              <span className="ml-1 text-zinc-400 text-xs">({a.lieu.departement})</span>
+                            )}
+                            {a.sousTitre && (
+                              <span className="ml-1 text-zinc-400 text-xs">({a.sousTitre})</span>
                             )}
                           </span>
                         ) : "—"}
                       </td>
-                      <td className="py-3 px-4 font-medium text-zinc-900">{a.titre}</td>
+                      <td className="py-3 px-4 font-medium text-zinc-900">
+                        <span className="flex items-center gap-2">
+                          {a.titre}
+                          {a.isCession && (
+                            <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700">
+                              Cession
+                            </span>
+                          )}
+                        </span>
+                      </td>
                       <td className="py-3 px-4 text-right tabular-nums text-zinc-700">{s.total}</td>
                       <td className="py-3 px-4 text-right tabular-nums text-zinc-700">{s.unique}</td>
                       <td className="py-3 px-4 text-right tabular-nums">
@@ -200,58 +255,70 @@ export default async function AnnoncesAdminPage() {
           <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm">
             {/* Mobile : cartes */}
             <div className="sm:hidden divide-y divide-zinc-100">
-              {brouillons.map((a) => {
-                const ville = getVille(a);
-                return (
-                  <div key={a.id} className="flex items-center justify-between gap-2 px-4 py-3 opacity-70">
-                    <div className="min-w-0">
+              {brouillons.map((a) => (
+                <div key={a.id} className="flex items-center justify-between gap-2 px-4 py-3 opacity-70">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
                       <p className="text-zinc-700 truncate">{a.titre || <span className="italic text-zinc-400">Sans titre</span>}</p>
-                      <p className="text-xs text-zinc-500 truncate">
-                        {ville ? `${ville.nom}${ville.departement ? ` (${ville.departement})` : ""}` : "—"}
-                      </p>
+                      {a.isCession && (
+                        <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700">
+                          Cession
+                        </span>
+                      )}
                     </div>
-                    {ville && (
-                      <Link
-                        href={`/villes/${ville.id}`}
-                        className="shrink-0 text-xs text-zinc-500 hover:text-zinc-900 hover:underline"
-                      >
-                        Éditer
-                      </Link>
-                    )}
+                    <p className="text-xs text-zinc-500 truncate">
+                      {a.lieu ? `${a.lieu.nom}${a.lieu.departement ? ` (${a.lieu.departement})` : ""}` : "—"}
+                      {a.sousTitre && ` · ${a.sousTitre}`}
+                    </p>
                   </div>
-                );
-              })}
+                  {a.href && (
+                    <Link
+                      href={a.href}
+                      className="shrink-0 text-xs text-zinc-500 hover:text-zinc-900 hover:underline"
+                    >
+                      Éditer
+                    </Link>
+                  )}
+                </div>
+              ))}
             </div>
 
             {/* Desktop : tableau */}
             <table className="hidden sm:table w-full text-sm">
               <thead>
                 <tr className="bg-gradient-to-br from-[#00729e] to-[#0089bd] text-left">
-                  <th className="py-2 px-4 font-medium text-white">Ville</th>
+                  <th className="py-2 px-4 font-medium text-white">Ville / Magasin</th>
                   <th className="py-2 px-4 font-medium text-white">Titre</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100">
-                {brouillons.map((a) => {
-                  const ville = getVille(a);
-                  return (
-                    <AnnonceRow key={a.id} ville={ville ?? null} className="opacity-70">
-                      <td className="py-3 px-4 text-zinc-500">
-                        {ville ? (
-                          <span>
-                            {ville.nom}
-                            {ville.departement && (
-                              <span className="ml-1 text-zinc-400 text-xs">({ville.departement})</span>
-                            )}
-                          </span>
-                        ) : "—"}
-                      </td>
-                      <td className="py-3 px-4 text-zinc-700">
+                {brouillons.map((a) => (
+                  <AnnonceRow key={a.id} href={a.href} className="opacity-70">
+                    <td className="py-3 px-4 text-zinc-500">
+                      {a.lieu ? (
+                        <span>
+                          {a.lieu.nom}
+                          {a.lieu.departement && (
+                            <span className="ml-1 text-zinc-400 text-xs">({a.lieu.departement})</span>
+                          )}
+                          {a.sousTitre && (
+                            <span className="ml-1 text-zinc-400 text-xs">({a.sousTitre})</span>
+                          )}
+                        </span>
+                      ) : "—"}
+                    </td>
+                    <td className="py-3 px-4 text-zinc-700">
+                      <span className="flex items-center gap-2">
                         {a.titre || <span className="italic text-zinc-400">Sans titre</span>}
-                      </td>
-                    </AnnonceRow>
-                  );
-                })}
+                        {a.isCession && (
+                          <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700">
+                            Cession
+                          </span>
+                        )}
+                      </span>
+                    </td>
+                  </AnnonceRow>
+                ))}
               </tbody>
             </table>
           </div>
