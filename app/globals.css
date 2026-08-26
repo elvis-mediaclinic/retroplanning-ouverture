@@ -69,9 +69,12 @@ textarea {
   }
 
   /* Header de page admin : titre + marge, sans carte. Un seul endroit à
-     modifier pour changer le style de tous les headers de l'admin. */
+     modifier pour changer le style de tous les headers de l'admin.
+     !important nécessaire : en Tailwind v4, "space-y-*" (layer utilities,
+     prioritaire sur ce layer components) remet margin-top à 0 sur tous ses
+     enfants sauf le dernier — y compris le premier, ce header. */
   .page-header {
-    @apply mt-6;
+    margin-top: calc(var(--spacing) * 6) !important;
   }
   .page-header-title {
     @apply text-2xl font-bold uppercase text-[#0089bd];
