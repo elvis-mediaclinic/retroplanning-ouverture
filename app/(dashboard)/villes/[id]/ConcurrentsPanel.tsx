@@ -119,55 +119,64 @@ export function ConcurrentsPanel({
         <ConcurrentForm villeId={villeId} onDone={() => setAdding(false)} />
       )}
 
-      <ul className="space-y-2">
-        {sorted.map((c) => {
-          if (editingId === c.id) {
-            return (
-              <li key={c.id}>
-                <ConcurrentForm villeId={villeId} concurrent={c} onDone={() => setEditingId(null)} />
-              </li>
-            );
-          }
-          return (
-            <li key={c.id} className="flex items-start gap-3 rounded-md border border-zinc-200 bg-white p-3">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-sm font-medium text-zinc-900">{c.enseigne}</span>
-                  <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-600">
-                    {TYPE_CONCURRENT_LABELS[c.type]}
-                  </span>
-                  {c.franchise ? (
-                    <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
-                      Franchise
-                    </span>
-                  ) : (
-                    <span className="rounded-full bg-zinc-50 px-2 py-0.5 text-xs text-zinc-400">
-                      Indépendant
-                    </span>
-                  )}
-                </div>
-                {c.notes && <p className="mt-1 text-sm text-zinc-600 whitespace-pre-line">{c.notes}</p>}
-              </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => { setEditingId(c.id); setAdding(false); }}
-                  className="text-xs text-zinc-500 hover:text-zinc-900"
-                >
-                  Éditer
-                </button>
-                <button
-                  type="button"
-                  onClick={() => deleteConcurrent(c.id, villeId)}
-                  className="text-xs text-red-500 hover:text-red-700"
-                >
-                  Suppr.
-                </button>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
+      {sorted.length > 0 && (
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-zinc-200 text-left text-xs text-zinc-400">
+              <th className="pb-2 font-medium">Enseigne</th>
+              <th className="pb-2 font-medium">Type</th>
+              <th className="pb-2 font-medium">Structure</th>
+              <th className="pb-2 font-medium">Notes</th>
+              <th className="pb-2" />
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-zinc-100">
+            {sorted.map((c) => {
+              if (editingId === c.id) {
+                return (
+                  <tr key={c.id}>
+                    <td colSpan={5} className="py-2">
+                      <ConcurrentForm villeId={villeId} concurrent={c} onDone={() => setEditingId(null)} />
+                    </td>
+                  </tr>
+                );
+              }
+              return (
+                <tr key={c.id}>
+                  <td className="py-2 pr-3 font-medium text-zinc-900 whitespace-nowrap">{c.enseigne}</td>
+                  <td className="py-2 pr-3 text-zinc-600 whitespace-nowrap">{TYPE_CONCURRENT_LABELS[c.type]}</td>
+                  <td className="py-2 pr-3 whitespace-nowrap">
+                    {c.franchise ? (
+                      <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
+                        Franchise
+                      </span>
+                    ) : (
+                      <span className="text-xs text-zinc-400">Indépendant</span>
+                    )}
+                  </td>
+                  <td className="py-2 pr-3 text-zinc-500">{c.notes || "—"}</td>
+                  <td className="py-2 text-right whitespace-nowrap">
+                    <button
+                      type="button"
+                      onClick={() => { setEditingId(c.id); setAdding(false); }}
+                      className="text-xs text-zinc-500 hover:text-zinc-900"
+                    >
+                      Éditer
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => deleteConcurrent(c.id, villeId)}
+                      className="ml-3 text-xs text-red-500 hover:text-red-700"
+                    >
+                      Suppr.
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 }
