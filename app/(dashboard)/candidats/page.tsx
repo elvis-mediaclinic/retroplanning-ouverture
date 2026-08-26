@@ -3,6 +3,7 @@ import { requireMC } from "@/lib/dal";
 import { createClient } from "@/lib/supabase/server";
 import { STATUT_CANDIDAT_LABELS } from "@/lib/types";
 import { STATUT_CANDIDAT_COLORS } from "@/lib/utils";
+import { CandidatRow } from "./CandidatRow";
 
 type Candidat = {
   id: string;
@@ -25,46 +26,6 @@ function getVilles(c: Candidat) {
     return Array.isArray(v) ? v[0]?.nom : v?.nom;
   }).filter(Boolean) as string[];
   return noms.length > 0 ? noms.join(", ") : (c.zone_souhaitee ?? "—");
-}
-
-function CandidatRow({ c, showProjet }: { c: Candidat; showProjet?: boolean }) {
-  const projetsActifs = (c.projets ?? []).filter((p) => ["prospection", "en_cours"].includes(p.statut));
-  return (
-    <tr className="border-b border-zinc-100 last:border-0">
-      <td className="py-2 px-4">
-        <Link href={`/candidats/${c.id}`} className="font-medium text-zinc-900 hover:underline">
-          {c.prenom} {c.nom}
-        </Link>
-        {c.profil_id && <div className="text-xs text-green-600 mt-0.5">✓ Compte actif</div>}
-      </td>
-      <td className="py-2 px-4 text-zinc-500">{c.email}</td>
-      <td className="py-2 px-4 text-zinc-500">{getVilles(c)}</td>
-      <td className="py-2 px-4 text-zinc-500">
-        {c.apport_personnel ? `${c.apport_personnel.toLocaleString("fr-FR")} €` : "—"}
-      </td>
-      {showProjet && (
-        <td className="py-2 px-4">
-          {projetsActifs.length > 0 ? (
-            <div className="flex flex-wrap gap-1">
-              {projetsActifs.map((p) => (
-                <Link key={p.id} href={`/projets/${p.id}`}
-                  className="rounded-full bg-brand/10 px-2 py-0.5 text-xs font-medium text-brand hover:bg-brand/20">
-                  Projet →
-                </Link>
-              ))}
-            </div>
-          ) : "—"}
-        </td>
-      )}
-      <td className="py-2 px-4">
-        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-          STATUT_CANDIDAT_COLORS[c.statut as keyof typeof STATUT_CANDIDAT_COLORS]
-        }`}>
-          {STATUT_CANDIDAT_LABELS[c.statut as keyof typeof STATUT_CANDIDAT_LABELS]}
-        </span>
-      </td>
-    </tr>
-  );
 }
 
 function CandidatCard({ c, showProjet }: { c: Candidat; showProjet?: boolean }) {
@@ -115,7 +76,7 @@ function CandidatTable({ candidats, empty, showProjet }: { candidats: Candidat[]
           <tr className="bg-gradient-to-br from-[#00729e] to-[#0089bd] text-left">
             <th className="py-2 px-4 font-medium text-white">Nom</th>
             <th className="py-2 px-4 font-medium text-white">Email</th>
-            <th className="py-2 px-4 font-medium text-white">Zone</th>
+            <th className="py-2 px-4 font-medium text-white">Ville</th>
             <th className="py-2 px-4 font-medium text-white">Apport</th>
             {showProjet && <th className="py-2 px-4 font-medium text-white">Projet</th>}
             <th className="py-2 px-4 font-medium text-white">Statut</th>
