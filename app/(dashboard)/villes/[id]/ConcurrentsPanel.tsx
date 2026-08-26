@@ -29,19 +29,34 @@ function parseZoneChalandise(zone: string | null): number | null {
   return Number.isFinite(n) && n > 0 ? n : null;
 }
 
+// Densité de référence (unités de pression pondérée pour 100 000 habitants)
+// à partir de laquelle le marché est considéré comme totalement saturé (10/10).
+// Ex. 4 réparateurs (poids 3) + 2 acteurs du cash (poids 0.5) = 13 points ;
+// sur 200 000 hab -> densité 6.5/100k -> ~8/10 (chargé) ; sur 1 000 000 hab
+// -> densité 1.3/100k -> ~1.6/10 (peu saturé) : le même nombre d'enseignes
+// ne pèse pas pareil selon la taille du marché.
+const DENSITE_SATURATION_MAX = 8;
+
 function computeStats(concurrents: VilleConcurrent[], zoneChalandise: string | null) {
   const weighted = concurrents.reduce((sum, c) => sum + SATURATION_WEIGHTS[c.type] * c.nb_magasins, 0);
-  const score = Math.min(10, Math.round(weighted * 10) / 10);
+  const population = parseZoneChalandise(zoneChalandise);
+
+  // Avec zone de chalandise : score basé sur la densité concurrentielle
+  // (pression pondérée pour 100 000 hab). Sans zone renseignée : repli sur
+  // le total pondéré brut, moins fiable (ne reflète pas la taille du marché).
+  const densitePour100k = population ? (weighted * 100000) / population : null;
+  const score = densitePour100k !== null
+    ? Math.min(10, Math.round((densitePour100k / DENSITE_SATURATION_MAX) * 100) / 10)
+    : Math.min(10, Math.round(weighted * 10) / 10);
 
   const nbReparateurs = concurrents
     .filter((c) => c.type === "reparateur")
     .reduce((sum, c) => sum + c.nb_magasins, 0);
-  const population = parseZoneChalandise(zoneChalandise);
   const habitantsParReparateur = population && nbReparateurs > 0 ? Math.round(population / nbReparateurs) : null;
 
   const nbFranchises = concurrents.filter((c) => c.franchise).length;
 
-  return { score, habitantsParReparateur, nbFranchises, nbReparateurs };
+  return { score, scoreFiable: densitePour100k !== null, habitantsParReparateur, nbFranchises, nbReparateurs };
 }
 
 function ConcurrentForm({
@@ -151,6 +166,9 @@ export function ConcurrentsPanel({
           <div className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2">
             <p className="text-xs text-zinc-400">Saturation concurrentielle</p>
             <p className="text-lg font-semibold text-zinc-900">{stats.score.toLocaleString("fr-FR")} / 10</p>
+            {!stats.scoreFiable && (
+              <p className="mt-0.5 text-xs text-amber-600">Zone de chalandise non renseignée — estimation brute</p>
+            )}
           </div>
           <div className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2">
             <p className="text-xs text-zinc-400">Habitants / réparateur</p>
