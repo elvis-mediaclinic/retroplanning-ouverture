@@ -241,28 +241,13 @@ export function ConcurrentsPanel({
             <ScoreGauge score={stats.score} label={stats.categorie.detail} />
 
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-md border border-zinc-200 bg-white px-3 py-2">
-                  <p className="text-xs text-zinc-400">Habitants par point de pression</p>
-                  <p className="text-lg font-semibold text-zinc-900">
-                    {stats.habitantsParConcurrent !== null
-                      ? stats.habitantsParConcurrent.toLocaleString("fr-FR")
-                      : "—"}
-                  </p>
-                  {stats.cp !== undefined && (
-                    <p className="mt-0.5 text-xs text-zinc-400">
-                      {stats.nbMagasinsReels} magasin{stats.nbMagasinsReels > 1 ? "s" : ""} concurrent{stats.nbMagasinsReels > 1 ? "s" : ""}, pondéré{stats.nbMagasinsReels > 1 ? "s" : ""} à {stats.cp.toLocaleString("fr-FR", { maximumFractionDigits: 2 })} point{stats.cp >= 2 ? "s" : ""} (poids × proximité)
-                    </p>
-                  )}
-                </div>
-                <div className="rounded-md border border-zinc-200 bg-white px-3 py-2">
-                  <p className="text-xs text-zinc-400">Marché prouvé</p>
-                  <p className="text-lg font-semibold text-zinc-900">
-                    {stats.nbFranchises > 0
-                      ? `${stats.nbFranchises} franchise${stats.nbFranchises > 1 ? "s" : ""} en place`
-                      : "Aucune franchise"}
-                  </p>
-                </div>
+              <div className="rounded-md border border-zinc-200 bg-white px-3 py-2">
+                <p className="text-xs text-zinc-400">Marché prouvé</p>
+                <p className="text-lg font-semibold text-zinc-900">
+                  {stats.nbFranchises > 0
+                    ? `${stats.nbFranchises} franchise${stats.nbFranchises > 1 ? "s" : ""} en place`
+                    : "Aucune franchise"}
+                </p>
               </div>
 
               <div>
