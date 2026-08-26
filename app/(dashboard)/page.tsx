@@ -132,7 +132,7 @@ export default async function DashboardPage() {
     <div className="space-y-8">
       {/* En-tête */}
       <div className="mt-4 mb-10">
-        <h1 className="text-3xl font-bold uppercase text-zinc-900">Suivi développement franchise</h1>
+        <h1 className="text-3xl font-bold uppercase text-[#0089bd]">Suivi développement franchise</h1>
         <p className="mt-2 text-lg text-zinc-500">Bonjour {profile.prenom} !</p>
       </div>
 

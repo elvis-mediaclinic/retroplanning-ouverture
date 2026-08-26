@@ -56,7 +56,7 @@ export default async function FranchisesPage({
     <div className="space-y-6">
       <div className="mt-2 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold uppercase text-zinc-900">Franchisés</h1>
+          <h1 className="text-2xl font-bold uppercase text-[#0089bd]">Franchisés</h1>
           <p className="mt-1 text-sm text-zinc-500">
             {franchises.length} franchisé{franchises.length !== 1 ? "s" : ""} {showArchives ? "archivés" : "actifs"}
           </p>

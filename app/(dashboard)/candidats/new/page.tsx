@@ -15,7 +15,7 @@ export default async function NewCandidatPage() {
   return (
     <div className="space-y-6">
       <div className="mt-2">
-        <h1 className="text-2xl font-bold uppercase text-zinc-900">Nouveau candidat</h1>
+        <h1 className="text-2xl font-bold uppercase text-[#0089bd]">Nouveau candidat</h1>
       </div>
       <div>
         <Link href="/candidats" className="text-sm text-zinc-500 hover:text-zinc-900">

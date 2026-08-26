@@ -138,7 +138,7 @@ export default async function VillesPage() {
     <div className="space-y-8">
       <div className="mt-2 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold uppercase text-zinc-900">Villes</h1>
+          <h1 className="text-2xl font-bold uppercase text-[#0089bd]">Villes</h1>
           <p className="mt-1 text-sm text-zinc-500">
             {propositions.length > 0 && `${propositions.length} proposition${propositions.length !== 1 ? "s" : ""} à valider · `}
             {enEtude.length} en étude · {validees.length} validée{validees.length !== 1 ? "s" : ""}

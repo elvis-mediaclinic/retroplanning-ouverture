@@ -32,7 +32,7 @@ export default async function EditCandidatPage({
   return (
     <div className="space-y-6">
       <div className="mt-2 flex items-center gap-3">
-        <h1 className="text-2xl font-bold uppercase text-zinc-900">
+        <h1 className="text-2xl font-bold uppercase text-[#0089bd]">
           {candidat.prenom} {candidat.nom}
         </h1>
         {candidat.profil_id && (

@@ -48,7 +48,7 @@ export default async function EditMagasinPage({
   return (
     <div className="space-y-6">
       <div className="mt-2 flex items-center justify-between">
-        <h1 className="text-2xl font-bold uppercase text-zinc-900">{magasin.nom}</h1>
+        <h1 className="text-2xl font-bold uppercase text-[#0089bd]">{magasin.nom}</h1>
         <div className="flex items-center gap-2">
           <CessionModal magasin={magasin} franchises={franchises} siretActuel={siretActuel} />
           <DeleteMagasinButton id={id} />

@@ -106,7 +106,7 @@ export default async function ProjetPage({
       <div className="mt-2 flex items-start justify-between">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold uppercase text-zinc-900">{projet.nom}</h1>
+            <h1 className="text-2xl font-bold uppercase text-[#0089bd]">{projet.nom}</h1>
             <span
               className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                 STATUT_PROJET_COLORS[projet.statut as keyof typeof STATUT_PROJET_COLORS]

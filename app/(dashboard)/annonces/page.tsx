@@ -64,7 +64,7 @@ export default async function AnnoncesAdminPage() {
       {/* En-tête */}
       <div className="mt-2 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold uppercase text-zinc-900">Annonces</h1>
+          <h1 className="text-2xl font-bold uppercase text-[#0089bd]">Annonces</h1>
           <p className="mt-1 text-sm text-zinc-500">
             {publiees.length} publiée{publiees.length !== 1 ? "s" : ""} · {brouillons.length} brouillon{brouillons.length !== 1 ? "s" : ""}
           </p>

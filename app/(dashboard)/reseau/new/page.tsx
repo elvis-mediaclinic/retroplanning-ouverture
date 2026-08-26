@@ -18,7 +18,7 @@ export default async function NewMagasinPage({
   return (
     <div className="space-y-6">
       <div className="mt-2">
-        <h1 className="text-2xl font-bold uppercase text-zinc-900">Nouveau magasin</h1>
+        <h1 className="text-2xl font-bold uppercase text-[#0089bd]">Nouveau magasin</h1>
       </div>
       <div>
         <a href="/reseau" className="text-sm text-zinc-500 hover:text-zinc-900">← Magasins</a>

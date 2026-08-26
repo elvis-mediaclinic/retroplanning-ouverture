@@ -78,7 +78,7 @@ export function GanttView({
   return (
     <div className="space-y-6">
       <div className="mt-2 flex items-center justify-between">
-        <h1 className="text-2xl font-bold uppercase text-zinc-900">Gantt — {projetNom}</h1>
+        <h1 className="text-2xl font-bold uppercase text-[#0089bd]">Gantt — {projetNom}</h1>
         <Link
           href={`/projets/${projetId}`}
           className="btn-secondary"

@@ -18,7 +18,7 @@ export default async function NewProjetPage() {
   return (
     <div className="space-y-6">
       <div className="mt-2">
-        <h1 className="text-2xl font-bold uppercase text-zinc-900">Nouveau projet</h1>
+        <h1 className="text-2xl font-bold uppercase text-[#0089bd]">Nouveau projet</h1>
         <p className="mt-1 text-sm text-zinc-500">
           Les 33 étapes du retroplanning seront générées automatiquement.
         </p>

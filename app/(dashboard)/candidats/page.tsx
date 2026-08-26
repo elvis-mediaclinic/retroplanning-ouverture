@@ -120,7 +120,7 @@ export default async function CandidatsPage() {
     <div className="space-y-8">
       <div className="mt-2 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold uppercase text-zinc-900">Candidats franchisés</h1>
+          <h1 className="text-2xl font-bold uppercase text-[#0089bd]">Candidats franchisés</h1>
           <p className="mt-1 text-sm text-zinc-500">
             {avecProjet.length > 0 && `${avecProjet.length} projet en cours · `}
             {enCours.length} en évaluation · {signes.length} signé{signes.length !== 1 ? "s" : ""}
