@@ -30,10 +30,12 @@ function parseZoneChalandise(zone: string | null): number | null {
 }
 
 function computeStats(concurrents: VilleConcurrent[], zoneChalandise: string | null) {
-  const weighted = concurrents.reduce((sum, c) => sum + SATURATION_WEIGHTS[c.type], 0);
+  const weighted = concurrents.reduce((sum, c) => sum + SATURATION_WEIGHTS[c.type] * c.nb_magasins, 0);
   const score = Math.min(10, Math.round(weighted * 10) / 10);
 
-  const nbReparateurs = concurrents.filter((c) => c.type === "reparateur").length;
+  const nbReparateurs = concurrents
+    .filter((c) => c.type === "reparateur")
+    .reduce((sum, c) => sum + c.nb_magasins, 0);
   const population = parseZoneChalandise(zoneChalandise);
   const habitantsParReparateur = population && nbReparateurs > 0 ? Math.round(population / nbReparateurs) : null;
 
@@ -64,7 +66,7 @@ function ConcurrentForm({
       }}
       className="space-y-3 rounded-md border border-zinc-200 bg-zinc-50 p-4"
     >
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-3 gap-3">
         <div className="space-y-1">
           <label className="text-xs font-medium text-zinc-600">Enseigne</label>
           <input
@@ -82,6 +84,16 @@ function ConcurrentForm({
               <option key={k} value={k}>{v}</option>
             ))}
           </select>
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs font-medium text-zinc-600">Magasins dans la zone</label>
+          <input
+            name="nb_magasins"
+            type="number"
+            min={1}
+            defaultValue={concurrent?.nb_magasins ?? 1}
+            className="input w-full text-sm"
+          />
         </div>
       </div>
       <label className="flex items-center gap-2 text-sm text-zinc-700 cursor-pointer">
@@ -182,6 +194,7 @@ export function ConcurrentsPanel({
             <tr className="border-b border-zinc-200 text-left text-xs text-zinc-400">
               <th className="pb-2 font-medium">Enseigne</th>
               <th className="pb-2 font-medium">Type</th>
+              <th className="pb-2 font-medium text-right">Magasins</th>
               <th className="pb-2 font-medium">Structure</th>
               <th className="pb-2 font-medium">Notes</th>
               <th className="pb-2" />
@@ -192,7 +205,7 @@ export function ConcurrentsPanel({
               if (editingId === c.id) {
                 return (
                   <tr key={c.id}>
-                    <td colSpan={5} className="py-2">
+                    <td colSpan={6} className="py-2">
                       <ConcurrentForm villeId={villeId} concurrent={c} onDone={() => setEditingId(null)} />
                     </td>
                   </tr>
@@ -202,6 +215,7 @@ export function ConcurrentsPanel({
                 <tr key={c.id}>
                   <td className="py-2 pr-3 font-medium text-zinc-900 whitespace-nowrap">{c.enseigne}</td>
                   <td className="py-2 pr-3 text-zinc-600 whitespace-nowrap">{TYPE_CONCURRENT_LABELS[c.type]}</td>
+                  <td className="py-2 pr-3 text-right tabular-nums text-zinc-600">{c.nb_magasins}</td>
                   <td className="py-2 pr-3 whitespace-nowrap">
                     {c.franchise ? (
                       <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">

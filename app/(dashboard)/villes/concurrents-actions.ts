@@ -9,6 +9,7 @@ const ConcurrentSchema = z.object({
   enseigne: z.string().min(1, { error: "Nom de l'enseigne requis." }),
   type: z.enum(["reparateur", "cash", "revendeur", "autre"]),
   franchise: z.coerce.boolean(),
+  nb_magasins: z.coerce.number().int().min(1, { error: "Au moins 1 magasin." }),
   notes: z.string().optional(),
 });
 
@@ -24,6 +25,7 @@ export async function createConcurrent(
     enseigne: formData.get("enseigne"),
     type: formData.get("type") || "autre",
     franchise: formData.get("franchise") === "true",
+    nb_magasins: formData.get("nb_magasins") || 1,
     notes: formData.get("notes") || undefined,
   });
 
@@ -37,6 +39,7 @@ export async function createConcurrent(
     enseigne: parsed.data.enseigne,
     type: parsed.data.type,
     franchise: parsed.data.franchise,
+    nb_magasins: parsed.data.nb_magasins,
     notes: parsed.data.notes ?? null,
     created_by: session.id,
   });
@@ -58,6 +61,7 @@ export async function updateConcurrent(
     enseigne: formData.get("enseigne"),
     type: formData.get("type") || "autre",
     franchise: formData.get("franchise") === "true",
+    nb_magasins: formData.get("nb_magasins") || 1,
     notes: formData.get("notes") || undefined,
   });
 
@@ -72,6 +76,7 @@ export async function updateConcurrent(
       enseigne: parsed.data.enseigne,
       type: parsed.data.type,
       franchise: parsed.data.franchise,
+      nb_magasins: parsed.data.nb_magasins,
       notes: parsed.data.notes ?? null,
     })
     .eq("id", id);

@@ -288,6 +288,7 @@ export type VilleConcurrent = {
   enseigne: string;
   type: TypeConcurrent;
   franchise: boolean;
+  nb_magasins: number;
   notes: string | null;
   created_at: string;
 };
