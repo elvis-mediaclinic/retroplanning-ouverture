@@ -12,6 +12,7 @@ import {
   type VilleConcurrent,
   type TypeConcurrent,
 } from "@/lib/types";
+import { ScoreGauge, CpParTypeBars } from "./ConcurrentsCharts";
 
 // Poids de pression concurrentielle par type : les réparateurs (surtout en
 // réseau) sont les vrais concurrents directs ; les acteurs du cash sans
@@ -51,6 +52,20 @@ function categoriser(score: number): { categorie: Categorie; detail: string } {
   if (score >= 45) return { categorie: "Marché normal", detail: "Différenciation nécessaire" };
   if (score >= 25) return { categorie: "Marché tendu", detail: "Emplacement décisif" };
   return { categorie: "Marché saturé", detail: "Marché saturé" };
+}
+
+function computeCpParType(concurrents: VilleConcurrent[]): Record<TypeConcurrent, number> {
+  const result = {
+    reparateur_reseau: 0,
+    reparateur_independant: 0,
+    cash_avec_reparation: 0,
+    cash_generaliste: 0,
+    destockage: 0,
+  } as Record<TypeConcurrent, number>;
+  for (const c of concurrents) {
+    result[c.type] += POIDS_TYPE[c.type] * c.nb_magasins * coefProximite(c.distance_minutes);
+  }
+  return result;
 }
 
 function computeStats(concurrents: VilleConcurrent[], zoneChalandise: string | null) {
@@ -208,35 +223,45 @@ export function ConcurrentsPanel({
 
   const sorted = [...concurrents].sort((a, b) => a.enseigne.localeCompare(b.enseigne));
   const stats = computeStats(concurrents, zoneChalandise);
+  const cpParType = computeCpParType(concurrents);
 
   return (
     <div className="space-y-4">
       {concurrents.length > 0 && (
-        <div className="grid grid-cols-3 gap-3">
-          <div className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2">
-            <p className="text-xs text-zinc-400">Saturation concurrentielle</p>
-            <p className="text-lg font-semibold text-zinc-900">{stats.score} / 100</p>
-            <p className="mt-0.5 text-xs text-zinc-500">{stats.categorie.detail}</p>
-            {!stats.scoreFiable && (
-              <p className="mt-0.5 text-xs text-amber-600">Zone de chalandise non renseignée — estimation brute</p>
-            )}
+        <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-4">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-[auto_1fr] sm:items-center">
+            <ScoreGauge score={stats.score} label={stats.categorie.detail} />
+
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-md border border-zinc-200 bg-white px-3 py-2">
+                  <p className="text-xs text-zinc-400">Habitants / concurrent pondéré</p>
+                  <p className="text-lg font-semibold text-zinc-900">
+                    {stats.habitantsParConcurrent !== null
+                      ? stats.habitantsParConcurrent.toLocaleString("fr-FR")
+                      : "—"}
+                  </p>
+                </div>
+                <div className="rounded-md border border-zinc-200 bg-white px-3 py-2">
+                  <p className="text-xs text-zinc-400">Marché prouvé</p>
+                  <p className="text-lg font-semibold text-zinc-900">
+                    {stats.nbFranchises > 0
+                      ? `${stats.nbFranchises} franchise${stats.nbFranchises > 1 ? "s" : ""} en place`
+                      : "Aucune franchise"}
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs text-zinc-400 mb-2">Pression concurrentielle par type</p>
+                <CpParTypeBars cpParType={cpParType} />
+              </div>
+            </div>
           </div>
-          <div className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2">
-            <p className="text-xs text-zinc-400">Habitants / concurrent pondéré</p>
-            <p className="text-lg font-semibold text-zinc-900">
-              {stats.habitantsParConcurrent !== null
-                ? stats.habitantsParConcurrent.toLocaleString("fr-FR")
-                : "—"}
-            </p>
-          </div>
-          <div className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2">
-            <p className="text-xs text-zinc-400">Marché prouvé</p>
-            <p className="text-lg font-semibold text-zinc-900">
-              {stats.nbFranchises > 0
-                ? `${stats.nbFranchises} franchise${stats.nbFranchises > 1 ? "s" : ""} en place`
-                : "Aucune franchise"}
-            </p>
-          </div>
+
+          {!stats.scoreFiable && (
+            <p className="mt-3 text-xs text-amber-600">Zone de chalandise non renseignée — score estimé sur le total brut, moins fiable.</p>
+          )}
         </div>
       )}
 
