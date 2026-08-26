@@ -71,7 +71,7 @@ textarea {
   /* Header de page admin : titre + marge, sans carte. Un seul endroit à
      modifier pour changer le style de tous les headers de l'admin. */
   .page-header {
-    @apply mt-2;
+    @apply mt-6;
   }
   .page-header-title {
     @apply text-2xl font-bold uppercase text-[#0089bd];
