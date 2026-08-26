@@ -164,7 +164,11 @@ export default async function AnnoncesAdminPage() {
                           </span>
                         ) : "—"}
                       </td>
-                      <td className="py-3 px-4 font-medium text-zinc-900">{a.titre}</td>
+                      <td className="py-3 px-4 font-medium text-zinc-900">
+                        {ville ? (
+                          <Link href={`/villes/${ville.id}`} className="hover:underline">{a.titre}</Link>
+                        ) : a.titre}
+                      </td>
                       <td className="py-3 px-4 text-right tabular-nums text-zinc-700">{s.total}</td>
                       <td className="py-3 px-4 text-right tabular-nums text-zinc-700">{s.unique}</td>
                       <td className="py-3 px-4 text-right tabular-nums">
@@ -175,24 +179,14 @@ export default async function AnnoncesAdminPage() {
                         )}
                       </td>
                       <td className="py-3 px-4 text-right">
-                        <div className="flex items-center justify-end gap-3">
-                          <a
-                            href={`${baseUrl}/annonce/${a.id}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-xs text-zinc-400 hover:text-zinc-700"
-                          >
-                            Voir ↗
-                          </a>
-                          {ville && (
-                            <Link
-                              href={`/villes/${ville.id}`}
-                              className="text-xs text-zinc-500 hover:text-zinc-900 hover:underline"
-                            >
-                              Modifier
-                            </Link>
-                          )}
-                        </div>
+                        <a
+                          href={`${baseUrl}/annonce/${a.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-zinc-400 hover:text-zinc-700"
+                        >
+                          Voir ↗
+                        </a>
                       </td>
                     </tr>
                   );
@@ -241,7 +235,6 @@ export default async function AnnoncesAdminPage() {
                 <tr className="bg-gradient-to-br from-[#00729e] to-[#0089bd] text-left">
                   <th className="py-2 px-4 font-medium text-white">Ville</th>
                   <th className="py-2 px-4 font-medium text-white">Titre</th>
-                  <th className="py-2 px-4 font-medium text-white"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100">
@@ -259,15 +252,13 @@ export default async function AnnoncesAdminPage() {
                           </span>
                         ) : "—"}
                       </td>
-                      <td className="py-3 px-4 text-zinc-700">{a.titre || <span className="italic text-zinc-400">Sans titre</span>}</td>
-                      <td className="py-3 px-4 text-right">
-                        {ville && (
-                          <Link
-                            href={`/villes/${ville.id}`}
-                            className="text-xs text-zinc-500 hover:text-zinc-900 hover:underline"
-                          >
-                            Éditer
+                      <td className="py-3 px-4 text-zinc-700">
+                        {ville ? (
+                          <Link href={`/villes/${ville.id}`} className="hover:underline">
+                            {a.titre || <span className="italic text-zinc-400">Sans titre</span>}
                           </Link>
+                        ) : (
+                          a.titre || <span className="italic text-zinc-400">Sans titre</span>
                         )}
                       </td>
                     </tr>

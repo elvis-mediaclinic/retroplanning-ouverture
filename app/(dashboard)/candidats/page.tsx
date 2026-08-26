@@ -32,7 +32,9 @@ function CandidatRow({ c, showProjet }: { c: Candidat; showProjet?: boolean }) {
   return (
     <tr className="border-b border-zinc-100 last:border-0">
       <td className="py-2 px-4">
-        <div className="font-medium text-zinc-900">{c.prenom} {c.nom}</div>
+        <Link href={`/candidats/${c.id}`} className="font-medium text-zinc-900 hover:underline">
+          {c.prenom} {c.nom}
+        </Link>
         {c.profil_id && <div className="text-xs text-green-600 mt-0.5">✓ Compte actif</div>}
       </td>
       <td className="py-2 px-4 text-zinc-500">{c.email}</td>
@@ -60,11 +62,6 @@ function CandidatRow({ c, showProjet }: { c: Candidat; showProjet?: boolean }) {
         }`}>
           {STATUT_CANDIDAT_LABELS[c.statut as keyof typeof STATUT_CANDIDAT_LABELS]}
         </span>
-      </td>
-      <td className="py-2 px-4 text-right">
-        <Link href={`/candidats/${c.id}`} className="text-xs text-zinc-500 hover:text-zinc-900">
-          Éditer
-        </Link>
       </td>
     </tr>
   );
@@ -122,7 +119,6 @@ function CandidatTable({ candidats, empty, showProjet }: { candidats: Candidat[]
             <th className="py-2 px-4 font-medium text-white">Apport</th>
             {showProjet && <th className="py-2 px-4 font-medium text-white">Projet</th>}
             <th className="py-2 px-4 font-medium text-white">Statut</th>
-            <th className="py-2 px-4" />
           </tr>
         </thead>
         <tbody>

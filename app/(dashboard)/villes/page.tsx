@@ -19,7 +19,7 @@ type Ville = {
   projets: Array<{ id: string; statut: string }> | null;
 };
 
-function VilleRow({ v, canEdit }: { v: Ville; canEdit: boolean }) {
+function VilleRow({ v }: { v: Ville }) {
   const annonce = v.annonces?.[0] ?? null;
   const nbCandidatures = v.candidatures?.length ?? 0;
   const projetsActifs = (v.projets ?? []).filter((p) =>
@@ -28,7 +28,9 @@ function VilleRow({ v, canEdit }: { v: Ville; canEdit: boolean }) {
 
   return (
     <tr className="border-b border-zinc-100 last:border-0">
-      <td className="py-2 px-4 font-medium text-zinc-900">{v.nom}</td>
+      <td className="py-2 px-4 font-medium text-zinc-900">
+        <Link href={`/villes/${v.id}`} className="hover:underline">{v.nom}</Link>
+      </td>
       <td className="py-2 px-4 text-zinc-500">
         {[v.departement, v.region].filter(Boolean).join(" · ") || "—"}
       </td>
@@ -77,16 +79,11 @@ function VilleRow({ v, canEdit }: { v: Ville; canEdit: boolean }) {
           <span className="text-xs text-zinc-400">—</span>
         )}
       </td>
-      <td className="py-2 px-4 text-right">
-        <Link href={`/villes/${v.id}`} className="text-xs text-zinc-500 hover:text-zinc-900">
-          {canEdit ? "Éditer" : "Voir"}
-        </Link>
-      </td>
     </tr>
   );
 }
 
-function VilleCard({ v, canEdit }: { v: Ville; canEdit: boolean }) {
+function VilleCard({ v }: { v: Ville }) {
   const annonce = v.annonces?.[0] ?? null;
   const nbCandidatures = v.candidatures?.length ?? 0;
   const projetsActifs = (v.projets ?? []).filter((p) =>
@@ -125,7 +122,7 @@ function VilleCard({ v, canEdit }: { v: Ville; canEdit: boolean }) {
   );
 }
 
-function VilleTable({ villes, canEdit, empty }: { villes: Ville[]; canEdit: boolean; empty: string }) {
+function VilleTable({ villes, empty }: { villes: Ville[]; empty: string }) {
   if (villes.length === 0) {
     return <p className="text-sm text-zinc-400 py-3">{empty}</p>;
   }
@@ -133,7 +130,7 @@ function VilleTable({ villes, canEdit, empty }: { villes: Ville[]; canEdit: bool
     <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm">
       {/* Mobile : cartes */}
       <div className="sm:hidden divide-y divide-zinc-100">
-        {villes.map((v) => <VilleCard key={v.id} v={v} canEdit={canEdit} />)}
+        {villes.map((v) => <VilleCard key={v.id} v={v} />)}
       </div>
 
       {/* Desktop : tableau */}
@@ -146,11 +143,10 @@ function VilleTable({ villes, canEdit, empty }: { villes: Ville[]; canEdit: bool
             <th className="py-2 px-4 font-medium text-white">Projet</th>
             <th className="py-2 px-4 font-medium text-white">Annonce</th>
             <th className="py-2 px-4 font-medium text-white">Candidatures</th>
-            <th className="py-2 px-4" />
           </tr>
         </thead>
         <tbody>
-          {villes.map((v) => <VilleRow key={v.id} v={v} canEdit={canEdit} />)}
+          {villes.map((v) => <VilleRow key={v.id} v={v} />)}
         </tbody>
       </table>
     </div>
@@ -229,7 +225,7 @@ export default async function VillesPage() {
           <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-zinc-400">
             Validées — projet en cours
           </h2>
-          <VilleTable villes={validees} canEdit={canEdit} empty="Aucune ville validée." />
+          <VilleTable villes={validees} empty="Aucune ville validée." />
         </section>
       )}
 
@@ -238,7 +234,7 @@ export default async function VillesPage() {
         <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-zinc-400">
           En étude
         </h2>
-        <VilleTable villes={enEtude} canEdit={canEdit} empty="Aucune ville en étude." />
+        <VilleTable villes={enEtude} empty="Aucune ville en étude." />
       </section>
     </div>
   );
