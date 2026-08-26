@@ -6,11 +6,13 @@ import { submitCandidature } from "./actions";
 export function CandidatureForm({
   annonceId,
   villeId,
+  magasinId,
 }: {
   annonceId: string;
   villeId: string;
+  magasinId?: string;
 }) {
-  const action = submitCandidature.bind(null, annonceId, villeId);
+  const action = submitCandidature.bind(null, annonceId, villeId, magasinId ?? "");
   const [state, formAction, pending] = useActionState(action, undefined);
 
   if (state?.success) {

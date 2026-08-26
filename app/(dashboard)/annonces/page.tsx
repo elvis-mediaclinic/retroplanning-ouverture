@@ -19,6 +19,7 @@ export default async function AnnoncesAdminPage() {
     supabase
       .from("annonces")
       .select("id, titre, actif, ville_id, villes(id, nom, departement)")
+      .eq("type_annonce", "ouverture")
       .order("created_at", { ascending: false }),
     supabase.from("annonce_views").select("annonce_id, visitor_id"),
     supabase.from("candidatures").select("annonce_id"),

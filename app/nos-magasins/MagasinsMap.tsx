@@ -49,6 +49,18 @@ export type MagasinPoint = {
   lng: number;
 };
 
+export type CessionPoint = {
+  id: string;
+  nom: string;
+  adresse: string | null;
+  codePostal: string | null;
+  ville: string | null;
+  annonceId: string;
+  annonceTitre: string;
+  lat: number;
+  lng: number;
+};
+
 export type VilleEnEtudePoint = {
   id: string;
   nom: string;
@@ -71,19 +83,22 @@ function dotIcon(color: string, size = 22) {
 const ICON_INTEGRE = dotIcon("#7c3aed");
 const ICON_FRANCHISE = dotIcon("#0089bd");
 const ICON_EN_ETUDE = dotIcon("#f59e0b");
+const ICON_CESSION = dotIcon("#ec4899", 24);
 
 export function MagasinsMap({
   points,
   villesEnEtude = [],
+  cessions = [],
   selectedId = null,
 }: {
   points: MagasinPoint[];
   villesEnEtude?: VilleEnEtudePoint[];
+  cessions?: CessionPoint[];
   selectedId?: string | null;
 }) {
   const markersRef = useRef<Record<string, L.Marker>>({});
 
-  const all = [...points, ...villesEnEtude];
+  const all = [...points, ...villesEnEtude, ...cessions];
   if (all.length === 0) return null;
 
   return (
@@ -131,6 +146,26 @@ export function MagasinsMap({
                   </a>
                 </>
               )}
+            </Popup>
+          </Marker>
+        ))}
+        {cessions.map((c) => (
+          <Marker
+            key={`cession-${c.id}`}
+            position={[c.lat, c.lng]}
+            icon={ICON_CESSION}
+            ref={(m) => { if (m) markersRef.current[`cession-${c.id}`] = m; }}
+          >
+            <Popup>
+              <span className="font-semibold">{c.nom}</span>
+              <br />
+              {[c.adresse, c.codePostal, c.ville].filter(Boolean).join(", ")}
+              <br />
+              <span className="text-xs font-semibold text-pink-600">Magasin en cession</span>
+              <br />
+              <a href={`/annonce/${c.annonceId}`} className="text-xs font-medium text-[#0089bd] hover:underline">
+                {c.annonceTitre} →
+              </a>
             </Popup>
           </Marker>
         ))}

@@ -4,7 +4,7 @@ import { geocodeAddress } from "@/lib/geocode";
 import { PublicNavbar } from "@/components/PublicNavbar";
 import { PublicFooter } from "@/components/PublicFooter";
 import { MagasinsExplorer } from "./MagasinsExplorer";
-import type { MagasinPoint, VilleEnEtudePoint } from "./MagasinsMap";
+import type { MagasinPoint, VilleEnEtudePoint, CessionPoint } from "./MagasinsMap";
 
 export const metadata = { title: "Nos magasins — Mediaclinic" };
 export const dynamic = "force-dynamic";
@@ -15,7 +15,7 @@ export default async function NosMagasinsPage() {
   // nous-mêmes les seules colonnes destinées à un annuaire public.
   const service = createServiceClient();
 
-  const [{ data: magasinsData }, { data: villesData }] = await Promise.all([
+  const [{ data: magasinsData }, { data: villesData }, { data: cessionAnnoncesData }] = await Promise.all([
     service
       .from("magasins")
       .select("id, nom, adresse, code_postal, ville, type, latitude, longitude")
@@ -27,6 +27,11 @@ export default async function NosMagasinsPage() {
       .eq("statut", "en_etude")
       .eq("annonces.actif", true)
       .order("nom"),
+    service
+      .from("annonces")
+      .select("id, titre, magasin_id")
+      .eq("type_annonce", "cession")
+      .eq("actif", true),
   ]);
 
   const magasins = magasinsData ?? [];
@@ -61,6 +66,25 @@ export default async function NosMagasinsPage() {
       });
     }
   }
+
+  // Magasins en cession — coordonnées déjà résolues via `points` ci-dessus
+  const pointsById = Object.fromEntries(points.map((p) => [p.id, p]));
+  const cessions: CessionPoint[] = (cessionAnnoncesData ?? [])
+    .filter((a) => a.magasin_id && pointsById[a.magasin_id])
+    .map((a) => {
+      const p = pointsById[a.magasin_id!];
+      return {
+        id: p.id,
+        nom: p.nom,
+        adresse: p.adresse,
+        codePostal: p.codePostal,
+        ville: p.ville,
+        annonceId: a.id,
+        annonceTitre: a.titre,
+        lat: p.lat,
+        lng: p.lng,
+      };
+    });
 
   // Géocode les villes en étude (par nom de commune)
   const villesEnEtude: VilleEnEtudePoint[] = [];
@@ -146,10 +170,16 @@ export default async function NosMagasinsPage() {
               Ville en étude
             </div>
           )}
+          {cessions.length > 0 && (
+            <div className="flex items-center gap-2">
+              <span className="inline-block w-3 h-3 rounded-full bg-pink-500 border-2 border-white shadow" />
+              Magasin en cession
+            </div>
+          )}
         </div>
 
         {(points.length > 0 || villesEnEtude.length > 0) && (
-          <MagasinsExplorer points={points} villesEnEtude={villesEnEtude} />
+          <MagasinsExplorer points={points} villesEnEtude={villesEnEtude} cessions={cessions} />
         )}
       </main>
 

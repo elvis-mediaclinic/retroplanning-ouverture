@@ -11,7 +11,9 @@ type Annonce = {
   id: string;
   titre: string;
   accroche: string | null;
+  isCession: boolean;
   ville: { nom: string; departement: string | null; region: string | null } | null;
+  magasin: { nom: string; ville: string | null; code_postal: string | null } | null;
 };
 
 function InteretSpontaneModal() {
@@ -118,7 +120,7 @@ export function OpportunitesExplorer({ annonces }: { annonces: Annonce[] }) {
     const q = search.toLowerCase().trim();
     const list = annonces.filter((a) => {
       if (!q) return true;
-      const hay = [a.titre, a.accroche, a.ville?.nom, a.ville?.departement, a.ville?.region]
+      const hay = [a.titre, a.accroche, a.ville?.nom, a.ville?.departement, a.ville?.region, a.magasin?.nom, a.magasin?.ville]
         .filter(Boolean).join(" ").toLowerCase();
       return hay.includes(q);
     });
@@ -158,11 +160,22 @@ export function OpportunitesExplorer({ annonces }: { annonces: Annonce[] }) {
               href={`/annonce/${a.id}`}
               className="block rounded-2xl bg-gradient-to-br from-[#00729e] to-[#0089bd] p-6 shadow-sm hover:brightness-110 transition-all"
             >
-              {a.ville && (
-                <p className="text-xs font-semibold uppercase tracking-widest text-white/70 mb-2">
-                  {a.ville.nom}{a.ville.departement ? ` · ${a.ville.departement}` : ""}
-                </p>
-              )}
+              <div className="flex items-center justify-between gap-2 mb-2">
+                {a.ville ? (
+                  <p className="text-xs font-semibold uppercase tracking-widest text-white/70">
+                    {a.ville.nom}{a.ville.departement ? ` · ${a.ville.departement}` : ""}
+                  </p>
+                ) : a.magasin ? (
+                  <p className="text-xs font-semibold uppercase tracking-widest text-white/70">
+                    {[a.magasin.ville, a.magasin.code_postal].filter(Boolean).join(" · ")}
+                  </p>
+                ) : <span />}
+                {a.isCession && (
+                  <span className="shrink-0 rounded-full bg-amber-400/90 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-950">
+                    Cession
+                  </span>
+                )}
+              </div>
               <h2 className="text-lg font-bold text-white leading-snug mb-2">{a.titre}</h2>
               {a.accroche && (
                 <p className="text-sm text-white/80 leading-relaxed line-clamp-3"><BoldText text={a.accroche} /></p>

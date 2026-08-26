@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/service";
 import { PublicNavbar } from "@/components/PublicNavbar";
 import { PublicFooter } from "@/components/PublicFooter";
 import { OpportunitesExplorer } from "./OpportunitesExplorer";
@@ -11,14 +12,38 @@ export default async function AnnoncesPage() {
 
   const { data } = await supabase
     .from("annonces")
-    .select("id, titre, accroche, villes(nom, departement, region)")
+    .select("id, titre, accroche, type_annonce, magasin_id, villes(nom, departement, region)")
     .eq("actif", true)
     .order("created_at", { ascending: false });
 
-  const annonces = (data ?? []).map((a) => {
+  const rows = data ?? [];
+
+  // Colonnes publiques des magasins visés par une annonce de cession, via le
+  // client de service (pas de policy RLS publique sur "magasins" : la
+  // jointure PostgREST échouerait silencieusement pour un visiteur anonyme).
+  const magasinIds = rows.map((a) => a.magasin_id).filter((v): v is string => !!v);
+  let magasinsMap: Record<string, { nom: string; ville: string | null; code_postal: string | null }> = {};
+  if (magasinIds.length > 0) {
+    const service = createServiceClient();
+    const { data: magasinsData } = await service
+      .from("magasins")
+      .select("id, nom, ville, code_postal")
+      .in("id", magasinIds);
+    magasinsMap = Object.fromEntries((magasinsData ?? []).map((m) => [m.id, m]));
+  }
+
+  const annonces = rows.map((a) => {
     const villeRaw = a.villes as { nom: string; departement: string | null; region: string | null } | { nom: string; departement: string | null; region: string | null }[] | null;
     const ville = Array.isArray(villeRaw) ? villeRaw[0] ?? null : villeRaw;
-    return { id: a.id, titre: a.titre, accroche: a.accroche, ville };
+    const magasin = a.magasin_id ? magasinsMap[a.magasin_id] ?? null : null;
+    return {
+      id: a.id,
+      titre: a.titre,
+      accroche: a.accroche,
+      isCession: a.type_annonce === "cession",
+      ville,
+      magasin,
+    };
   });
 
   return (

@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/service";
 import { PublicNavbar } from "@/components/PublicNavbar";
 import { PublicFooter } from "@/components/PublicFooter";
 import { BoldText } from "@/components/BoldText";
@@ -29,7 +30,7 @@ export default async function AnnoncePage({
   const [{ data: annonce }, { data: conceptPage }, { data: { user } }] = await Promise.all([
     supabase
       .from("annonces")
-      .select("id, titre, accroche, contenu, contenu_json, sections, actif, hero_bleu, hero_carte, hero_titre_centre, hero_accroche_centre, villes(id, nom)")
+      .select("id, titre, accroche, contenu, contenu_json, sections, actif, hero_bleu, hero_carte, hero_titre_centre, hero_accroche_centre, magasin_id, type_annonce, villes(id, nom)")
       .eq("id", id)
       .single(),
     supabase.from("pages").select("sections").eq("key", "concept").maybeSingle(),
@@ -42,6 +43,22 @@ export default async function AnnoncePage({
   const ville = Array.isArray(villeRaw)
     ? (villeRaw[0] as { id: string; nom: string } | undefined)
     : (villeRaw as { id: string; nom: string } | null);
+
+  const isCession = annonce.type_annonce === "cession";
+
+  // Magasin visé par une annonce de cession : colonnes publiques sélectionnées
+  // explicitement via le client de service (pas de policy RLS publique sur
+  // "magasins", pour ne jamais exposer telephone/email/notes/siret).
+  let magasin: { id: string; nom: string; ville: string | null; code_postal: string | null } | null = null;
+  if (annonce.magasin_id) {
+    const service = createServiceClient();
+    const { data } = await service
+      .from("magasins")
+      .select("id, nom, ville, code_postal")
+      .eq("id", annonce.magasin_id)
+      .maybeSingle();
+    magasin = data;
+  }
 
   // Sections structurées (nouveau format) ou fallback sur l'ancien contenu_json
   const storedSections = parseStoredSections(annonce.sections);
@@ -98,8 +115,15 @@ export default async function AnnoncePage({
             />
           </div>
           <p className="text-xl sm:text-2xl font-semibold uppercase tracking-widest text-[#0089bd]">
-            Opportunité de franchise{ville?.nom ? ` — ${ville.nom}` : ""}
+            {isCession
+              ? `Cession de magasin${magasin?.nom ? ` — ${magasin.nom}` : ""}`
+              : `Opportunité de franchise${ville?.nom ? ` — ${ville.nom}` : ""}`}
           </p>
+          {isCession && (
+            <span className="mt-3 inline-block rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-amber-700">
+              Cession
+            </span>
+          )}
         </div>
 
         <hr className="border-t border-zinc-200 my-12" />
@@ -198,7 +222,7 @@ export default async function AnnoncePage({
           <p className="text-sm text-zinc-500 mb-6">
             Remplissez ce formulaire et l&apos;équipe Mediaclinic vous recontactera rapidement.
           </p>
-          <CandidatureForm annonceId={annonce.id} villeId={ville?.id ?? ""} />
+          <CandidatureForm annonceId={annonce.id} villeId={ville?.id ?? ""} magasinId={annonce.magasin_id ?? ""} />
         </div>
       </main>
 

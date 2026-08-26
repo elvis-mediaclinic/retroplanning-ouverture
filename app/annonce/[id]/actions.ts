@@ -31,6 +31,7 @@ export type CandidatureState = { error?: string; success?: boolean } | undefined
 export async function submitCandidature(
   annonceId: string,
   villeId: string,
+  magasinId: string,
   _state: CandidatureState,
   formData: FormData
 ): Promise<CandidatureState> {
@@ -52,6 +53,7 @@ export async function submitCandidature(
   const { error } = await supabase.from("candidatures").insert({
     annonce_id: annonceId,
     ville_id: villeId || null,
+    magasin_id: magasinId || null,
     ...parsed.data,
     telephone: parsed.data.telephone ?? null,
     apport_personnel: parsed.data.apport_personnel ?? null,
@@ -66,7 +68,7 @@ export async function submitCandidature(
     // Fetch annonce title
     const { data: annonceData } = await service
       .from("annonces")
-      .select("titre, villes(nom)")
+      .select("titre, villes(nom), magasins(nom)")
       .eq("id", annonceId)
       .single();
 
@@ -74,6 +76,11 @@ export async function submitCandidature(
     const villeNom = Array.isArray(villeRaw)
       ? (villeRaw[0] as { nom: string } | undefined)?.nom
       : (villeRaw as { nom: string } | null)?.nom;
+
+    const magasinRaw = annonceData?.magasins as unknown;
+    const magasinNom = Array.isArray(magasinRaw)
+      ? (magasinRaw[0] as { nom: string } | undefined)?.nom
+      : (magasinRaw as { nom: string } | null)?.nom;
 
     const dateStr = new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" });
     const notes = [
@@ -160,17 +167,22 @@ export async function submitCandidature(
            </tr>`
         : "";
 
+      const lieuNom = villeNom ?? magasinNom;
+      const adminLink = magasinId
+        ? `${process.env.NEXT_PUBLIC_SITE_URL}/reseau/${magasinId}`
+        : `${process.env.NEXT_PUBLIC_SITE_URL}/villes/${villeId}`;
+
       await transporter.sendMail({
         from: process.env.SMTP_FROM,
         to: adminEmails.join(", "),
-        subject: `${isRepeat ? "[Récidive] " : ""}Candidature franchise — ${villeNom ?? ""}`,
+        subject: `${isRepeat ? "[Récidive] " : ""}Candidature ${magasinId ? "cession" : "franchise"} — ${lieuNom ?? ""}`,
         html: `
           <div style="font-family:sans-serif;max-width:600px;margin:0 auto;color:#18181b">
             <div style="background:#00b9ff;padding:20px 24px;border-radius:8px 8px 0 0">
               <h1 style="color:#fff;margin:0;font-size:18px">
-                ${isRepeat ? "Nouvelle candidature (récidive)" : "Nouvelle candidature franchise"}
+                ${isRepeat ? "Nouvelle candidature (récidive)" : magasinId ? "Nouvelle candidature — cession" : "Nouvelle candidature franchise"}
               </h1>
-              ${villeNom ? `<p style="color:rgba(255,255,255,0.85);margin:4px 0 0;font-size:14px">${villeNom}</p>` : ""}
+              ${lieuNom ? `<p style="color:rgba(255,255,255,0.85);margin:4px 0 0;font-size:14px">${lieuNom}</p>` : ""}
             </div>
             <div style="background:#fff;border:1px solid #e4e4e7;border-top:none;padding:24px;border-radius:0 0 8px 8px">
               ${repeatBanner}
@@ -205,7 +217,7 @@ export async function submitCandidature(
                 </tr>
               </table>
               <div style="margin-top:24px">
-                <a href="${process.env.NEXT_PUBLIC_SITE_URL}/villes/${villeId}" style="display:inline-block;background:#00b9ff;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-size:14px;font-weight:500">
+                <a href="${adminLink}" style="display:inline-block;background:#00b9ff;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-size:14px;font-weight:500">
                   Voir les candidatures →
                 </a>
               </div>

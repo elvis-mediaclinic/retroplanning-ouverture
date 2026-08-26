@@ -2,7 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import dynamic from "next/dynamic";
-import type { MagasinPoint, VilleEnEtudePoint } from "./MagasinsMap";
+import type { MagasinPoint, VilleEnEtudePoint, CessionPoint } from "./MagasinsMap";
 
 const MagasinsMap = dynamic(() => import("./MagasinsMap").then((m) => m.MagasinsMap), {
   ssr: false,
@@ -76,9 +76,11 @@ function JustifiedList<T>({
 export function MagasinsExplorer({
   points,
   villesEnEtude,
+  cessions = [],
 }: {
   points: MagasinPoint[];
   villesEnEtude: VilleEnEtudePoint[];
+  cessions?: CessionPoint[];
 }) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -112,9 +114,37 @@ export function MagasinsExplorer({
         </div>
       )}
 
+      {/* Liste des magasins en cession */}
+      {cessions.length > 0 && (
+        <div>
+          <h3 className="text-sm font-semibold text-zinc-900 mb-3">Magasins en cession</h3>
+          <div className="max-h-64 overflow-y-auto rounded-2xl border border-zinc-200 bg-white shadow-sm">
+            <JustifiedList
+              items={cessions}
+              keyFn={(c) => `cession-${c.id}`}
+              selectedId={selectedId}
+              onSelect={setSelectedId}
+              selectedClass="bg-pink-50"
+              emptyLabel="Aucun magasin en cession pour le moment."
+              renderItem={(c) => (
+                <>
+                  <div className="flex items-center gap-2">
+                    <span className="inline-block w-2 h-2 rounded-full shrink-0 bg-pink-500" />
+                    <p className="text-sm font-semibold text-zinc-900">{c.nom}</p>
+                  </div>
+                  <p className="mt-0.5 text-xs text-zinc-500 pl-4">
+                    {[c.codePostal, c.ville].filter(Boolean).join(" ") || "—"}
+                  </p>
+                </>
+              )}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Carte */}
       <div className="h-[500px] sm:h-[650px]">
-        <MagasinsMap points={points} villesEnEtude={villesEnEtude} selectedId={selectedId} />
+        <MagasinsMap points={points} villesEnEtude={villesEnEtude} cessions={cessions} selectedId={selectedId} />
       </div>
 
       {/* Liste des magasins ouverts */}

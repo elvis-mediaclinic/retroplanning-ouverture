@@ -2,7 +2,7 @@
 
 import { useActionState, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import { upsertAnnonce } from "./annonce-actions";
+import { upsertAnnonce, type AnnonceState } from "./annonce-actions";
 import { BoldText } from "@/components/BoldText";
 import type { Section } from "./SectionsEditor";
 
@@ -27,14 +27,16 @@ type Annonce = {
 
 export function AnnonceEditor({
   villeId,
+  action: actionProp,
   annonce,
   publicUrl,
 }: {
-  villeId: string;
+  villeId?: string;
+  action?: (state: AnnonceState, formData: FormData) => Promise<AnnonceState>;
   annonce: Annonce | null;
   publicUrl: string;
 }) {
-  const action = upsertAnnonce.bind(null, villeId, annonce?.id ?? null);
+  const action = actionProp ?? upsertAnnonce.bind(null, villeId!, annonce?.id ?? null);
   const [state, formAction, pending] = useActionState(action, undefined);
   const [actif, setActif] = useState(annonce?.actif ?? false);
   const [accroche, setAccroche] = useState(annonce?.accroche ?? "");
