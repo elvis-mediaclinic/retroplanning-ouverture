@@ -13,15 +13,29 @@ import {
   type TypeConcurrent,
 } from "@/lib/types";
 
-// Poids de pression concurrentielle : les réparateurs sont les vrais
-// concurrents directs (réparation/reconditionnement), les acteurs du cash
-// vendent de l'occasion mais n'ont pas ce service, d'où un poids bien moindre.
-const SATURATION_WEIGHTS: Record<TypeConcurrent, number> = {
-  reparateur: 3,
-  revendeur: 1.5,
-  cash: 0.5,
-  autre: 0.5,
+// Poids de pression concurrentielle par type : les réparateurs (surtout en
+// réseau) sont les vrais concurrents directs ; les acteurs du cash sans
+// service de réparation pèsent peu ; le déstockage n'est pas un concurrent.
+const POIDS_TYPE: Record<TypeConcurrent, number> = {
+  reparateur_reseau: 1.0,
+  reparateur_independant: 0.7,
+  cash_avec_reparation: 0.5,
+  cash_generaliste: 0.25,
+  destockage: 0.0,
 };
+
+// Un concurrent à 3 minutes ne compte pas comme un concurrent à 25 minutes :
+// pondération dégressive par tranche de distance.
+function coefProximite(distanceMinutes: number): number {
+  if (distanceMinutes < 5) return 1.0;
+  if (distanceMinutes < 10) return 0.7;
+  if (distanceMinutes < 20) return 0.4;
+  return 0.2;
+}
+
+// Coefficient de décroissance exponentielle du score — recalibrable après
+// confrontation à des cas réels, sans toucher au reste du calcul.
+const COEFFICIENT_DECROISSANCE = 0.35;
 
 function parseZoneChalandise(zone: string | null): number | null {
   if (!zone) return null;
@@ -29,34 +43,60 @@ function parseZoneChalandise(zone: string | null): number | null {
   return Number.isFinite(n) && n > 0 ? n : null;
 }
 
-// Densité de référence (unités de pression pondérée pour 100 000 habitants)
-// à partir de laquelle le marché est considéré comme totalement saturé (10/10).
-// Ex. 4 réparateurs (poids 3) + 2 acteurs du cash (poids 0.5) = 13 points ;
-// sur 200 000 hab -> densité 6.5/100k -> ~8/10 (chargé) ; sur 1 000 000 hab
-// -> densité 1.3/100k -> ~1.6/10 (peu saturé) : le même nombre d'enseignes
-// ne pèse pas pareil selon la taille du marché.
-const DENSITE_SATURATION_MAX = 8;
+type Categorie = "Marché vierge" | "Marché ouvert" | "Marché normal" | "Marché tendu" | "Marché saturé";
+
+function categoriser(score: number): { categorie: Categorie; detail: string } {
+  if (score >= 85) return { categorie: "Marché vierge", detail: "Marché vierge ou quasi vierge" };
+  if (score >= 65) return { categorie: "Marché ouvert", detail: "Position de pionnier possible" };
+  if (score >= 45) return { categorie: "Marché normal", detail: "Différenciation nécessaire" };
+  if (score >= 25) return { categorie: "Marché tendu", detail: "Emplacement décisif" };
+  return { categorie: "Marché saturé", detail: "Marché saturé" };
+}
 
 function computeStats(concurrents: VilleConcurrent[], zoneChalandise: string | null) {
-  const weighted = concurrents.reduce((sum, c) => sum + SATURATION_WEIGHTS[c.type] * c.nb_magasins, 0);
+  // CP : pression concurrentielle pondérée (poids du type × nombre de
+  // magasins × coefficient de proximité), sommée sur tous les concurrents.
+  const cp = concurrents.reduce(
+    (sum, c) => sum + POIDS_TYPE[c.type] * c.nb_magasins * coefProximite(c.distance_minutes),
+    0
+  );
   const population = parseZoneChalandise(zoneChalandise);
 
-  // Avec zone de chalandise : score basé sur la densité concurrentielle
-  // (pression pondérée pour 100 000 hab). Sans zone renseignée : repli sur
-  // le total pondéré brut, moins fiable (ne reflète pas la taille du marché).
-  const densitePour100k = population ? (weighted * 100000) / population : null;
-  const score = densitePour100k !== null
-    ? Math.min(10, Math.round((densitePour100k / DENSITE_SATURATION_MAX) * 100) / 10)
-    : Math.min(10, Math.round(weighted * 10) / 10);
+  if (cp === 0) {
+    return {
+      score: 100,
+      categorie: categoriser(100),
+      habitantsParConcurrent: null,
+      scoreFiable: true,
+      nbFranchises: concurrents.filter((c) => c.franchise).length,
+    };
+  }
 
-  const nbReparateurs = concurrents
-    .filter((c) => c.type === "reparateur")
-    .reduce((sum, c) => sum + c.nb_magasins, 0);
-  const habitantsParReparateur = population && nbReparateurs > 0 ? Math.round(population / nbReparateurs) : null;
+  if (!population) {
+    // Sans zone de chalandise, impossible de calculer une densité fiable :
+    // repli sur un score approximatif basé sur le CP brut, à signaler comme
+    // non fiable.
+    const scoreApprox = Math.round(Math.max(0, Math.min(100, 100 * Math.exp(-COEFFICIENT_DECROISSANCE * cp))));
+    return {
+      score: scoreApprox,
+      categorie: categoriser(scoreApprox),
+      habitantsParConcurrent: null,
+      scoreFiable: false,
+      nbFranchises: concurrents.filter((c) => c.franchise).length,
+    };
+  }
 
-  const nbFranchises = concurrents.filter((c) => c.franchise).length;
+  const densitePour100k = (cp / population) * 100000;
+  const habitantsParConcurrent = Math.round(population / cp);
+  const score = Math.round(Math.max(0, Math.min(100, 100 * Math.exp(-COEFFICIENT_DECROISSANCE * densitePour100k))));
 
-  return { score, scoreFiable: densitePour100k !== null, habitantsParReparateur, nbFranchises, nbReparateurs };
+  return {
+    score,
+    categorie: categoriser(score),
+    habitantsParConcurrent,
+    scoreFiable: true,
+    nbFranchises: concurrents.filter((c) => c.franchise).length,
+  };
 }
 
 function ConcurrentForm({
@@ -81,7 +121,7 @@ function ConcurrentForm({
       }}
       className="space-y-3 rounded-md border border-zinc-200 bg-zinc-50 p-4"
     >
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
           <label className="text-xs font-medium text-zinc-600">Enseigne</label>
           <input
@@ -94,7 +134,7 @@ function ConcurrentForm({
         </div>
         <div className="space-y-1">
           <label className="text-xs font-medium text-zinc-600">Type</label>
-          <select name="type" defaultValue={concurrent?.type ?? "autre"} className="input w-full text-sm">
+          <select name="type" defaultValue={concurrent?.type ?? "destockage"} className="input w-full text-sm">
             {(Object.entries(TYPE_CONCURRENT_LABELS) as [TypeConcurrent, string][]).map(([k, v]) => (
               <option key={k} value={k}>{v}</option>
             ))}
@@ -107,6 +147,16 @@ function ConcurrentForm({
             type="number"
             min={1}
             defaultValue={concurrent?.nb_magasins ?? 1}
+            className="input w-full text-sm"
+          />
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs font-medium text-zinc-600">Distance en voiture (minutes)</label>
+          <input
+            name="distance_minutes"
+            type="number"
+            min={0}
+            defaultValue={concurrent?.distance_minutes ?? 10}
             className="input w-full text-sm"
           />
         </div>
@@ -165,17 +215,18 @@ export function ConcurrentsPanel({
         <div className="grid grid-cols-3 gap-3">
           <div className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2">
             <p className="text-xs text-zinc-400">Saturation concurrentielle</p>
-            <p className="text-lg font-semibold text-zinc-900">{stats.score.toLocaleString("fr-FR")} / 10</p>
+            <p className="text-lg font-semibold text-zinc-900">{stats.score} / 100</p>
+            <p className="mt-0.5 text-xs text-zinc-500">{stats.categorie.detail}</p>
             {!stats.scoreFiable && (
               <p className="mt-0.5 text-xs text-amber-600">Zone de chalandise non renseignée — estimation brute</p>
             )}
           </div>
           <div className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2">
-            <p className="text-xs text-zinc-400">Habitants / réparateur</p>
+            <p className="text-xs text-zinc-400">Habitants / concurrent pondéré</p>
             <p className="text-lg font-semibold text-zinc-900">
-              {stats.habitantsParReparateur !== null
-                ? stats.habitantsParReparateur.toLocaleString("fr-FR")
-                : stats.nbReparateurs === 0 ? "Aucun réparateur" : "—"}
+              {stats.habitantsParConcurrent !== null
+                ? stats.habitantsParConcurrent.toLocaleString("fr-FR")
+                : "—"}
             </p>
           </div>
           <div className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2">
@@ -213,6 +264,7 @@ export function ConcurrentsPanel({
               <th className="pb-2 font-medium">Enseigne</th>
               <th className="pb-2 font-medium">Type</th>
               <th className="pb-2 font-medium text-right">Magasins</th>
+              <th className="pb-2 font-medium text-right">Distance</th>
               <th className="pb-2 font-medium">Structure</th>
               <th className="pb-2 font-medium">Notes</th>
               <th className="pb-2" />
@@ -223,7 +275,7 @@ export function ConcurrentsPanel({
               if (editingId === c.id) {
                 return (
                   <tr key={c.id}>
-                    <td colSpan={6} className="py-2">
+                    <td colSpan={7} className="py-2">
                       <ConcurrentForm villeId={villeId} concurrent={c} onDone={() => setEditingId(null)} />
                     </td>
                   </tr>
@@ -234,6 +286,7 @@ export function ConcurrentsPanel({
                   <td className="py-2 pr-3 font-medium text-zinc-900 whitespace-nowrap">{c.enseigne}</td>
                   <td className="py-2 pr-3 text-zinc-600 whitespace-nowrap">{TYPE_CONCURRENT_LABELS[c.type]}</td>
                   <td className="py-2 pr-3 text-right tabular-nums text-zinc-600">{c.nb_magasins}</td>
+                  <td className="py-2 pr-3 text-right tabular-nums text-zinc-600 whitespace-nowrap">{c.distance_minutes} min</td>
                   <td className="py-2 pr-3 whitespace-nowrap">
                     {c.franchise ? (
                       <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">

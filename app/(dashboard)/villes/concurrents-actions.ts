@@ -7,9 +7,10 @@ import { createClient } from "@/lib/supabase/server";
 
 const ConcurrentSchema = z.object({
   enseigne: z.string().min(1, { error: "Nom de l'enseigne requis." }),
-  type: z.enum(["reparateur", "cash", "revendeur", "autre"]),
+  type: z.enum(["reparateur_reseau", "reparateur_independant", "cash_avec_reparation", "cash_generaliste", "destockage"]),
   franchise: z.coerce.boolean(),
   nb_magasins: z.coerce.number().int().min(1, { error: "Au moins 1 magasin." }),
+  distance_minutes: z.coerce.number().int().min(0, { error: "Distance invalide." }),
   notes: z.string().optional(),
 });
 
@@ -23,9 +24,10 @@ export async function createConcurrent(
   const session = await requireMC();
   const parsed = ConcurrentSchema.safeParse({
     enseigne: formData.get("enseigne"),
-    type: formData.get("type") || "autre",
+    type: formData.get("type") || "destockage",
     franchise: formData.get("franchise") === "true",
     nb_magasins: formData.get("nb_magasins") || 1,
+    distance_minutes: formData.get("distance_minutes") || 10,
     notes: formData.get("notes") || undefined,
   });
 
@@ -40,6 +42,7 @@ export async function createConcurrent(
     type: parsed.data.type,
     franchise: parsed.data.franchise,
     nb_magasins: parsed.data.nb_magasins,
+    distance_minutes: parsed.data.distance_minutes,
     notes: parsed.data.notes ?? null,
     created_by: session.id,
   });
@@ -59,9 +62,10 @@ export async function updateConcurrent(
   await requireMC();
   const parsed = ConcurrentSchema.safeParse({
     enseigne: formData.get("enseigne"),
-    type: formData.get("type") || "autre",
+    type: formData.get("type") || "destockage",
     franchise: formData.get("franchise") === "true",
     nb_magasins: formData.get("nb_magasins") || 1,
+    distance_minutes: formData.get("distance_minutes") || 10,
     notes: formData.get("notes") || undefined,
   });
 
@@ -77,6 +81,7 @@ export async function updateConcurrent(
       type: parsed.data.type,
       franchise: parsed.data.franchise,
       nb_magasins: parsed.data.nb_magasins,
+      distance_minutes: parsed.data.distance_minutes,
       notes: parsed.data.notes ?? null,
     })
     .eq("id", id);

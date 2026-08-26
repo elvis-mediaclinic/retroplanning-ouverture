@@ -273,13 +273,19 @@ export const STATUT_CANDIDAT_LABELS: Record<StatutCandidat, string> = {
   refuse: "Refusé",
 };
 
-export type TypeConcurrent = "reparateur" | "cash" | "revendeur" | "autre";
+export type TypeConcurrent =
+  | "reparateur_reseau"
+  | "reparateur_independant"
+  | "cash_avec_reparation"
+  | "cash_generaliste"
+  | "destockage";
 
 export const TYPE_CONCURRENT_LABELS: Record<TypeConcurrent, string> = {
-  reparateur: "Réparateur",
-  cash: "Acteur du cash",
-  revendeur: "Revendeur",
-  autre: "Autre",
+  reparateur_reseau: "Réparateur en réseau",
+  reparateur_independant: "Réparateur indépendant",
+  cash_avec_reparation: "Acteur du cash (avec réparation)",
+  cash_generaliste: "Acteur du cash (généraliste)",
+  destockage: "Déstockage / revente",
 };
 
 export type VilleConcurrent = {
@@ -289,6 +295,7 @@ export type VilleConcurrent = {
   type: TypeConcurrent;
   franchise: boolean;
   nb_magasins: number;
+  distance_minutes: number;
   notes: string | null;
   created_at: string;
 };
