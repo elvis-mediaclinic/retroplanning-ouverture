@@ -13,6 +13,35 @@ import {
   type TypeConcurrent,
 } from "@/lib/types";
 
+// Poids de pression concurrentielle : les réparateurs sont les vrais
+// concurrents directs (réparation/reconditionnement), les acteurs du cash
+// vendent de l'occasion mais n'ont pas ce service, d'où un poids bien moindre.
+const SATURATION_WEIGHTS: Record<TypeConcurrent, number> = {
+  reparateur: 3,
+  revendeur: 1.5,
+  cash: 0.5,
+  autre: 0.5,
+};
+
+function parseZoneChalandise(zone: string | null): number | null {
+  if (!zone) return null;
+  const n = Number(zone.replace(/[^\d]/g, ""));
+  return Number.isFinite(n) && n > 0 ? n : null;
+}
+
+function computeStats(concurrents: VilleConcurrent[], zoneChalandise: string | null) {
+  const weighted = concurrents.reduce((sum, c) => sum + SATURATION_WEIGHTS[c.type], 0);
+  const score = Math.min(10, Math.round(weighted * 10) / 10);
+
+  const nbReparateurs = concurrents.filter((c) => c.type === "reparateur").length;
+  const population = parseZoneChalandise(zoneChalandise);
+  const habitantsParReparateur = population && nbReparateurs > 0 ? Math.round(population / nbReparateurs) : null;
+
+  const nbFranchises = concurrents.filter((c) => c.franchise).length;
+
+  return { score, habitantsParReparateur, nbFranchises, nbReparateurs };
+}
+
 function ConcurrentForm({
   villeId,
   concurrent,
@@ -91,17 +120,45 @@ function ConcurrentForm({
 export function ConcurrentsPanel({
   villeId,
   concurrents,
+  zoneChalandise,
 }: {
   villeId: string;
   concurrents: VilleConcurrent[];
+  zoneChalandise: string | null;
 }) {
   const [adding, setAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
   const sorted = [...concurrents].sort((a, b) => a.enseigne.localeCompare(b.enseigne));
+  const stats = computeStats(concurrents, zoneChalandise);
 
   return (
     <div className="space-y-4">
+      {concurrents.length > 0 && (
+        <div className="grid grid-cols-3 gap-3">
+          <div className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2">
+            <p className="text-xs text-zinc-400">Saturation concurrentielle</p>
+            <p className="text-lg font-semibold text-zinc-900">{stats.score.toLocaleString("fr-FR")} / 10</p>
+          </div>
+          <div className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2">
+            <p className="text-xs text-zinc-400">Habitants / réparateur</p>
+            <p className="text-lg font-semibold text-zinc-900">
+              {stats.habitantsParReparateur !== null
+                ? stats.habitantsParReparateur.toLocaleString("fr-FR")
+                : stats.nbReparateurs === 0 ? "Aucun réparateur" : "—"}
+            </p>
+          </div>
+          <div className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2">
+            <p className="text-xs text-zinc-400">Marché prouvé</p>
+            <p className="text-lg font-semibold text-zinc-900">
+              {stats.nbFranchises > 0
+                ? `${stats.nbFranchises} franchise${stats.nbFranchises > 1 ? "s" : ""} en place`
+                : "Aucune franchise"}
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center justify-between">
         <p className="text-sm text-zinc-500">
           {concurrents.length === 0

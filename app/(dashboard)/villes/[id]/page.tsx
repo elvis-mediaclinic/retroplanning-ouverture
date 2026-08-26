@@ -75,7 +75,7 @@ export default async function EditVillePage({
       {/* Concurrents en place */}
       <section className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
         <h2 className="text-sm font-semibold text-zinc-900 mb-4">Concurrents en place</h2>
-        <ConcurrentsPanel villeId={id} concurrents={(concurrents ?? []) as VilleConcurrent[]} />
+        <ConcurrentsPanel villeId={id} concurrents={(concurrents ?? []) as VilleConcurrent[]} zoneChalandise={ville.zone_chalandise} />
       </section>
 
       {/* Annonce publique */}
