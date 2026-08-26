@@ -40,7 +40,6 @@ export function CandidatForm({ action, defaultValues, villes = [], selectedVille
     <form action={formAction} className="space-y-6">
       {/* Candidat principal */}
       <div className="space-y-1">
-        <p className="text-sm font-semibold text-zinc-900">Candidat</p>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1">
             <label className="text-sm font-medium text-zinc-700">
@@ -67,11 +66,10 @@ export function CandidatForm({ action, defaultValues, villes = [], selectedVille
         </div>
       </div>
 
-      {/* Associés — même niveau/apparence que le candidat, aucun n'est prioritaire */}
-      {associeDrafts.map((a, i) => (
+      {/* Autres personnes portant la candidature — même niveau/apparence, aucune n'est prioritaire */}
+      {associeDrafts.map((a) => (
         <div key={a.id} className="space-y-1 border-t border-zinc-100 pt-5">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-semibold text-zinc-900">Associé {i + 1}</p>
+          <div className="flex items-center justify-end">
             <button type="button" onClick={() => removeAssocie(a.id)} className="text-xs text-red-400 hover:text-red-600">
               Retirer
             </button>
