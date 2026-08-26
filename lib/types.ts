@@ -83,6 +83,16 @@ export type Candidat = {
   created_at: string;
 };
 
+export type CandidatAssocie = {
+  id: string;
+  candidat_id: string;
+  prenom: string;
+  nom: string;
+  email: string | null;
+  telephone: string | null;
+  ordre: number;
+};
+
 export type CandidatInteraction = {
   id: string;
   candidat_id: string;

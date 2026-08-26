@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { updateCandidat } from "../actions";
 import { CandidatForm } from "../CandidatForm";
 import { InteractionTimeline } from "./InteractionTimeline";
-import type { CandidatInteraction } from "@/lib/types";
+import type { CandidatInteraction, CandidatAssocie } from "@/lib/types";
 
 export default async function EditCandidatPage({
   params,
@@ -16,11 +16,12 @@ export default async function EditCandidatPage({
   const { id } = await params;
   const supabase = await createClient();
 
-  const [{ data: candidat }, { data: villes }, { data: candidatVilles }, { data: interactions }] = await Promise.all([
+  const [{ data: candidat }, { data: villes }, { data: candidatVilles }, { data: interactions }, { data: associes }] = await Promise.all([
     supabase.from("candidats").select("*").eq("id", id).single(),
     supabase.from("villes").select("id, nom").order("nom"),
     supabase.from("candidat_villes").select("ville_id").eq("candidat_id", id),
     supabase.from("candidat_interactions").select("*").eq("candidat_id", id).order("created_at", { ascending: false }),
+    supabase.from("candidat_associes").select("*").eq("candidat_id", id).order("ordre"),
   ]);
 
   if (!candidat) notFound();
@@ -47,7 +48,13 @@ export default async function EditCandidatPage({
         </Link>
       </div>
       <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
-        <CandidatForm action={action} defaultValues={candidat} villes={villes ?? []} selectedVilleIds={selectedVilleIds} />
+        <CandidatForm
+          action={action}
+          defaultValues={candidat}
+          villes={villes ?? []}
+          selectedVilleIds={selectedVilleIds}
+          associes={(associes ?? []) as CandidatAssocie[]}
+        />
       </div>
 
       <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">

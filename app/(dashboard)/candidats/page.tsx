@@ -6,6 +6,8 @@ import { STATUT_CANDIDAT_COLORS } from "@/lib/utils";
 import { CandidatRow } from "./CandidatRow";
 import { CopyEmail } from "./CopyEmail";
 
+type Associe = { id: string; prenom: string; nom: string; email: string | null; telephone: string | null; ordre: number };
+
 type Candidat = {
   id: string;
   nom: string;
@@ -18,6 +20,7 @@ type Candidat = {
   profil_id: string | null;
   candidat_villes: Array<{ villes: { nom: string } | { nom: string }[] | null }> | null;
   projets: Array<{ id: string; statut: string }> | null;
+  candidat_associes: Associe[] | null;
 };
 
 function getVilles(c: Candidat) {
@@ -31,6 +34,7 @@ function getVilles(c: Candidat) {
 
 function CandidatCard({ c, showProjet }: { c: Candidat; showProjet?: boolean }) {
   const projetsActifs = (c.projets ?? []).filter((p) => ["prospection", "en_cours"].includes(p.statut));
+  const associes = [...(c.candidat_associes ?? [])].sort((a, b) => a.ordre - b.ordre);
   return (
     <Link href={`/candidats/${c.id}`} className="block px-4 py-3 hover:bg-zinc-50">
       <div className="flex items-center justify-between gap-2">
@@ -46,6 +50,13 @@ function CandidatCard({ c, showProjet }: { c: Candidat; showProjet?: boolean }) 
         <CopyEmail email={c.email} />
         {c.telephone && ` · ${c.telephone}`}
       </p>
+      {associes.map((a) => (
+        <div key={a.id} className="mt-0.5 text-xs text-zinc-500">
+          <span className="text-zinc-400">{a.prenom} {a.nom} — </span>
+          {a.email ? <CopyEmail email={a.email} /> : "—"}
+          {a.telephone && ` · ${a.telephone}`}
+        </div>
+      ))}
       <p className="mt-1 text-xs text-zinc-500">
         {getVilles(c)}
         {c.apport_personnel ? ` · ${c.apport_personnel.toLocaleString("fr-FR")} €` : ""}
@@ -101,7 +112,7 @@ export default async function CandidatsPage() {
 
   const { data } = await supabase
     .from("candidats")
-    .select("id, nom, prenom, email, telephone, zone_souhaitee, statut, apport_personnel, profil_id, candidat_villes(villes(nom)), projets(id, statut)")
+    .select("id, nom, prenom, email, telephone, zone_souhaitee, statut, apport_personnel, profil_id, candidat_villes(villes(nom)), projets(id, statut), candidat_associes(id, prenom, nom, email, telephone, ordre)")
     .order("created_at", { ascending: false });
 
   const candidats = (data ?? []) as Candidat[];

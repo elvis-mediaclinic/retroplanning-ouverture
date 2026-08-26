@@ -41,6 +41,7 @@ export async function createCandidat(
   }
 
   const villeIds = formData.getAll("ville_ids") as string[];
+  const associes = parseAssocies(formData);
 
   const supabase = await createClient();
   const { data: newCandidat, error } = await supabase.from("candidats").insert({
@@ -63,7 +64,36 @@ export async function createCandidat(
     );
   }
 
+  if (newCandidat && associes.length > 0) {
+    await supabase.from("candidat_associes").insert(
+      associes.map((a, i) => ({ candidat_id: newCandidat.id, ...a, ordre: i }))
+    );
+  }
+
   redirect("/candidats");
+}
+
+// Associés : champs répétables associe_prenom[]/associe_nom[]/associe_email[]/associe_telephone[],
+// en parallèle par index. Une ligne n'est retenue que si prénom et nom sont renseignés.
+function parseAssocies(formData: FormData) {
+  const prenoms = formData.getAll("associe_prenom") as string[];
+  const noms = formData.getAll("associe_nom") as string[];
+  const emails = formData.getAll("associe_email") as string[];
+  const telephones = formData.getAll("associe_telephone") as string[];
+
+  const associes: { prenom: string; nom: string; email: string | null; telephone: string | null }[] = [];
+  for (let i = 0; i < prenoms.length; i++) {
+    const prenom = prenoms[i]?.trim();
+    const nom = noms[i]?.trim();
+    if (!prenom || !nom) continue;
+    associes.push({
+      prenom,
+      nom,
+      email: emails[i]?.trim() || null,
+      telephone: telephones[i]?.trim() || null,
+    });
+  }
+  return associes;
 }
 
 export async function updateCandidat(
@@ -89,6 +119,7 @@ export async function updateCandidat(
   }
 
   const villeIds = formData.getAll("ville_ids") as string[];
+  const associes = parseAssocies(formData);
 
   const supabase = await createClient();
   const { error } = await supabase
@@ -112,6 +143,14 @@ export async function updateCandidat(
   if (villeIds.length > 0) {
     await supabase.from("candidat_villes").insert(
       villeIds.map((ville_id) => ({ candidat_id: id, ville_id }))
+    );
+  }
+
+  // Remplace les associés
+  await supabase.from("candidat_associes").delete().eq("candidat_id", id);
+  if (associes.length > 0) {
+    await supabase.from("candidat_associes").insert(
+      associes.map((a, i) => ({ candidat_id: id, ...a, ordre: i }))
     );
   }
 
