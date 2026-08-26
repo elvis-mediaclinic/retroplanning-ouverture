@@ -2,7 +2,7 @@ import Link from "next/link";
 import { requireMarketing } from "@/lib/dal";
 import { createClient } from "@/lib/supabase/server";
 import { NewAnnonceModal } from "./NewAnnonceModal";
-import { AnnonceRow } from "./AnnonceRow";
+import { AnnonceRow, VoirArticleLink } from "./AnnonceRow";
 
 export const metadata = { title: "Annonces — Mediaclinic" };
 
@@ -176,15 +176,10 @@ export default async function AnnoncesAdminPage() {
                         )}
                       </td>
                       <td className="py-3 px-4 text-right">
-                        <a
+                        <VoirArticleLink
                           href={`${baseUrl}/annonce/${a.id}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={(e) => e.stopPropagation()}
                           className="text-xs text-zinc-400 hover:text-zinc-700"
-                        >
-                          Voir l&apos;article ↗
-                        </a>
+                        />
                       </td>
                     </AnnonceRow>
                   );

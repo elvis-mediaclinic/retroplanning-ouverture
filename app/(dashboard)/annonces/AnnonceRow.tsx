@@ -16,3 +16,19 @@ export function AnnonceRow({ ville, children, className = "" }: { ville: Ville |
     </tr>
   );
 }
+
+// Lien externe à l'intérieur d'une AnnonceRow : bloque la propagation du
+// clic pour ne pas déclencher aussi la navigation de la ligne.
+export function VoirArticleLink({ href, className }: { href: string; className?: string }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={(e) => e.stopPropagation()}
+      className={className}
+    >
+      Voir l&apos;article ↗
+    </a>
+  );
+}
