@@ -43,8 +43,16 @@ export async function requireRole(...roles: Profile["role"][]) {
   return profile;
 }
 
-// Équipe MC interne : admin, consultant, responsable_mc.
+// Équipe MC interne (accès en écriture) : admin, responsable_mc.
+// Le consultant n'en fait plus partie — il est en lecture seule et scopé à
+// ce qu'il a lui-même apporté (cf. migration 0041_consultant_readonly).
 export async function requireMC() {
+  return requireRole("admin", "responsable_mc");
+}
+
+// Équipe MC + consultant (lecture, éventuellement restreinte par les
+// policies RLS elles-mêmes — villes, candidats, ouvertures).
+export async function requireMCOrConsultant() {
   return requireRole("admin", "consultant", "responsable_mc");
 }
 

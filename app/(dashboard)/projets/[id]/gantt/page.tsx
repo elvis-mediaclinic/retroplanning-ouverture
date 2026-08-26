@@ -15,8 +15,9 @@ export default async function GanttPage({ params }: { params: Promise<{ id: stri
 
   if (!projet) notFound();
   if (profile.role === "franchise" && projet.franchisee_id !== profile.id) notFound();
+  if (profile.role === "consultant") notFound();
 
-  const isMC = profile.role === "admin" || profile.role === "consultant" || profile.role === "responsable_mc";
+  const isMC = profile.role === "admin" || profile.role === "responsable_mc";
   const canEdit = profile.role === "admin" || profile.role === "franchise";
 
   return (

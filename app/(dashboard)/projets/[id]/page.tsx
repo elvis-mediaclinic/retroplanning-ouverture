@@ -71,7 +71,11 @@ export default async function ProjetPage({
     notFound();
   }
 
-  const isMC = profile.role === "admin" || profile.role === "consultant" || profile.role === "responsable_mc";
+  // Le consultant n'a pas accès au détail du retroplanning, seulement à la
+  // progression globale listée sur /projets.
+  if (profile.role === "consultant") notFound();
+
+  const isMC = profile.role === "admin" || profile.role === "responsable_mc";
   const canEditAll = profile.role === "admin" || profile.role === "franchise";
   const isResponsableMC = profile.role === "responsable_mc";
 

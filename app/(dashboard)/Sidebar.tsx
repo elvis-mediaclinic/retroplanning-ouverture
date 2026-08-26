@@ -48,30 +48,16 @@ const NAV: Record<UserRole, NavGroup[]> = {
   ],
   consultant: [
     {
-      items: [
-        { href: "/", label: "Tableau de bord" },
-      ],
-    },
-    {
-      title: "Réseau",
+      title: "Prospection (lecture seule)",
       items: [
         { href: "/projets", label: "Ouvertures" },
-        { href: "/reseau", label: "Magasins" },
-        { href: "/reseau/franchises", label: "Franchisés" },
-        { href: "/reseau/carte", label: "Sur la carte" },
-      ],
-    },
-    {
-      title: "Prospection",
-      items: [
         { href: "/villes", label: "Villes" },
-        { href: "/candidats", label: "Candidats" },
-        { href: "/annonces", label: "Annonces" },
+        { href: "/candidats", label: "Mes candidats" },
       ],
     },
     {
-      title: "Contenu",
-      items: [{ href: "/concept", label: "Concept Mediaclinic" }],
+      title: "Partager",
+      items: [{ href: "/opportunites", label: "Annonces & mon lien" }],
     },
   ],
   franchise: [

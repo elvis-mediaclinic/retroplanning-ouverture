@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { requireMC } from "@/lib/dal";
+import { requireMCOrConsultant, getProfile } from "@/lib/dal";
 import { createClient } from "@/lib/supabase/server";
 import { STATUT_CANDIDAT_LABELS } from "@/lib/types";
 import { STATUT_CANDIDAT_COLORS } from "@/lib/utils";
@@ -108,7 +108,9 @@ function CandidatTable({ candidats, empty, showProjet }: { candidats: Candidat[]
 }
 
 export default async function CandidatsPage() {
-  await requireMC();
+  await requireMCOrConsultant();
+  const profile = await getProfile();
+  const canEdit = profile.role !== "consultant";
   const supabase = await createClient();
 
   const { data } = await supabase
@@ -138,7 +140,7 @@ export default async function CandidatsPage() {
             {refuses.length > 0 && ` · ${refuses.length} refusé${refuses.length !== 1 ? "s" : ""}`}
           </p>
         </div>
-        <Link href="/candidats/new" className="btn-primary">+ Ajouter</Link>
+        {canEdit && <Link href="/candidats/new" className="btn-primary">+ Ajouter</Link>}
       </div>
 
       {/* Signés */}

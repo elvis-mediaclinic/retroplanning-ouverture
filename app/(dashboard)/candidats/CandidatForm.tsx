@@ -12,6 +12,7 @@ type Props = {
   selectedVilleIds?: string[];
   associes?: CandidatAssocie[];
   submitLabel?: string;
+  readOnly?: boolean;
 };
 
 function uid() { return Math.random().toString(36).slice(2); }
@@ -20,7 +21,7 @@ type AssocieDraft = { id: string; prenom: string; nom: string; email: string; te
 
 const inputCls = "w-full rounded-md border border-zinc-300 px-3 py-2 text-sm";
 
-export function CandidatForm({ action, defaultValues, villes = [], selectedVilleIds = [], associes = [], submitLabel = "Enregistrer" }: Props) {
+export function CandidatForm({ action, defaultValues, villes = [], selectedVilleIds = [], associes = [], submitLabel = "Enregistrer", readOnly = false }: Props) {
   const [state, formAction, pending] = useActionState(action, undefined);
   const [associeDrafts, setAssocieDrafts] = useState<AssocieDraft[]>(
     associes.map((a) => ({ id: a.id, prenom: a.prenom, nom: a.nom, email: a.email ?? "", telephone: a.telephone ?? "" }))
@@ -38,6 +39,7 @@ export function CandidatForm({ action, defaultValues, villes = [], selectedVille
 
   return (
     <form action={formAction} className="space-y-6">
+    <fieldset disabled={readOnly} className="space-y-6 border-0 p-0 m-0">
       {/* Candidat principal */}
       <div className="space-y-1">
         <div className="grid grid-cols-2 gap-4">
@@ -69,11 +71,13 @@ export function CandidatForm({ action, defaultValues, villes = [], selectedVille
       {/* Autres personnes portant la candidature — même niveau/apparence, aucune n'est prioritaire */}
       {associeDrafts.map((a) => (
         <div key={a.id} className="space-y-1 border-t border-zinc-100 pt-5">
-          <div className="flex items-center justify-end">
-            <button type="button" onClick={() => removeAssocie(a.id)} className="text-xs text-red-400 hover:text-red-600">
-              Retirer
-            </button>
-          </div>
+          {!readOnly && (
+            <div className="flex items-center justify-end">
+              <button type="button" onClick={() => removeAssocie(a.id)} className="text-xs text-red-400 hover:text-red-600">
+                Retirer
+              </button>
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
               <label className="text-sm font-medium text-zinc-700">Prénom</label>
@@ -117,11 +121,13 @@ export function CandidatForm({ action, defaultValues, villes = [], selectedVille
         </div>
       ))}
 
-      <div className="border-t border-zinc-100 pt-4">
-        <button type="button" onClick={addAssocie} className="text-sm text-brand hover:text-brand-dark">
-          + Ajouter un associé
-        </button>
-      </div>
+      {!readOnly && (
+        <div className="border-t border-zinc-100 pt-4">
+          <button type="button" onClick={addAssocie} className="text-sm text-brand hover:text-brand-dark">
+            + Ajouter un associé
+          </button>
+        </div>
+      )}
 
       {/* Champs communs à la candidature */}
       <div className="grid grid-cols-2 gap-4 border-t border-zinc-100 pt-5">
@@ -195,9 +201,12 @@ export function CandidatForm({ action, defaultValues, villes = [], selectedVille
         <p className="text-sm text-red-600" role="alert">{state.error}</p>
       )}
 
-      <button type="submit" disabled={pending} className="btn-primary">
-        {pending ? "Enregistrement…" : submitLabel}
-      </button>
+      {!readOnly && (
+        <button type="submit" disabled={pending} className="btn-primary">
+          {pending ? "Enregistrement…" : submitLabel}
+        </button>
+      )}
+    </fieldset>
     </form>
   );
 }

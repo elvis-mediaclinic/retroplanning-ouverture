@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { requireMC } from "@/lib/dal";
+import { requireMCOrConsultant, getProfile } from "@/lib/dal";
 import { createClient } from "@/lib/supabase/server";
 import { updateCandidat } from "../actions";
 import { CandidatForm } from "../CandidatForm";
@@ -12,7 +12,9 @@ export default async function EditCandidatPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  await requireMC();
+  await requireMCOrConsultant();
+  const profile = await getProfile();
+  const canEdit = profile.role !== "consultant";
   const { id } = await params;
   const supabase = await createClient();
 
@@ -56,12 +58,13 @@ export default async function EditCandidatPage({
           villes={villes ?? []}
           selectedVilleIds={selectedVilleIds}
           associes={associesList}
+          readOnly={!canEdit}
         />
       </div>
 
       <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
         <h2 className="text-sm font-semibold text-zinc-900 mb-4">Suivi des échanges</h2>
-        <InteractionTimeline candidatId={id} interactions={(interactions ?? []) as CandidatInteraction[]} />
+        <InteractionTimeline candidatId={id} interactions={(interactions ?? []) as CandidatInteraction[]} readOnly={!canEdit} />
       </div>
     </div>
   );

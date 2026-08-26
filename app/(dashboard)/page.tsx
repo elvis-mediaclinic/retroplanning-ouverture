@@ -34,6 +34,10 @@ function isUrgent(dateCible: string | null, statut: string) {
 export default async function DashboardPage() {
   const profile = await getProfile();
   if (profile.role === "franchise") redirect("/mon-projet");
+  // Le consultant a une vue restreinte (lecture seule, scopée à ses
+  // propres candidats) : ce tableau de bord agrège des données réseau
+  // auxquelles il n'a plus accès.
+  if (profile.role === "consultant") redirect("/villes");
 
   const supabase = await createClient();
   const today = new Date().toISOString().split("T")[0];

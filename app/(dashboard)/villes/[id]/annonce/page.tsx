@@ -28,7 +28,6 @@ export default async function VilleAnnoncePage({
 
   const canEdit =
     profile.role === "admin" ||
-    profile.role === "consultant" ||
     (profile.role === "responsable_mc" && !!profile.fonction?.toLowerCase().includes("marketing"));
 
   if (!canEdit) notFound();

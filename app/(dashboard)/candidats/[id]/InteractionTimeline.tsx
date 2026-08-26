@@ -106,9 +106,11 @@ function InteractionForm({
 export function InteractionTimeline({
   candidatId,
   interactions,
+  readOnly = false,
 }: {
   candidatId: string;
   interactions: CandidatInteraction[];
+  readOnly?: boolean;
 }) {
   const [adding, setAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -127,27 +129,29 @@ export function InteractionTimeline({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-2">
-        {quickActions.map((qa) => (
+      {!readOnly && (
+        <div className="flex flex-wrap items-center gap-2">
+          {quickActions.map((qa) => (
+            <button
+              key={qa.type}
+              type="button"
+              onClick={() => { setQuickType(qa.type); setAdding(true); setEditingId(null); }}
+              className="btn-secondary text-xs px-3 py-1.5"
+            >
+              + {qa.label}
+            </button>
+          ))}
           <button
-            key={qa.type}
             type="button"
-            onClick={() => { setQuickType(qa.type); setAdding(true); setEditingId(null); }}
-            className="btn-secondary text-xs px-3 py-1.5"
+            onClick={() => { setQuickType("autre"); setAdding(true); setEditingId(null); }}
+            className="text-xs text-zinc-500 hover:text-zinc-900 px-2"
           >
-            + {qa.label}
+            + Autre échange
           </button>
-        ))}
-        <button
-          type="button"
-          onClick={() => { setQuickType("autre"); setAdding(true); setEditingId(null); }}
-          className="text-xs text-zinc-500 hover:text-zinc-900 px-2"
-        >
-          + Autre échange
-        </button>
-      </div>
+        </div>
+      )}
 
-      {adding && (
+      {!readOnly && adding && (
         <InteractionForm candidatId={candidatId} defaultType={quickType} onDone={() => setAdding(false)} />
       )}
 
@@ -157,7 +161,7 @@ export function InteractionTimeline({
 
       <ul className="space-y-2">
         {sorted.map((it) => {
-          if (editingId === it.id) {
+          if (!readOnly && editingId === it.id) {
             return (
               <li key={it.id}>
                 <InteractionForm candidatId={candidatId} interaction={it} onDone={() => setEditingId(null)} />
@@ -176,22 +180,24 @@ export function InteractionTimeline({
                 </div>
                 {it.notes && <p className="mt-1 text-sm text-zinc-600 whitespace-pre-line">{it.notes}</p>}
               </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => { setEditingId(it.id); setAdding(false); }}
-                  className="text-xs text-zinc-500 hover:text-zinc-900"
-                >
-                  Éditer
-                </button>
-                <button
-                  type="button"
-                  onClick={() => deleteInteraction(it.id, candidatId)}
-                  className="text-xs text-red-500 hover:text-red-700"
-                >
-                  Suppr.
-                </button>
-              </div>
+              {!readOnly && (
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => { setEditingId(it.id); setAdding(false); }}
+                    className="text-xs text-zinc-500 hover:text-zinc-900"
+                  >
+                    Éditer
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => deleteInteraction(it.id, candidatId)}
+                    className="text-xs text-red-500 hover:text-red-700"
+                  >
+                    Suppr.
+                  </button>
+                </div>
+              )}
             </li>
           );
         })}

@@ -221,10 +221,12 @@ export function ConcurrentsPanel({
   villeId,
   concurrents,
   zoneChalandise,
+  readOnly = false,
 }: {
   villeId: string;
   concurrents: VilleConcurrent[];
   zoneChalandise: string | null;
+  readOnly?: boolean;
 }) {
   const [adding, setAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -269,14 +271,14 @@ export function ConcurrentsPanel({
             ? "Aucun concurrent recensé pour le moment."
             : `${concurrents.length} concurrent${concurrents.length > 1 ? "s" : ""} recensé${concurrents.length > 1 ? "s" : ""}`}
         </p>
-        {!adding && (
+        {!readOnly && !adding && (
           <button type="button" onClick={() => { setAdding(true); setEditingId(null); }} className="btn-secondary text-xs px-3 py-1.5">
             + Ajouter un concurrent
           </button>
         )}
       </div>
 
-      {adding && (
+      {!readOnly && adding && (
         <ConcurrentForm villeId={villeId} onDone={() => setAdding(false)} />
       )}
 
@@ -290,12 +292,12 @@ export function ConcurrentsPanel({
               <th className="pb-2 font-medium text-right">Distance</th>
               <th className="pb-2 font-medium">Structure</th>
               <th className="pb-2 font-medium">Notes</th>
-              <th className="pb-2" />
+              {!readOnly && <th className="pb-2" />}
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-100">
             {sorted.map((c) => {
-              if (editingId === c.id) {
+              if (!readOnly && editingId === c.id) {
                 return (
                   <tr key={c.id}>
                     <td colSpan={7} className="py-2">
@@ -320,22 +322,24 @@ export function ConcurrentsPanel({
                     )}
                   </td>
                   <td className="py-2 pr-3 text-zinc-500">{c.notes || "—"}</td>
-                  <td className="py-2 text-right whitespace-nowrap">
-                    <button
-                      type="button"
-                      onClick={() => { setEditingId(c.id); setAdding(false); }}
-                      className="text-xs text-zinc-500 hover:text-zinc-900"
-                    >
-                      Éditer
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => deleteConcurrent(c.id, villeId)}
-                      className="ml-3 text-xs text-red-500 hover:text-red-700"
-                    >
-                      Suppr.
-                    </button>
-                  </td>
+                  {!readOnly && (
+                    <td className="py-2 text-right whitespace-nowrap">
+                      <button
+                        type="button"
+                        onClick={() => { setEditingId(c.id); setAdding(false); }}
+                        className="text-xs text-zinc-500 hover:text-zinc-900"
+                      >
+                        Éditer
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => deleteConcurrent(c.id, villeId)}
+                        className="ml-3 text-xs text-red-500 hover:text-red-700"
+                      >
+                        Suppr.
+                      </button>
+                    </td>
+                  )}
                 </tr>
               );
             })}

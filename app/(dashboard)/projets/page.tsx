@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { requireMC } from "@/lib/dal";
+import { requireMCOrConsultant, getProfile } from "@/lib/dal";
 import { createClient } from "@/lib/supabase/server";
 import {
   FORMAT_LABELS,
@@ -9,22 +9,30 @@ import {
 import { STATUT_PROJET_COLORS, formatDate } from "@/lib/utils";
 
 export default async function ProjetsPage() {
-  await requireMC();
+  await requireMCOrConsultant();
+  const profile = await getProfile();
+  const isConsultant = profile.role === "consultant";
   const supabase = await createClient();
 
+  // Le consultant n'a pas accès à etapes_projet (détail du retroplanning) :
+  // on se contente du % pré-calculé sur "projets" (progression_pct), sans
+  // détail de retard/tâches à faire.
   const [{ data: projets }, { data: etapes }] = await Promise.all([
     supabase
       .from("projets")
-      .select(`id, nom, type_magasin, format_magasin, statut, date_cible_ouverture, villes(nom), candidats(nom, prenom)`)
+      .select(`id, nom, type_magasin, format_magasin, statut, date_cible_ouverture, progression_pct, villes(nom), candidats(nom, prenom)`)
       .order("created_at", { ascending: false }),
-    supabase
-      .from("etapes_projet")
-      .select("projet_id, statut, date_cible"),
+    isConsultant
+      ? Promise.resolve({ data: null })
+      : supabase.from("etapes_projet").select("projet_id, statut, date_cible"),
   ]);
 
   const today = new Date(); today.setHours(0, 0, 0, 0);
 
-  function statsForProjet(projetId: string) {
+  function statsForProjet(projetId: string, fallbackProgression: number) {
+    if (isConsultant) {
+      return { progression: fallbackProgression, total: 1, retard: 0, aFaire: 0 };
+    }
     const all = (etapes ?? []).filter((e) => e.projet_id === projetId);
     const total = all.length;
     const faites = all.filter((e) => e.statut === "fait" || e.statut === "na").length;
@@ -51,7 +59,7 @@ export default async function ProjetsPage() {
           <h1 className="page-header-title">Ouvertures</h1>
           <p className="page-header-subtitle">Tous les dossiers d&apos;ouverture</p>
         </div>
-        <Link href="/projets/new" className="btn-primary">+ Nouveau projet</Link>
+        {!isConsultant && <Link href="/projets/new" className="btn-primary">+ Nouveau projet</Link>}
       </div>
 
       <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm">
@@ -62,10 +70,10 @@ export default async function ProjetsPage() {
             const ville = Array.isArray(villeRaw) ? (villeRaw[0] as { nom: string } | undefined) ?? null : (villeRaw as { nom: string } | null);
             const candidatRaw = p.candidats as unknown;
             const candidat = Array.isArray(candidatRaw) ? (candidatRaw[0] as { nom: string; prenom: string } | undefined) ?? null : (candidatRaw as { nom: string; prenom: string } | null);
-            const { progression, total, retard, aFaire } = statsForProjet(p.id);
+            const { progression, total, retard, aFaire } = statsForProjet(p.id, p.progression_pct ?? 0);
 
-            return (
-              <Link key={p.id} href={`/projets/${p.id}`} className="block px-4 py-3 hover:bg-zinc-50">
+            const cardContent = (
+              <>
                 <div className="flex items-center justify-between gap-2">
                   <p className="font-medium text-zinc-900">{p.nom}</p>
                   <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${STATUT_PROJET_COLORS[p.statut as keyof typeof STATUT_PROJET_COLORS]}`}>
@@ -96,13 +104,20 @@ export default async function ProjetsPage() {
                     </span>
                   )}
                 </div>
+              </>
+            );
+            return isConsultant ? (
+              <div key={p.id} className="px-4 py-3">{cardContent}</div>
+            ) : (
+              <Link key={p.id} href={`/projets/${p.id}`} className="block px-4 py-3 hover:bg-zinc-50">
+                {cardContent}
               </Link>
             );
           })}
           {(projets ?? []).length === 0 && (
             <p className="py-6 px-4 text-center text-zinc-400">
               Aucun projet.{" "}
-              <Link href="/projets/new" className="text-zinc-600 underline">Créer le premier</Link>
+              {!isConsultant && <Link href="/projets/new" className="text-zinc-600 underline">Créer le premier</Link>}
             </p>
           )}
         </div>
@@ -126,14 +141,18 @@ export default async function ProjetsPage() {
               const ville = Array.isArray(villeRaw) ? (villeRaw[0] as { nom: string } | undefined) ?? null : (villeRaw as { nom: string } | null);
               const candidatRaw = p.candidats as unknown;
               const candidat = Array.isArray(candidatRaw) ? (candidatRaw[0] as { nom: string; prenom: string } | undefined) ?? null : (candidatRaw as { nom: string; prenom: string } | null);
-              const { progression, total, retard, aFaire } = statsForProjet(p.id);
+              const { progression, total, retard, aFaire } = statsForProjet(p.id, p.progression_pct ?? 0);
 
               return (
                 <tr key={p.id} className="border-b border-zinc-100 last:border-0 align-middle">
                   <td className="py-3 px-4">
-                    <Link href={`/projets/${p.id}`} className="font-medium text-zinc-900 hover:underline">
-                      {p.nom}
-                    </Link>
+                    {isConsultant ? (
+                      <span className="font-medium text-zinc-900">{p.nom}</span>
+                    ) : (
+                      <Link href={`/projets/${p.id}`} className="font-medium text-zinc-900 hover:underline">
+                        {p.nom}
+                      </Link>
+                    )}
                     <div className="text-xs text-zinc-400 mt-0.5">
                       {TYPE_LABELS[p.type_magasin as keyof typeof TYPE_LABELS]} · {FORMAT_LABELS[p.format_magasin as keyof typeof FORMAT_LABELS]}
                     </div>
@@ -186,7 +205,7 @@ export default async function ProjetsPage() {
               <tr>
                 <td colSpan={7} className="py-6 px-4 text-center text-zinc-400">
                   Aucun projet.{" "}
-                  <Link href="/projets/new" className="text-zinc-600 underline">Créer le premier</Link>
+                  {!isConsultant && <Link href="/projets/new" className="text-zinc-600 underline">Créer le premier</Link>}
                 </td>
               </tr>
             )}

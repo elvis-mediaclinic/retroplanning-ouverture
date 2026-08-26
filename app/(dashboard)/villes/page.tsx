@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { requireMC, getProfile } from "@/lib/dal";
+import { requireMCOrConsultant, getProfile } from "@/lib/dal";
 import { createClient } from "@/lib/supabase/server";
 import { STATUT_VILLE_LABELS } from "@/lib/types";
 import { STATUT_VILLE_COLORS } from "@/lib/utils";
@@ -101,7 +101,7 @@ function VilleTable({
 }
 
 export default async function VillesPage() {
-  await requireMC();
+  await requireMCOrConsultant();
   const profile = await getProfile();
   const supabase = await createClient();
 
@@ -119,7 +119,6 @@ export default async function VillesPage() {
 
   const canEdit =
     profile.role === "admin" ||
-    profile.role === "consultant" ||
     (profile.role === "responsable_mc" && !!profile.fonction?.toLowerCase().includes("marketing"));
 
   return (

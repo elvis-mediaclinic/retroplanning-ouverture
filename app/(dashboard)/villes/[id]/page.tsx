@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { requireMC, getProfile } from "@/lib/dal";
+import { requireMCOrConsultant, getProfile } from "@/lib/dal";
 import { createClient } from "@/lib/supabase/server";
 import { updateVille } from "../actions";
 import { VilleInfoPanel } from "./VilleInfoPanel";
@@ -12,7 +12,7 @@ export default async function EditVillePage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  await requireMC();
+  await requireMCOrConsultant();
   const profile = await getProfile();
   const { id } = await params;
   const supabase = await createClient();
@@ -32,7 +32,6 @@ export default async function EditVillePage({
 
   const canEdit =
     profile.role === "admin" ||
-    profile.role === "consultant" ||
     (profile.role === "responsable_mc" && !!profile.fonction?.toLowerCase().includes("marketing"));
 
   const action = updateVille.bind(null, id);
@@ -68,7 +67,7 @@ export default async function EditVillePage({
       {/* Concurrents en place */}
       <section className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
         <h2 className="text-sm font-semibold text-zinc-900 mb-4">Concurrents en place</h2>
-        <ConcurrentsPanel villeId={id} concurrents={(concurrents ?? []) as VilleConcurrent[]} zoneChalandise={ville.zone_chalandise} />
+        <ConcurrentsPanel villeId={id} concurrents={(concurrents ?? []) as VilleConcurrent[]} zoneChalandise={ville.zone_chalandise} readOnly={!canEdit} />
       </section>
 
       {/* Candidatures reçues */}
