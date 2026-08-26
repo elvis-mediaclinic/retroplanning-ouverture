@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { STATUT_VILLE_LABELS } from "@/lib/types";
 import { STATUT_VILLE_COLORS } from "@/lib/utils";
 import { PropositionActions } from "./PropositionActions";
+import { VilleRow } from "./VilleRow";
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://retroplanning-ouverture.vercel.app";
 
@@ -18,70 +19,6 @@ type Ville = {
   candidatures: Array<{ id: string }> | null;
   projets: Array<{ id: string; statut: string }> | null;
 };
-
-function VilleRow({ v }: { v: Ville }) {
-  const annonce = v.annonces?.[0] ?? null;
-  const nbCandidatures = v.candidatures?.length ?? 0;
-  const projetsActifs = (v.projets ?? []).filter((p) =>
-    ["prospection", "en_cours"].includes(p.statut)
-  );
-
-  return (
-    <tr className="border-b border-zinc-100 last:border-0">
-      <td className="py-2 px-4 font-medium text-zinc-900">
-        <Link href={`/villes/${v.id}`} className="hover:underline">{v.nom}</Link>
-      </td>
-      <td className="py-2 px-4 text-zinc-500">
-        {[v.departement, v.region].filter(Boolean).join(" · ") || "—"}
-      </td>
-      <td className="py-2 px-4 text-zinc-500">
-        {v.zone_chalandise ?? "—"}
-      </td>
-      <td className="py-2 px-4">
-        {projetsActifs.length > 0 ? (
-          <div className="flex flex-wrap gap-1">
-            {projetsActifs.map((p) => (
-              <Link key={p.id} href={`/projets/${p.id}`}
-                className="rounded-full bg-brand/10 px-2 py-0.5 text-xs font-medium text-brand hover:bg-brand/20">
-                Projet →
-              </Link>
-            ))}
-          </div>
-        ) : (
-          <span className="text-xs text-zinc-400">—</span>
-        )}
-      </td>
-      <td className="py-2 px-4">
-        {annonce ? (
-          <div className="flex items-center gap-2">
-            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
-              annonce.actif ? "bg-green-100 text-green-700" : "bg-zinc-100 text-zinc-500"
-            }`}>
-              {annonce.actif ? "Publiée" : "Brouillon"}
-            </span>
-            {annonce.actif && (
-              <a href={`${baseUrl}/annonce/${annonce.id}`} target="_blank" rel="noopener noreferrer"
-                className="text-xs text-brand hover:text-brand-dark">
-                Voir ↗
-              </a>
-            )}
-          </div>
-        ) : (
-          <span className="text-xs text-zinc-400">—</span>
-        )}
-      </td>
-      <td className="py-2 px-4">
-        {nbCandidatures > 0 ? (
-          <span className="inline-flex items-center rounded-full bg-brand/10 px-2 py-0.5 text-xs font-medium text-brand">
-            {nbCandidatures}
-          </span>
-        ) : (
-          <span className="text-xs text-zinc-400">—</span>
-        )}
-      </td>
-    </tr>
-  );
-}
 
 function VilleCard({ v }: { v: Ville }) {
   const annonce = v.annonces?.[0] ?? null;
@@ -122,7 +59,17 @@ function VilleCard({ v }: { v: Ville }) {
   );
 }
 
-function VilleTable({ villes, empty }: { villes: Ville[]; empty: string }) {
+function VilleTable({
+  villes,
+  empty,
+  showProjet = true,
+  showAnnonce = true,
+}: {
+  villes: Ville[];
+  empty: string;
+  showProjet?: boolean;
+  showAnnonce?: boolean;
+}) {
   if (villes.length === 0) {
     return <p className="text-sm text-zinc-400 py-3">{empty}</p>;
   }
@@ -140,13 +87,13 @@ function VilleTable({ villes, empty }: { villes: Ville[]; empty: string }) {
             <th className="py-2 px-4 font-medium text-white">Ville</th>
             <th className="py-2 px-4 font-medium text-white">Dép. / Région</th>
             <th className="py-2 px-4 font-medium text-white">Zone de chalandise</th>
-            <th className="py-2 px-4 font-medium text-white">Projet</th>
-            <th className="py-2 px-4 font-medium text-white">Annonce</th>
+            {showProjet && <th className="py-2 px-4 font-medium text-white">Projet</th>}
+            {showAnnonce && <th className="py-2 px-4 font-medium text-white">Annonce</th>}
             <th className="py-2 px-4 font-medium text-white">Candidatures</th>
           </tr>
         </thead>
         <tbody>
-          {villes.map((v) => <VilleRow key={v.id} v={v} />)}
+          {villes.map((v) => <VilleRow key={v.id} v={v} showProjet={showProjet} showAnnonce={showAnnonce} />)}
         </tbody>
       </table>
     </div>
@@ -225,7 +172,7 @@ export default async function VillesPage() {
           <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-zinc-400">
             Validées — projet en cours
           </h2>
-          <VilleTable villes={validees} empty="Aucune ville validée." />
+          <VilleTable villes={validees} empty="Aucune ville validée." showAnnonce={false} />
         </section>
       )}
 
@@ -234,7 +181,7 @@ export default async function VillesPage() {
         <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-zinc-400">
           En étude
         </h2>
-        <VilleTable villes={enEtude} empty="Aucune ville en étude." />
+        <VilleTable villes={enEtude} empty="Aucune ville en étude." showProjet={false} />
       </section>
     </div>
   );
