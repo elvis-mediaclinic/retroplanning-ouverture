@@ -86,7 +86,7 @@ function VilleTable({
           <tr className="bg-gradient-to-br from-[#00729e] to-[#0089bd] text-left">
             <th className="py-2 px-4 font-medium text-white">Ville</th>
             <th className="py-2 px-4 font-medium text-white">Dép. / Région</th>
-            <th className="py-2 px-4 font-medium text-white">Zone de chalandise</th>
+            <th className="py-2 px-4 font-medium text-white text-right">Zone de chalandise</th>
             {showProjet && <th className="py-2 px-4 font-medium text-white">Projet</th>}
             {showAnnonce && <th className="py-2 px-4 font-medium text-white">Annonce</th>}
             <th className="py-2 px-4 font-medium text-white">Candidatures</th>

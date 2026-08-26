@@ -34,7 +34,7 @@ export function VilleRow({ v, showProjet, showAnnonce }: { v: Ville; showProjet:
       <td className="py-2 px-4 text-zinc-500">
         {[v.departement, v.region].filter(Boolean).join(" · ") || "—"}
       </td>
-      <td className="py-2 px-4 text-zinc-500">
+      <td className="py-2 px-4 text-zinc-500 text-right tabular-nums">
         {v.zone_chalandise ?? "—"}
       </td>
       {showProjet && (
