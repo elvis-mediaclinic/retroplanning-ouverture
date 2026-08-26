@@ -77,11 +77,15 @@ function computeStats(concurrents: VilleConcurrent[], zoneChalandise: string | n
   );
   const population = parseZoneChalandise(zoneChalandise);
 
+  const nbMagasinsReels = concurrents.reduce((sum, c) => sum + c.nb_magasins, 0);
+
   if (cp === 0) {
     return {
       score: 100,
       categorie: categoriser(100),
       habitantsParConcurrent: null,
+      cp,
+      nbMagasinsReels,
       scoreFiable: true,
       nbFranchises: concurrents.filter((c) => c.franchise).length,
     };
@@ -96,6 +100,8 @@ function computeStats(concurrents: VilleConcurrent[], zoneChalandise: string | n
       score: scoreApprox,
       categorie: categoriser(scoreApprox),
       habitantsParConcurrent: null,
+      cp,
+      nbMagasinsReels,
       scoreFiable: false,
       nbFranchises: concurrents.filter((c) => c.franchise).length,
     };
@@ -109,6 +115,8 @@ function computeStats(concurrents: VilleConcurrent[], zoneChalandise: string | n
     score,
     categorie: categoriser(score),
     habitantsParConcurrent,
+    cp,
+    nbMagasinsReels,
     scoreFiable: true,
     nbFranchises: concurrents.filter((c) => c.franchise).length,
   };
@@ -235,12 +243,17 @@ export function ConcurrentsPanel({
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div className="rounded-md border border-zinc-200 bg-white px-3 py-2">
-                  <p className="text-xs text-zinc-400">Habitants / concurrent pondéré</p>
+                  <p className="text-xs text-zinc-400">Habitants par point de pression</p>
                   <p className="text-lg font-semibold text-zinc-900">
                     {stats.habitantsParConcurrent !== null
                       ? stats.habitantsParConcurrent.toLocaleString("fr-FR")
                       : "—"}
                   </p>
+                  {stats.cp !== undefined && (
+                    <p className="mt-0.5 text-xs text-zinc-400">
+                      {stats.nbMagasinsReels} magasin{stats.nbMagasinsReels > 1 ? "s" : ""} concurrent{stats.nbMagasinsReels > 1 ? "s" : ""}, pondéré{stats.nbMagasinsReels > 1 ? "s" : ""} à {stats.cp.toLocaleString("fr-FR", { maximumFractionDigits: 2 })} point{stats.cp >= 2 ? "s" : ""} (poids × proximité)
+                    </p>
+                  )}
                 </div>
                 <div className="rounded-md border border-zinc-200 bg-white px-3 py-2">
                   <p className="text-xs text-zinc-400">Marché prouvé</p>
