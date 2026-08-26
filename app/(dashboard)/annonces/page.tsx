@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireMarketing } from "@/lib/dal";
 import { createClient } from "@/lib/supabase/server";
 import { NewAnnonceModal } from "./NewAnnonceModal";
+import { AnnonceRow } from "./AnnonceRow";
 
 export const metadata = { title: "Annonces — Mediaclinic" };
 
@@ -120,7 +121,7 @@ export default async function AnnoncesAdminPage() {
                         rel="noopener noreferrer"
                         className="text-xs text-zinc-400 hover:text-zinc-700"
                       >
-                        Voir ↗
+                        Voir l&apos;article ↗
                       </a>
                       {ville && (
                         <Link
@@ -153,7 +154,7 @@ export default async function AnnoncesAdminPage() {
                   const ville = getVille(a);
                   const s = statsFor(a.id);
                   return (
-                    <tr key={a.id}>
+                    <AnnonceRow key={a.id} ville={ville ?? null}>
                       <td className="py-3 px-4 text-zinc-600">
                         {ville ? (
                           <span>
@@ -164,11 +165,7 @@ export default async function AnnoncesAdminPage() {
                           </span>
                         ) : "—"}
                       </td>
-                      <td className="py-3 px-4 font-medium text-zinc-900">
-                        {ville ? (
-                          <Link href={`/villes/${ville.id}`} className="hover:underline">{a.titre}</Link>
-                        ) : a.titre}
-                      </td>
+                      <td className="py-3 px-4 font-medium text-zinc-900">{a.titre}</td>
                       <td className="py-3 px-4 text-right tabular-nums text-zinc-700">{s.total}</td>
                       <td className="py-3 px-4 text-right tabular-nums text-zinc-700">{s.unique}</td>
                       <td className="py-3 px-4 text-right tabular-nums">
@@ -183,12 +180,13 @@ export default async function AnnoncesAdminPage() {
                           href={`${baseUrl}/annonce/${a.id}`}
                           target="_blank"
                           rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
                           className="text-xs text-zinc-400 hover:text-zinc-700"
                         >
-                          Voir ↗
+                          Voir l&apos;article ↗
                         </a>
                       </td>
-                    </tr>
+                    </AnnonceRow>
                   );
                 })}
               </tbody>
@@ -241,7 +239,7 @@ export default async function AnnoncesAdminPage() {
                 {brouillons.map((a) => {
                   const ville = getVille(a);
                   return (
-                    <tr key={a.id} className="opacity-70">
+                    <AnnonceRow key={a.id} ville={ville ?? null} className="opacity-70">
                       <td className="py-3 px-4 text-zinc-500">
                         {ville ? (
                           <span>
@@ -253,15 +251,9 @@ export default async function AnnoncesAdminPage() {
                         ) : "—"}
                       </td>
                       <td className="py-3 px-4 text-zinc-700">
-                        {ville ? (
-                          <Link href={`/villes/${ville.id}`} className="hover:underline">
-                            {a.titre || <span className="italic text-zinc-400">Sans titre</span>}
-                          </Link>
-                        ) : (
-                          a.titre || <span className="italic text-zinc-400">Sans titre</span>
-                        )}
+                        {a.titre || <span className="italic text-zinc-400">Sans titre</span>}
                       </td>
-                    </tr>
+                    </AnnonceRow>
                   );
                 })}
               </tbody>
