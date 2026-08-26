@@ -62,10 +62,10 @@ export default async function AnnoncesAdminPage() {
   return (
     <div className="space-y-8">
       {/* En-tête */}
-      <div className="rounded-xl bg-gradient-to-br from-[#00729e] to-[#0089bd] p-6 shadow-sm flex items-center justify-between">
+      <div className="mt-2 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold uppercase text-white">Annonces</h1>
-          <p className="mt-1 text-sm text-white/70">
+          <h1 className="text-2xl font-bold uppercase text-zinc-900">Annonces</h1>
+          <p className="mt-1 text-sm text-zinc-500">
             {publiees.length} publiée{publiees.length !== 1 ? "s" : ""} · {brouillons.length} brouillon{brouillons.length !== 1 ? "s" : ""}
           </p>
         </div>

@@ -54,15 +54,15 @@ export default async function FranchisesPage({
 
   return (
     <div className="space-y-6">
-      <div className="rounded-xl bg-gradient-to-br from-[#00729e] to-[#0089bd] p-6 shadow-sm flex items-center justify-between">
+      <div className="mt-2 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold uppercase text-white">Franchisés</h1>
-          <p className="mt-1 text-sm text-white/70">
+          <h1 className="text-2xl font-bold uppercase text-zinc-900">Franchisés</h1>
+          <p className="mt-1 text-sm text-zinc-500">
             {franchises.length} franchisé{franchises.length !== 1 ? "s" : ""} {showArchives ? "archivés" : "actifs"}
           </p>
         </div>
         {isAdmin && !showArchives && (
-          <Link href="/reseau/franchises/new" className="rounded-md bg-white px-3 py-2 text-sm font-medium text-[#00729e] hover:bg-white/90 transition-colors">
+          <Link href="/reseau/franchises/new" className="btn-primary">
             + Nouveau franchisé
           </Link>
         )}

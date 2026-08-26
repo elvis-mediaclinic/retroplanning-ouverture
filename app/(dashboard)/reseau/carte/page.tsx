@@ -76,9 +76,9 @@ export default async function ReseauCartePage() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-xl bg-gradient-to-br from-[#00729e] to-[#0089bd] p-6 shadow-sm">
-        <h1 className="text-2xl font-bold uppercase text-white">Sur la carte</h1>
-        <p className="mt-1 text-sm text-white/70">
+      <div className="mt-2">
+        <h1 className="text-2xl font-bold uppercase text-zinc-900">Sur la carte</h1>
+        <p className="mt-1 text-sm text-zinc-500">
           {points.length} magasin{points.length !== 1 ? "s" : ""} ouvert{points.length !== 1 ? "s" : ""}
           {villesEnEtude.length > 0 && ` · ${villesEnEtude.length} ville${villesEnEtude.length !== 1 ? "s" : ""} en étude`}
         </p>

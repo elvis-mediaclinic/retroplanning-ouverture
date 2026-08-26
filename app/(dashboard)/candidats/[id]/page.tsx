@@ -31,8 +31,8 @@ export default async function EditCandidatPage({
 
   return (
     <div className="space-y-6">
-      <div className="rounded-xl bg-gradient-to-br from-[#00729e] to-[#0089bd] p-6 shadow-sm flex items-center gap-3">
-        <h1 className="text-2xl font-bold uppercase text-white">
+      <div className="mt-2 flex items-center gap-3">
+        <h1 className="text-2xl font-bold uppercase text-zinc-900">
           {candidat.prenom} {candidat.nom}
         </h1>
         {candidat.profil_id && (

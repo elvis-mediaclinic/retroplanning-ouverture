@@ -52,16 +52,16 @@ export default async function ReseauPage({
 
   return (
     <div className="space-y-6">
-      <div className="rounded-xl bg-gradient-to-br from-[#00729e] to-[#0089bd] p-6 shadow-sm flex items-center justify-between">
+      <div className="mt-2 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold uppercase text-white">Magasins</h1>
-          <p className="mt-1 text-sm text-white/70">
+          <h1 className="text-2xl font-bold uppercase text-zinc-900">Magasins</h1>
+          <p className="mt-1 text-sm text-zinc-500">
             {magasins.length} magasin{magasins.length !== 1 ? "s" : ""} {showArchives ? "archivés" : "dans le réseau"}
           </p>
         </div>
         <div className="flex items-center gap-2">
           {isAdmin && !showArchives && (
-            <Link href="/reseau/new" className="rounded-md bg-white px-3 py-2 text-sm font-medium text-[#00729e] hover:bg-white/90 transition-colors">
+            <Link href="/reseau/new" className="btn-primary">
               + Ajouter un magasin
             </Link>
           )}

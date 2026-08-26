@@ -21,7 +21,7 @@ export function CreateUserModal() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="rounded-md bg-white px-3 py-2 text-sm font-medium text-[#00729e] hover:bg-white/90 transition-colors"
+        className="btn-primary"
       >
         + Ajouter un utilisateur
       </button>

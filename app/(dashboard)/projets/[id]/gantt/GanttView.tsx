@@ -77,11 +77,11 @@ export function GanttView({
 
   return (
     <div className="space-y-6">
-      <div className="rounded-xl bg-gradient-to-br from-[#00729e] to-[#0089bd] p-6 shadow-sm flex items-center justify-between">
-        <h1 className="text-2xl font-bold uppercase text-white">Gantt — {projetNom}</h1>
+      <div className="mt-2 flex items-center justify-between">
+        <h1 className="text-2xl font-bold uppercase text-zinc-900">Gantt — {projetNom}</h1>
         <Link
           href={`/projets/${projetId}`}
-          className="rounded-md border border-white/40 px-3 py-1.5 text-sm text-white hover:bg-white/10 transition-colors"
+          className="btn-secondary"
         >
           Vue liste
         </Link>

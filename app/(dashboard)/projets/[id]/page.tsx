@@ -103,10 +103,10 @@ export default async function ProjetPage({
   return (
     <div className="space-y-6">
       {/* En-tête */}
-      <div className="rounded-xl bg-gradient-to-br from-[#00729e] to-[#0089bd] p-6 shadow-sm flex items-start justify-between">
+      <div className="mt-2 flex items-start justify-between">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold uppercase text-white">{projet.nom}</h1>
+            <h1 className="text-2xl font-bold uppercase text-zinc-900">{projet.nom}</h1>
             <span
               className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                 STATUT_PROJET_COLORS[projet.statut as keyof typeof STATUT_PROJET_COLORS]
@@ -115,7 +115,7 @@ export default async function ProjetPage({
               {STATUT_PROJET_LABELS[projet.statut as keyof typeof STATUT_PROJET_LABELS]}
             </span>
           </div>
-          <p className="mt-1 text-sm text-white/70">
+          <p className="mt-1 text-sm text-zinc-500">
             {TYPE_LABELS[projet.type_magasin as keyof typeof TYPE_LABELS]} ·{" "}
             {FORMAT_LABELS[projet.format_magasin as keyof typeof FORMAT_LABELS]}
             {projet.surface_m2 && ` · ${projet.surface_m2} m²`}
@@ -133,7 +133,7 @@ export default async function ProjetPage({
           <ExportButtons etapes={etapes ?? []} projetNom={projet.nom} mcUsers={mcUsers} />
           <Link
             href={`/projets/${id}/gantt`}
-            className="rounded-md border border-white/40 px-3 py-1.5 text-sm text-white hover:bg-white/10"
+            className="btn-secondary"
           >
             Vue Gantt
           </Link>
@@ -143,7 +143,7 @@ export default async function ProjetPage({
           {profile.role === "admin" && (
             <Link
               href={`/projets/${id}/edit`}
-              className="rounded-md border border-white/40 px-3 py-1.5 text-sm text-white hover:bg-white/10"
+              className="btn-secondary"
             >
               Modifier
             </Link>

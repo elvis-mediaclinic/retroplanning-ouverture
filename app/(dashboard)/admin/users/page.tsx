@@ -69,10 +69,10 @@ export default async function AdminUsersPage() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-xl bg-gradient-to-br from-[#00729e] to-[#0089bd] p-6 shadow-sm flex items-center justify-between">
+      <div className="mt-2 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold uppercase text-white">Utilisateurs</h1>
-          <p className="mt-1 text-sm text-white/70">
+          <h1 className="text-2xl font-bold uppercase text-zinc-900">Utilisateurs</h1>
+          <p className="mt-1 text-sm text-zinc-500">
             L&apos;auto-inscription est désactivée : seul un admin peut créer un compte.
           </p>
         </div>

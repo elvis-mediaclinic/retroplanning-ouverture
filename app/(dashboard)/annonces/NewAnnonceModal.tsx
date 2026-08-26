@@ -28,7 +28,7 @@ export function NewAnnonceModal({ villes }: { villes: Ville[] }) {
 
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} className="rounded-md bg-white px-3 py-2 text-sm font-medium text-[#00729e] hover:bg-white/90 transition-colors">
+      <button type="button" onClick={() => setOpen(true)} className="btn-primary">
         + Créer une annonce
       </button>
 
