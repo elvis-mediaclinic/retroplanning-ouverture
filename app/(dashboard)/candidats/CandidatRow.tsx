@@ -21,6 +21,7 @@ type Candidat = {
   candidat_villes: Array<{ villes: { nom: string } | { nom: string }[] | null }> | null;
   projets: Array<{ id: string; statut: string }> | null;
   candidat_associes: Associe[] | null;
+  consultant?: { prenom: string; nom: string } | null;
 };
 
 function getVilles(c: Candidat) {
@@ -42,10 +43,15 @@ export function CandidatRow({ c, showProjet }: { c: Candidat; showProjet?: boole
       className="cursor-pointer border-b border-zinc-100 last:border-0 hover:bg-zinc-50 align-top"
     >
       <td className="py-2 px-4">
-        <div className="min-h-[1.25rem]">
+        <div className="min-h-[1.25rem] flex items-center gap-2">
           <span className="font-medium text-zinc-900">{c.prenom} {c.nom}</span>
-          {c.profil_id && <div className="text-xs text-green-600 mt-0.5">✓ Compte actif</div>}
+          {c.consultant && (
+            <span className="shrink-0 rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-violet-700">
+              {c.consultant.prenom} {c.consultant.nom}
+            </span>
+          )}
         </div>
+        {c.profil_id && <div className="text-xs text-green-600 mt-0.5">✓ Compte actif</div>}
         {associes.map((a) => (
           <div key={a.id} className="mt-1.5 pt-1.5 border-t border-zinc-100 font-medium text-zinc-900">
             {a.prenom} {a.nom}

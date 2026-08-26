@@ -21,6 +21,7 @@ type Candidat = {
   candidat_villes: Array<{ villes: { nom: string } | { nom: string }[] | null }> | null;
   projets: Array<{ id: string; statut: string }> | null;
   candidat_associes: Associe[] | null;
+  consultant?: { prenom: string; nom: string } | null;
 };
 
 function getVilles(c: Candidat) {
@@ -32,6 +33,15 @@ function getVilles(c: Candidat) {
   return noms.length > 0 ? noms.join(", ") : (c.zone_souhaitee ?? "—");
 }
 
+function ConsultantBadge({ consultant }: { consultant?: { prenom: string; nom: string } | null }) {
+  if (!consultant) return null;
+  return (
+    <span className="shrink-0 rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-violet-700">
+      {consultant.prenom} {consultant.nom}
+    </span>
+  );
+}
+
 function CandidatCard({ c, showProjet }: { c: Candidat; showProjet?: boolean }) {
   const projetsActifs = (c.projets ?? []).filter((p) => ["prospection", "en_cours"].includes(p.statut));
   const associes = [...(c.candidat_associes ?? [])].sort((a, b) => a.ordre - b.ordre);
@@ -41,11 +51,14 @@ function CandidatCard({ c, showProjet }: { c: Candidat; showProjet?: boolean }) 
         <p className="font-medium text-zinc-900">
           {c.prenom} {c.nom}{associes.map((a) => `, ${a.prenom} ${a.nom}`).join("")}
         </p>
-        <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
-          STATUT_CANDIDAT_COLORS[c.statut as keyof typeof STATUT_CANDIDAT_COLORS]
-        }`}>
-          {STATUT_CANDIDAT_LABELS[c.statut as keyof typeof STATUT_CANDIDAT_LABELS]}
-        </span>
+        <div className="shrink-0 flex items-center gap-2">
+          <ConsultantBadge consultant={c.consultant} />
+          <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+            STATUT_CANDIDAT_COLORS[c.statut as keyof typeof STATUT_CANDIDAT_COLORS]
+          }`}>
+            {STATUT_CANDIDAT_LABELS[c.statut as keyof typeof STATUT_CANDIDAT_LABELS]}
+          </span>
+        </div>
       </div>
       {c.profil_id && <p className="text-xs text-green-600 mt-0.5">✓ Compte actif</p>}
       <p className="mt-0.5 text-xs text-zinc-500">
@@ -113,12 +126,31 @@ export default async function CandidatsPage() {
   const canEdit = profile.role !== "consultant";
   const supabase = await createClient();
 
-  const { data } = await supabase
-    .from("candidats")
-    .select("id, nom, prenom, email, telephone, zone_souhaitee, statut, apport_personnel, profil_id, candidat_villes(villes(nom)), projets(id, statut), candidat_associes(id, prenom, nom, email, telephone, ordre)")
-    .order("created_at", { ascending: false });
+  const [{ data }, { data: candidaturesConsultant }] = await Promise.all([
+    supabase
+      .from("candidats")
+      .select("id, nom, prenom, email, telephone, zone_souhaitee, statut, apport_personnel, profil_id, candidat_villes(villes(nom)), projets(id, statut), candidat_associes(id, prenom, nom, email, telephone, ordre)")
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("candidatures")
+      .select("email, consultant:profiles(prenom, nom)")
+      .not("consultant_id", "is", null),
+  ]);
 
-  const candidats = (data ?? []) as Candidat[];
+  // Origine consultant par candidat, retrouvée via l'email de la candidature
+  const consultantParEmail = new Map<string, { prenom: string; nom: string }>();
+  for (const cd of candidaturesConsultant ?? []) {
+    const raw = cd.consultant as unknown;
+    const consultant = Array.isArray(raw)
+      ? (raw[0] as { prenom: string; nom: string } | undefined)
+      : (raw as { prenom: string; nom: string } | null);
+    if (consultant && cd.email) consultantParEmail.set(cd.email.toLowerCase(), consultant);
+  }
+
+  const candidats = ((data ?? []) as Candidat[]).map((c) => ({
+    ...c,
+    consultant: consultantParEmail.get(c.email.toLowerCase()) ?? null,
+  }));
 
   const hasProjetActif = (c: Candidat) =>
     (c.projets ?? []).some((p) => ["prospection", "en_cours"].includes(p.statut));

@@ -28,6 +28,19 @@ export default async function EditCandidatPage({
 
   if (!candidat) notFound();
 
+  const { data: candidatureConsultant } = await supabase
+    .from("candidatures")
+    .select("consultant:profiles(prenom, nom)")
+    .eq("email", candidat.email)
+    .not("consultant_id", "is", null)
+    .limit(1)
+    .maybeSingle();
+
+  const consultantRaw = candidatureConsultant?.consultant as unknown;
+  const consultant = Array.isArray(consultantRaw)
+    ? (consultantRaw[0] as { prenom: string; nom: string } | undefined)
+    : (consultantRaw as { prenom: string; nom: string } | null);
+
   const selectedVilleIds = (candidatVilles ?? []).map((cv) => cv.ville_id);
   const associesList = (associes ?? []) as CandidatAssocie[];
   const allNames = [`${candidat.prenom} ${candidat.nom}`, ...associesList.map((a) => `${a.prenom} ${a.nom}`)].join(", ");
@@ -43,6 +56,11 @@ export default async function EditCandidatPage({
         {candidat.profil_id && (
           <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
             ✓ Compte actif
+          </span>
+        )}
+        {consultant && (
+          <span className="rounded-full bg-violet-100 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-violet-700">
+            Consultant — {consultant.prenom} {consultant.nom}
           </span>
         )}
       </div>
