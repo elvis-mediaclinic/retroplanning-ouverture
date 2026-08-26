@@ -1,13 +1,15 @@
 import Link from "next/link";
-import { requireMarketing } from "@/lib/dal";
+import { requireMarketingOrConsultant } from "@/lib/dal";
 import { createClient } from "@/lib/supabase/server";
 import { NewAnnonceModal } from "./NewAnnonceModal";
 import { AnnonceRow, VoirArticleLink } from "./AnnonceRow";
+import { CopyConsultantLink } from "./CopyConsultantLink";
 
 export const metadata = { title: "Annonces — Mediaclinic" };
 
 export default async function AnnoncesAdminPage() {
-  await requireMarketing();
+  const profile = await requireMarketingOrConsultant();
+  const isConsultant = profile.role === "consultant";
   const supabase = await createClient();
 
   const [
@@ -97,6 +99,119 @@ export default async function AnnoncesAdminPage() {
   const villesDisponibles = (toutesVilles ?? []).filter((v) => !villesAvecAnnonce.has(v.id));
 
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://retroplanning-ouverture.vercel.app";
+
+  if (isConsultant) {
+    return (
+      <div className="space-y-8">
+        <div className="page-header">
+          <h1 className="page-header-title">Annonces</h1>
+          <p className="page-header-subtitle">
+            {publiees.length} annonce{publiees.length !== 1 ? "s" : ""} publiée{publiees.length !== 1 ? "s" : ""} — copiez votre lien pour être identifié comme apporteur
+          </p>
+        </div>
+
+        <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm">
+          {/* Mobile : cartes */}
+          <div className="sm:hidden divide-y divide-zinc-100">
+            {publiees.map((a) => (
+              <div key={a.id} className="px-4 py-3">
+                <div className="flex items-center gap-2">
+                  <p className="font-medium text-zinc-900">{a.titre}</p>
+                  {a.isCession && (
+                    <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700">
+                      Cession
+                    </span>
+                  )}
+                </div>
+                <p className="mt-0.5 text-xs text-zinc-500">
+                  {a.lieu ? `${a.lieu.nom}${a.lieu.departement ? ` (${a.lieu.departement})` : ""}` : "—"}
+                  {a.sousTitre && ` · ${a.sousTitre}`}
+                </p>
+                <div className="mt-2 flex items-center gap-3">
+                  <a
+                    href={`${baseUrl}/annonce/${a.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-zinc-400 hover:text-zinc-700"
+                  >
+                    Voir l&apos;annonce ↗
+                  </a>
+                  <CopyConsultantLink
+                    href={`${baseUrl}/annonce/${a.id}?c=${profile.id}`}
+                    className="text-xs font-medium text-brand hover:text-brand-dark"
+                  />
+                </div>
+              </div>
+            ))}
+            {publiees.length === 0 && (
+              <p className="py-6 px-4 text-center text-zinc-400">Aucune annonce publiée pour l&apos;instant.</p>
+            )}
+          </div>
+
+          {/* Desktop : tableau */}
+          <table className="hidden sm:table w-full text-sm">
+            <thead>
+              <tr className="bg-gradient-to-br from-[#00729e] to-[#0089bd] text-left">
+                <th className="py-2 px-4 font-medium text-white">Ville / Magasin</th>
+                <th className="py-2 px-4 font-medium text-white">Titre</th>
+                <th className="py-2 px-4 font-medium text-white"></th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-zinc-100">
+              {publiees.map((a) => (
+                <tr key={a.id}>
+                  <td className="py-3 px-4 text-zinc-600">
+                    {a.lieu ? (
+                      <span>
+                        {a.lieu.nom}
+                        {a.lieu.departement && (
+                          <span className="ml-1 text-zinc-400 text-xs">({a.lieu.departement})</span>
+                        )}
+                        {a.sousTitre && (
+                          <span className="ml-1 text-zinc-400 text-xs">({a.sousTitre})</span>
+                        )}
+                      </span>
+                    ) : "—"}
+                  </td>
+                  <td className="py-3 px-4 font-medium text-zinc-900">
+                    <span className="flex items-center gap-2">
+                      {a.titre}
+                      {a.isCession && (
+                        <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700">
+                          Cession
+                        </span>
+                      )}
+                    </span>
+                  </td>
+                  <td className="py-3 px-4 text-right">
+                    <div className="flex items-center justify-end gap-3">
+                      <a
+                        href={`${baseUrl}/annonce/${a.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-zinc-400 hover:text-zinc-700"
+                      >
+                        Voir l&apos;annonce ↗
+                      </a>
+                      <CopyConsultantLink
+                        href={`${baseUrl}/annonce/${a.id}?c=${profile.id}`}
+                        className="text-xs font-medium text-brand hover:text-brand-dark"
+                      />
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {publiees.length === 0 && (
+                <tr>
+                  <td colSpan={3} className="py-6 px-4 text-center text-zinc-400">Aucune annonce publiée pour l&apos;instant.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">

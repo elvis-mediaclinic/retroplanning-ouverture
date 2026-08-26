@@ -57,7 +57,7 @@ const NAV: Record<UserRole, NavGroup[]> = {
     },
     {
       title: "Partager",
-      items: [{ href: "/opportunites", label: "Annonces & mon lien" }],
+      items: [{ href: "/annonces", label: "Annonces" }],
     },
   ],
   franchise: [

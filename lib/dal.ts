@@ -66,3 +66,15 @@ export async function requireMarketing() {
   if (!isMarketing) redirect("/");
   return profile;
 }
+
+// Comme requireMarketing(), mais laisse aussi passer le consultant (lecture
+// seule — les policies RLS le limitent déjà aux annonces publiées).
+export async function requireMarketingOrConsultant() {
+  const profile = await getProfile();
+  const isMarketing =
+    profile.role === "admin" ||
+    (profile.role === "responsable_mc" &&
+      profile.fonction?.toLowerCase().includes("marketing"));
+  if (!isMarketing && profile.role !== "consultant") redirect("/");
+  return profile;
+}
