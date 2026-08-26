@@ -41,6 +41,7 @@ export async function upsertAnnonce(
   if (error) return { error: error.message };
 
   revalidatePath(`/villes/${villeId}`);
+  revalidatePath(`/villes/${villeId}/annonce`);
   return { ok: true };
 }
 
@@ -49,4 +50,5 @@ export async function toggleAnnonce(annonceId: string, actif: boolean, villeId: 
   const supabase = await createClient();
   await supabase.from("annonces").update({ actif, updated_at: new Date().toISOString() }).eq("id", annonceId);
   revalidatePath(`/villes/${villeId}`);
+  revalidatePath(`/villes/${villeId}/annonce`);
 }

@@ -54,7 +54,7 @@ export default async function AnnoncesAdminPage() {
       actif: a.actif,
       isCession: false as const,
       lieu: getVille(a),
-      href: getVille(a) ? `/villes/${getVille(a)!.id}` : null,
+      href: getVille(a) ? `/villes/${getVille(a)!.id}/annonce` : null,
       sousTitre: null as string | null,
     })),
     ...(cessionAnnonces ?? []).map((a) => {

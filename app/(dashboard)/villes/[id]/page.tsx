@@ -4,9 +4,7 @@ import { requireMC, getProfile } from "@/lib/dal";
 import { createClient } from "@/lib/supabase/server";
 import { updateVille } from "../actions";
 import { VilleInfoPanel } from "./VilleInfoPanel";
-import { AnnonceEditor } from "./AnnonceEditor";
 import { ConcurrentsPanel } from "./ConcurrentsPanel";
-import { BoldText } from "@/components/BoldText";
 import type { VilleConcurrent } from "@/lib/types";
 
 export default async function EditVillePage({
@@ -21,7 +19,7 @@ export default async function EditVillePage({
 
   const [{ data: ville }, { data: annonce }, { data: candidatures }, { data: concurrents }] = await Promise.all([
     supabase.from("villes").select("*").eq("id", id).single(),
-    supabase.from("annonces").select("id, titre, accroche, contenu, contenu_json, sections, actif, hero_bleu, hero_carte, hero_titre_centre, hero_accroche_centre").eq("ville_id", id).maybeSingle(),
+    supabase.from("annonces").select("id, actif").eq("ville_id", id).maybeSingle(),
     supabase
       .from("candidatures")
       .select("id, prenom, nom, email, telephone, apport_personnel, message, traite, created_at")
@@ -37,29 +35,24 @@ export default async function EditVillePage({
     profile.role === "consultant" ||
     (profile.role === "responsable_mc" && !!profile.fonction?.toLowerCase().includes("marketing"));
 
-  // Stats de vues — uniquement pour les éditeurs
-  let viewStats: { total: number; unique: number } | null = null;
-  if (annonce?.id && canEdit) {
-    const { data: views } = await supabase
-      .from("annonce_views")
-      .select("visitor_id")
-      .eq("annonce_id", annonce.id);
-    if (views) {
-      viewStats = {
-        total: views.length,
-        unique: new Set(views.map((v) => v.visitor_id)).size,
-      };
-    }
-  }
-
   const action = updateVille.bind(null, id);
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://retroplanning-ouverture.vercel.app";
-  const publicUrl = annonce ? `${baseUrl}/annonce/${annonce.id}` : `${baseUrl}/annonce/[id]`;
 
   return (
     <div className="space-y-8">
-      <div className="page-header">
+      <div className="page-header flex items-center justify-between">
         <h1 className="page-header-title">{ville.nom}</h1>
+        {canEdit && (
+          <Link href={`/villes/${id}/annonce`} className="btn-secondary text-sm">
+            {annonce ? "Éditer l'annonce" : "Créer l'annonce"}
+            {annonce && (
+              <span className={`ml-2 rounded-full px-1.5 py-0.5 text-[10px] font-medium ${
+                annonce.actif ? "bg-green-100 text-green-700" : "bg-zinc-100 text-zinc-500"
+              }`}>
+                {annonce.actif ? "Publiée" : "Brouillon"}
+              </span>
+            )}
+          </Link>
+        )}
       </div>
       <div>
         <Link href="/villes" className="text-sm text-zinc-500 hover:text-zinc-900">
@@ -77,48 +70,6 @@ export default async function EditVillePage({
         <h2 className="text-sm font-semibold text-zinc-900 mb-4">Concurrents en place</h2>
         <ConcurrentsPanel villeId={id} concurrents={(concurrents ?? []) as VilleConcurrent[]} zoneChalandise={ville.zone_chalandise} />
       </section>
-
-      {/* Annonce publique */}
-      {canEdit && (
-        <section className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold text-zinc-900">Annonce franchisé</h2>
-            {viewStats && annonce?.actif && (
-              <div className="flex items-center gap-4 text-xs text-zinc-500">
-                <span>
-                  <span className="font-semibold text-zinc-900">{viewStats.total}</span> vue{viewStats.total !== 1 ? "s" : ""}
-                </span>
-                <span>
-                  <span className="font-semibold text-zinc-900">{viewStats.unique}</span> visiteur{viewStats.unique !== 1 ? "s" : ""} unique{viewStats.unique !== 1 ? "s" : ""}
-                </span>
-              </div>
-            )}
-          </div>
-          <AnnonceEditor villeId={id} annonce={annonce ?? null} publicUrl={publicUrl} />
-        </section>
-      )}
-
-      {/* Annonce : lecture seule */}
-      {!canEdit && annonce && (
-        <section className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold text-zinc-900">Annonce franchisé</h2>
-            <span className={`text-xs rounded-full px-2 py-0.5 font-medium ${
-              annonce.actif ? "bg-green-100 text-green-700" : "bg-zinc-100 text-zinc-500"
-            }`}>
-              {annonce.actif ? "Publiée" : "Brouillon"}
-            </span>
-          </div>
-          {annonce.titre && <p className="font-semibold text-zinc-900 mb-1">{annonce.titre}</p>}
-          {annonce.accroche && <p className="text-sm text-zinc-500 mb-3 italic"><BoldText text={annonce.accroche} /></p>}
-          {annonce.actif && (
-            <a href={publicUrl} target="_blank" rel="noopener noreferrer"
-              className="text-sm text-brand hover:underline">
-              Voir l'annonce publique ↗
-            </a>
-          )}
-        </section>
-      )}
 
       {/* Candidatures reçues */}
       {(candidatures ?? []).length > 0 && (() => {

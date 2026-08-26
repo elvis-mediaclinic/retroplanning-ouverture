@@ -29,5 +29,5 @@ export async function createAnnonce(villeId: string) {
 
   if (error || !data) throw new Error("Impossible de créer l'annonce.");
 
-  redirect(`/villes/${villeId}`);
+  redirect(`/villes/${villeId}/annonce`);
 }
