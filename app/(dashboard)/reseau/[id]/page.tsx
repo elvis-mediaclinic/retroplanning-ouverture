@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireRole } from "@/lib/dal";
 import { createClient } from "@/lib/supabase/server";
@@ -5,8 +6,6 @@ import type { Magasin, Franchise, MagasinSiret, MagasinCession } from "@/lib/typ
 import { MagasinForm } from "../MagasinForm";
 import { DeleteMagasinButton } from "./DeleteMagasinButton";
 import { CessionModal } from "./CessionModal";
-import { AnnonceEditor } from "../../villes/[id]/AnnonceEditor";
-import { upsertCessionAnnonce } from "../cession-actions";
 
 const TYPE_CESSION_LABELS: Record<string, string> = {
   franchise_a_franchise: "Franchisé → Franchisé",
@@ -36,7 +35,7 @@ export default async function EditMagasinPage({
     supabase.from("magasin_cessions").select("*").eq("magasin_id", id).order("date_cession", { ascending: false }),
     supabase
       .from("annonces")
-      .select("id, titre, accroche, contenu, contenu_json, sections, actif, hero_bleu, hero_carte, hero_titre_centre, hero_accroche_centre")
+      .select("id, actif")
       .eq("magasin_id", id)
       .eq("type_annonce", "cession")
       .maybeSingle(),
@@ -54,15 +53,23 @@ export default async function EditMagasinPage({
   // Map franchise id → nom pour l'historique
   const franchiseMap = Object.fromEntries(franchises.map((f) => [f.id, f.nom]));
 
-  const cessionAction = upsertCessionAnnonce.bind(null, id, annonceCession?.id ?? null);
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://retroplanning-ouverture.vercel.app";
-  const cessionPublicUrl = annonceCession ? `${baseUrl}/annonce/${annonceCession.id}` : `${baseUrl}/annonce/[id]`;
-
   return (
     <div className="space-y-6">
       <div className="page-header flex items-center justify-between">
         <h1 className="page-header-title">{magasin.nom}</h1>
         <div className="flex items-center gap-2">
+          {!magasin.archive && (
+            <Link href={`/reseau/${id}/cession`} className="btn-secondary text-sm">
+              {annonceCession ? "Éditer l'annonce de cession" : "Créer une annonce de cession"}
+              {annonceCession && (
+                <span className={`ml-2 rounded-full px-1.5 py-0.5 text-[10px] font-medium ${
+                  annonceCession.actif ? "bg-green-100 text-green-700" : "bg-zinc-100 text-zinc-500"
+                }`}>
+                  {annonceCession.actif ? "Publiée" : "Brouillon"}
+                </span>
+              )}
+            </Link>
+          )}
           <CessionModal magasin={magasin} franchises={franchises} siretActuel={siretActuel} />
           <DeleteMagasinButton id={id} />
         </div>
@@ -72,18 +79,6 @@ export default async function EditMagasinPage({
       </div>
 
       <MagasinForm magasin={magasin} franchises={franchises} siretActuel={siretActuel} />
-
-      {/* Annonce de cession — recherche publique d'un repreneur pour ce magasin */}
-      {!magasin.archive && (
-        <section className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
-          <h2 className="text-sm font-semibold text-zinc-900 mb-4">Annonce de cession</h2>
-          <p className="text-xs text-zinc-400 mb-4">
-            Publie une annonce publique pour trouver un repreneur à ce magasin — distincte des annonces
-            d&apos;ouverture, elle apparaît marquée « Cession » dans les opportunités et sur la carte publique.
-          </p>
-          <AnnonceEditor action={cessionAction} annonce={annonceCession ?? null} publicUrl={cessionPublicUrl} />
-        </section>
-      )}
 
       {/* Historique des SIRET */}
       {sirets.length > 0 && (
