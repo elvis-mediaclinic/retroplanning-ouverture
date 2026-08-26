@@ -38,7 +38,9 @@ function CandidatCard({ c, showProjet }: { c: Candidat; showProjet?: boolean }) 
   return (
     <Link href={`/candidats/${c.id}`} className="block px-4 py-3 hover:bg-zinc-50">
       <div className="flex items-center justify-between gap-2">
-        <p className="font-medium text-zinc-900">{c.prenom} {c.nom}</p>
+        <p className="font-medium text-zinc-900">
+          {c.prenom} {c.nom}{associes.map((a) => `, ${a.prenom} ${a.nom}`).join("")}
+        </p>
         <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
           STATUT_CANDIDAT_COLORS[c.statut as keyof typeof STATUT_CANDIDAT_COLORS]
         }`}>
@@ -51,11 +53,10 @@ function CandidatCard({ c, showProjet }: { c: Candidat; showProjet?: boolean }) 
         {c.telephone && ` · ${c.telephone}`}
       </p>
       {associes.map((a) => (
-        <div key={a.id} className="mt-0.5 text-xs text-zinc-500">
-          <span className="text-zinc-400">{a.prenom} {a.nom} — </span>
+        <p key={a.id} className="mt-0.5 text-xs text-zinc-500">
           {a.email ? <CopyEmail email={a.email} /> : "—"}
           {a.telephone && ` · ${a.telephone}`}
-        </div>
+        </p>
       ))}
       <p className="mt-1 text-xs text-zinc-500">
         {getVilles(c)}

@@ -18,6 +18,8 @@ function uid() { return Math.random().toString(36).slice(2); }
 
 type AssocieDraft = { id: string; prenom: string; nom: string; email: string; telephone: string };
 
+const inputCls = "w-full rounded-md border border-zinc-300 px-3 py-2 text-sm";
+
 export function CandidatForm({ action, defaultValues, villes = [], selectedVilleIds = [], associes = [], submitLabel = "Enregistrer" }: Props) {
   const [state, formAction, pending] = useActionState(action, undefined);
   const [associeDrafts, setAssocieDrafts] = useState<AssocieDraft[]>(
@@ -35,53 +37,96 @@ export function CandidatForm({ action, defaultValues, villes = [], selectedVille
   }
 
   return (
-    <form action={formAction} className="space-y-5">
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-1">
-          <label className="text-sm font-medium text-zinc-700">
-            Prénom <span className="text-red-500">*</span>
-          </label>
-          <input
-            name="prenom"
-            required
-            defaultValue={defaultValues?.prenom ?? ""}
-            className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
-          />
+    <form action={formAction} className="space-y-6">
+      {/* Candidat principal */}
+      <div className="space-y-1">
+        <p className="text-sm font-semibold text-zinc-900">Candidat</p>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-zinc-700">
+              Prénom <span className="text-red-500">*</span>
+            </label>
+            <input name="prenom" required defaultValue={defaultValues?.prenom ?? ""} className={inputCls} />
+          </div>
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-zinc-700">
+              Nom <span className="text-red-500">*</span>
+            </label>
+            <input name="nom" required defaultValue={defaultValues?.nom ?? ""} className={inputCls} />
+          </div>
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-zinc-700">
+              Email <span className="text-red-500">*</span>
+            </label>
+            <input name="email" type="email" required defaultValue={defaultValues?.email ?? ""} className={inputCls} />
+          </div>
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-zinc-700">Téléphone</label>
+            <input name="telephone" type="tel" defaultValue={defaultValues?.telephone ?? ""} className={inputCls} />
+          </div>
         </div>
-        <div className="space-y-1">
-          <label className="text-sm font-medium text-zinc-700">
-            Nom <span className="text-red-500">*</span>
-          </label>
-          <input
-            name="nom"
-            required
-            defaultValue={defaultValues?.nom ?? ""}
-            className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
-          />
-        </div>
+      </div>
 
-        <div className="space-y-1">
-          <label className="text-sm font-medium text-zinc-700">
-            Email <span className="text-red-500">*</span>
-          </label>
-          <input
-            name="email"
-            type="email"
-            required
-            defaultValue={defaultValues?.email ?? ""}
-            className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
-          />
+      {/* Associés — même niveau/apparence que le candidat, aucun n'est prioritaire */}
+      {associeDrafts.map((a, i) => (
+        <div key={a.id} className="space-y-1 border-t border-zinc-100 pt-5">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-semibold text-zinc-900">Associé {i + 1}</p>
+            <button type="button" onClick={() => removeAssocie(a.id)} className="text-xs text-red-400 hover:text-red-600">
+              Retirer
+            </button>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-zinc-700">Prénom</label>
+              <input
+                name="associe_prenom"
+                value={a.prenom}
+                onChange={(e) => updateAssocie(a.id, { prenom: e.target.value })}
+                className={inputCls}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-zinc-700">Nom</label>
+              <input
+                name="associe_nom"
+                value={a.nom}
+                onChange={(e) => updateAssocie(a.id, { nom: e.target.value })}
+                className={inputCls}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-zinc-700">Email</label>
+              <input
+                name="associe_email"
+                type="email"
+                value={a.email}
+                onChange={(e) => updateAssocie(a.id, { email: e.target.value })}
+                className={inputCls}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-zinc-700">Téléphone</label>
+              <input
+                name="associe_telephone"
+                type="tel"
+                value={a.telephone}
+                onChange={(e) => updateAssocie(a.id, { telephone: e.target.value })}
+                className={inputCls}
+              />
+            </div>
+          </div>
         </div>
-        <div className="space-y-1">
-          <label className="text-sm font-medium text-zinc-700">Téléphone</label>
-          <input
-            name="telephone"
-            type="tel"
-            defaultValue={defaultValues?.telephone ?? ""}
-            className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
-          />
-        </div>
+      ))}
 
+      <div className="border-t border-zinc-100 pt-4">
+        <button type="button" onClick={addAssocie} className="text-sm text-brand hover:text-brand-dark">
+          + Ajouter un associé
+        </button>
+      </div>
+
+      {/* Champs communs à la candidature */}
+      <div className="grid grid-cols-2 gap-4 border-t border-zinc-100 pt-5">
         <div className="space-y-1">
           <label className="text-sm font-medium text-zinc-700">Apport personnel (€)</label>
           <input
@@ -89,7 +134,7 @@ export function CandidatForm({ action, defaultValues, villes = [], selectedVille
             type="number"
             min="0"
             defaultValue={defaultValues?.apport_personnel ?? ""}
-            className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
+            className={inputCls}
           />
         </div>
         <div className="space-y-1">
@@ -97,7 +142,7 @@ export function CandidatForm({ action, defaultValues, villes = [], selectedVille
           <select
             name="statut"
             defaultValue={defaultValues?.statut ?? "prospect"}
-            className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
+            className={inputCls}
           >
             <option value="prospect">Prospect</option>
             <option value="en_evaluation">En évaluation</option>
@@ -133,7 +178,7 @@ export function CandidatForm({ action, defaultValues, villes = [], selectedVille
             name="zone_souhaitee"
             defaultValue={defaultValues?.zone_souhaitee ?? ""}
             placeholder="ex : Sud-Ouest, Bretagne…"
-            className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
+            className={inputCls}
           />
         </div>
 
@@ -143,62 +188,8 @@ export function CandidatForm({ action, defaultValues, villes = [], selectedVille
             name="notes"
             rows={3}
             defaultValue={defaultValues?.notes ?? ""}
-            className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
+            className={inputCls}
           />
-        </div>
-      </div>
-
-      {/* Associés — la candidature peut être portée par plusieurs personnes, aucune prioritaire */}
-      <div className="space-y-2 border-t border-zinc-100 pt-4">
-        <div className="flex items-center justify-between">
-          <label className="text-sm font-medium text-zinc-700">Associés</label>
-          <button type="button" onClick={addAssocie} className="text-xs text-brand hover:text-brand-dark">
-            + Ajouter un associé
-          </button>
-        </div>
-        {associeDrafts.length === 0 && (
-          <p className="text-xs text-zinc-400">Aucun associé — candidature portée par une seule personne.</p>
-        )}
-        <div className="space-y-3">
-          {associeDrafts.map((a) => (
-            <div key={a.id} className="rounded-md border border-zinc-200 bg-zinc-50 p-3 grid grid-cols-2 gap-2">
-              <input
-                name="associe_prenom"
-                placeholder="Prénom"
-                value={a.prenom}
-                onChange={(e) => updateAssocie(a.id, { prenom: e.target.value })}
-                className="rounded-md border border-zinc-300 bg-white px-2 py-1.5 text-sm"
-              />
-              <div className="flex items-center gap-2">
-                <input
-                  name="associe_nom"
-                  placeholder="Nom"
-                  value={a.nom}
-                  onChange={(e) => updateAssocie(a.id, { nom: e.target.value })}
-                  className="flex-1 rounded-md border border-zinc-300 bg-white px-2 py-1.5 text-sm"
-                />
-                <button type="button" onClick={() => removeAssocie(a.id)} className="text-xs text-red-400 hover:text-red-600 shrink-0">
-                  ✕
-                </button>
-              </div>
-              <input
-                name="associe_email"
-                type="email"
-                placeholder="Email"
-                value={a.email}
-                onChange={(e) => updateAssocie(a.id, { email: e.target.value })}
-                className="rounded-md border border-zinc-300 bg-white px-2 py-1.5 text-sm"
-              />
-              <input
-                name="associe_telephone"
-                type="tel"
-                placeholder="Téléphone"
-                value={a.telephone}
-                onChange={(e) => updateAssocie(a.id, { telephone: e.target.value })}
-                className="rounded-md border border-zinc-300 bg-white px-2 py-1.5 text-sm"
-              />
-            </div>
-          ))}
         </div>
       </div>
 

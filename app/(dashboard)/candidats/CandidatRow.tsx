@@ -47,7 +47,7 @@ export function CandidatRow({ c, showProjet }: { c: Candidat; showProjet?: boole
           {c.profil_id && <div className="text-xs text-green-600 mt-0.5">✓ Compte actif</div>}
         </div>
         {associes.map((a) => (
-          <div key={a.id} className="mt-1.5 pt-1.5 border-t border-zinc-100 text-zinc-500">
+          <div key={a.id} className="mt-1.5 pt-1.5 border-t border-zinc-100 font-medium text-zinc-900">
             {a.prenom} {a.nom}
           </div>
         ))}

@@ -27,6 +27,8 @@ export default async function EditCandidatPage({
   if (!candidat) notFound();
 
   const selectedVilleIds = (candidatVilles ?? []).map((cv) => cv.ville_id);
+  const associesList = (associes ?? []) as CandidatAssocie[];
+  const allNames = [`${candidat.prenom} ${candidat.nom}`, ...associesList.map((a) => `${a.prenom} ${a.nom}`)].join(", ");
 
   const action = updateCandidat.bind(null, id);
 
@@ -34,7 +36,7 @@ export default async function EditCandidatPage({
     <div className="space-y-6">
       <div className="page-header flex items-center gap-3">
         <h1 className="page-header-title">
-          {candidat.prenom} {candidat.nom}
+          {allNames}
         </h1>
         {candidat.profil_id && (
           <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
@@ -53,7 +55,7 @@ export default async function EditCandidatPage({
           defaultValues={candidat}
           villes={villes ?? []}
           selectedVilleIds={selectedVilleIds}
-          associes={(associes ?? []) as CandidatAssocie[]}
+          associes={associesList}
         />
       </div>
 
