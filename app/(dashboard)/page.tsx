@@ -236,11 +236,11 @@ export default async function DashboardPage() {
           <div className="space-y-3">
             {Object.entries(etapesParProjet).map(([pid, { projetNom, etapes: pe }]) => (
               <div key={pid} className="rounded-lg border border-zinc-200 bg-white shadow-sm overflow-hidden">
-                <div className="flex items-center justify-between border-b border-zinc-100 bg-[#0089bd]/5 px-4 py-2.5">
-                  <Link href={`/projets/${pid}`} className="text-sm font-semibold text-zinc-900 hover:underline">
+                <div className="flex items-center justify-between bg-gradient-to-br from-[#00729e] to-[#0089bd] px-4 py-2.5">
+                  <Link href={`/projets/${pid}`} className="text-sm font-semibold text-white hover:underline">
                     {projetNom}
                   </Link>
-                  <span className="text-xs text-[#00729e] font-medium">{pe.length} étape{pe.length > 1 ? "s" : ""}</span>
+                  <span className="text-xs text-white/80 font-medium">{pe.length} étape{pe.length > 1 ? "s" : ""}</span>
                 </div>
                 <ul className="divide-y divide-zinc-100">
                   {pe.map((e: any) => {
