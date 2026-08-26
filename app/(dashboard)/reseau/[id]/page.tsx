@@ -28,6 +28,7 @@ export default async function EditMagasinPage({
     { data: siretsData },
     { data: cessionsData },
     { data: annonceCession },
+    { data: candidatures },
   ] = await Promise.all([
     supabase.from("magasins").select("*").eq("id", id).single(),
     supabase.from("franchises").select("*").order("nom"),
@@ -39,6 +40,11 @@ export default async function EditMagasinPage({
       .eq("magasin_id", id)
       .eq("type_annonce", "cession")
       .maybeSingle(),
+    supabase
+      .from("candidatures")
+      .select("id, prenom, nom, email, telephone, apport_personnel, message, traite, created_at, consultant_id, consultant:profiles(prenom, nom)")
+      .eq("magasin_id", id)
+      .order("created_at", { ascending: false }),
   ]);
 
   if (!data) notFound();
@@ -148,6 +154,94 @@ export default async function EditMagasinPage({
           </div>
         </section>
       )}
+
+      {/* Candidatures reçues (reprise) */}
+      {(candidatures ?? []).length > 0 && (() => {
+        const groups = new Map<string, typeof candidatures>();
+        for (const c of candidatures ?? []) {
+          const key = c.email;
+          if (!groups.has(key)) groups.set(key, []);
+          groups.get(key)!.push(c);
+        }
+        const entries = [...groups.entries()];
+
+        return (
+          <section className="rounded-lg border border-zinc-200 bg-white shadow-sm">
+            <div className="border-b border-zinc-200 px-6 py-4">
+              <h2 className="text-sm font-semibold text-zinc-900">
+                Candidatures reçues{" "}
+                <span className="ml-1 rounded-full bg-brand/10 px-2 py-0.5 text-xs font-medium text-brand">
+                  {candidatures?.length}
+                </span>
+                {entries.length < (candidatures?.length ?? 0) && (
+                  <span className="ml-2 text-xs text-zinc-400 font-normal">
+                    ({entries.length} personne{entries.length > 1 ? "s" : ""})
+                  </span>
+                )}
+              </h2>
+            </div>
+            <div className="divide-y divide-zinc-100">
+              {entries.map(([email, msgs]) => {
+                const first = msgs![0];
+                const isRepeat = msgs!.length > 1;
+                return (
+                  <div key={email} className="px-6 py-4 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium text-zinc-900 text-sm">{first.prenom} {first.nom}</p>
+                        {isRepeat && (
+                          <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
+                            {msgs!.length} candidatures
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-3">
+                        {msgs!.every((m) => m.traite) && (
+                          <span className="text-xs text-green-600 font-medium">✓ Traité</span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex gap-4 text-xs text-zinc-500">
+                      <a href={`mailto:${email}`} className="hover:text-zinc-900">{email}</a>
+                      {first.telephone && <span>{first.telephone}</span>}
+                      {first.apport_personnel && (
+                        <span>Apport : {Number(first.apport_personnel).toLocaleString("fr-FR")} €</span>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      {msgs!.map((m) => {
+                        const consultantRaw = m.consultant as unknown;
+                        const consultant = Array.isArray(consultantRaw)
+                          ? (consultantRaw[0] as { prenom: string; nom: string } | undefined)
+                          : (consultantRaw as { prenom: string; nom: string } | null);
+                        return (
+                          <div key={m.id} className="rounded-md bg-zinc-50 px-3 py-2 text-xs text-zinc-500">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-zinc-400">
+                                {new Date(m.created_at).toLocaleDateString("fr-FR")}
+                              </span>
+                              {consultant ? (
+                                <span className="rounded-full bg-brand/10 px-2 py-0.5 text-[10px] font-medium text-brand">
+                                  Consultant — {consultant.prenom} {consultant.nom}
+                                </span>
+                              ) : (
+                                <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-[10px] font-medium text-zinc-400">
+                                  Lien direct
+                                </span>
+                              )}
+                            </div>
+                            {m.message ? m.message : <span className="italic">Aucun message</span>}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        );
+      })()}
     </div>
   );
 }
