@@ -55,8 +55,8 @@ export default async function EditVillePage({
 
   return (
     <div className="space-y-8">
-      <div className="mt-2">
-        <h1 className="text-2xl font-bold uppercase text-[#0089bd]">{ville.nom}</h1>
+      <div className="page-header">
+        <h1 className="page-header-title">{ville.nom}</h1>
       </div>
       <div>
         <Link href="/villes" className="text-sm text-zinc-500 hover:text-zinc-900">

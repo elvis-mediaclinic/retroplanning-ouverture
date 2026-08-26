@@ -46,10 +46,10 @@ export default async function ProjetsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="mt-2 flex items-center justify-between">
+      <div className="page-header flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold uppercase text-[#0089bd]">Ouvertures</h1>
-          <p className="mt-1 text-sm text-zinc-500">Tous les dossiers d&apos;ouverture</p>
+          <h1 className="page-header-title">Ouvertures</h1>
+          <p className="page-header-subtitle">Tous les dossiers d&apos;ouverture</p>
         </div>
         <Link href="/projets/new" className="btn-primary">+ Nouveau projet</Link>
       </div>

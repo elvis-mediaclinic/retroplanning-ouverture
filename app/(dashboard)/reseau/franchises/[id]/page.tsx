@@ -21,8 +21,8 @@ export default async function EditFranchisePage({
 
   return (
     <div className="space-y-6">
-      <div className="mt-2 flex items-center justify-between">
-        <h1 className="text-2xl font-bold uppercase text-[#0089bd]">{franchise.nom}</h1>
+      <div className="page-header flex items-center justify-between">
+        <h1 className="page-header-title">{franchise.nom}</h1>
         <DeleteFranchiseButton id={id} />
       </div>
       <div>

@@ -7,8 +7,8 @@ export default async function NewVillePage() {
   await requireMarketing();
   return (
     <div className="space-y-6">
-      <div className="mt-2">
-        <h1 className="text-2xl font-bold uppercase text-[#0089bd]">Nouvelle ville</h1>
+      <div className="page-header">
+        <h1 className="page-header-title">Nouvelle ville</h1>
       </div>
       <div>
         <Link href="/villes" className="text-sm text-zinc-500 hover:text-zinc-900">

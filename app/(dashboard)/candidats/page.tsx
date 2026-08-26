@@ -118,10 +118,10 @@ export default async function CandidatsPage() {
 
   return (
     <div className="space-y-8">
-      <div className="mt-2 flex items-center justify-between">
+      <div className="page-header flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold uppercase text-[#0089bd]">Candidats franchisés</h1>
-          <p className="mt-1 text-sm text-zinc-500">
+          <h1 className="page-header-title">Candidats franchisés</h1>
+          <p className="page-header-subtitle">
             {avecProjet.length > 0 && `${avecProjet.length} projet en cours · `}
             {enCours.length} en évaluation · {signes.length} signé{signes.length !== 1 ? "s" : ""}
             {refuses.length > 0 && ` · ${refuses.length} refusé${refuses.length !== 1 ? "s" : ""}`}

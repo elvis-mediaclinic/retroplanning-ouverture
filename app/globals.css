@@ -67,4 +67,16 @@ textarea {
   .btn-danger {
     @apply rounded-md bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50 transition-colors;
   }
+
+  /* Header de page admin : titre + marge, sans carte. Un seul endroit à
+     modifier pour changer le style de tous les headers de l'admin. */
+  .page-header {
+    @apply mt-2;
+  }
+  .page-header-title {
+    @apply text-2xl font-bold uppercase text-[#0089bd];
+  }
+  .page-header-subtitle {
+    @apply mt-1 text-sm text-zinc-500;
+  }
 }

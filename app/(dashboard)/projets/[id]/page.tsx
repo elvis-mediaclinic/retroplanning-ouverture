@@ -103,10 +103,10 @@ export default async function ProjetPage({
   return (
     <div className="space-y-6">
       {/* En-tête */}
-      <div className="mt-2 flex items-start justify-between">
+      <div className="page-header flex items-start justify-between">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold uppercase text-[#0089bd]">{projet.nom}</h1>
+            <h1 className="page-header-title">{projet.nom}</h1>
             <span
               className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                 STATUT_PROJET_COLORS[projet.statut as keyof typeof STATUT_PROJET_COLORS]
@@ -115,7 +115,7 @@ export default async function ProjetPage({
               {STATUT_PROJET_LABELS[projet.statut as keyof typeof STATUT_PROJET_LABELS]}
             </span>
           </div>
-          <p className="mt-1 text-sm text-zinc-500">
+          <p className="page-header-subtitle">
             {TYPE_LABELS[projet.type_magasin as keyof typeof TYPE_LABELS]} ·{" "}
             {FORMAT_LABELS[projet.format_magasin as keyof typeof FORMAT_LABELS]}
             {projet.surface_m2 && ` · ${projet.surface_m2} m²`}

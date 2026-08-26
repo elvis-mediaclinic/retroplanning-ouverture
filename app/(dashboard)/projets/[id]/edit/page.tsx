@@ -28,8 +28,8 @@ export default async function EditProjetPage({
 
   return (
     <div className="space-y-6">
-      <div className="mt-2">
-        <h1 className="text-2xl font-bold uppercase text-[#0089bd]">
+      <div className="page-header">
+        <h1 className="page-header-title">
           Modifier le projet
         </h1>
       </div>

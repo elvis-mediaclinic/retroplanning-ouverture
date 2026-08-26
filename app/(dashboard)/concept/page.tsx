@@ -21,9 +21,9 @@ export default async function ConceptPage() {
 
   return (
     <div className="space-y-6">
-      <div className="mt-2">
-        <h1 className="text-2xl font-bold uppercase text-[#0089bd]">Concept Mediaclinic</h1>
-        <p className="mt-1 text-sm text-zinc-500">
+      <div className="page-header">
+        <h1 className="page-header-title">Concept Mediaclinic</h1>
+        <p className="page-header-subtitle">
           Toutes ces sections apparaissent sur la page publique « La franchise ».
           Cochez « Dans les annonces » pour celles à reprendre aussi dans la
           rubrique « Découvrir le concept Mediaclinic » de chaque annonce.

@@ -14,9 +14,9 @@ export default async function TemplatePage() {
 
   return (
     <div className="space-y-6">
-      <div className="mt-2">
-        <h1 className="text-2xl font-bold uppercase text-[#0089bd]">Template retroplanning</h1>
-        <p className="mt-1 text-sm text-zinc-500">
+      <div className="page-header">
+        <h1 className="page-header-title">Template retroplanning</h1>
+        <p className="page-header-subtitle">
           Ces étapes sont copiées lors de la création de chaque nouveau projet.
         </p>
       </div>
