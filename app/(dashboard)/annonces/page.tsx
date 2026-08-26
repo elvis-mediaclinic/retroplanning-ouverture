@@ -271,14 +271,24 @@ export default async function AnnoncesAdminPage() {
                       {a.sousTitre && ` · ${a.sousTitre}`}
                     </p>
                   </div>
-                  {a.href && (
-                    <Link
-                      href={a.href}
-                      className="shrink-0 text-xs text-zinc-500 hover:text-zinc-900 hover:underline"
+                  <div className="shrink-0 flex items-center gap-3">
+                    <a
+                      href={`${baseUrl}/annonce/${a.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-zinc-400 hover:text-zinc-700"
                     >
-                      Éditer
-                    </Link>
-                  )}
+                      Voir l&apos;article ↗
+                    </a>
+                    {a.href && (
+                      <Link
+                        href={a.href}
+                        className="text-xs text-zinc-500 hover:text-zinc-900 hover:underline"
+                      >
+                        Éditer
+                      </Link>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -289,6 +299,7 @@ export default async function AnnoncesAdminPage() {
                 <tr className="bg-gradient-to-br from-[#00729e] to-[#0089bd] text-left">
                   <th className="py-2 px-4 font-medium text-white">Ville / Magasin</th>
                   <th className="py-2 px-4 font-medium text-white">Titre</th>
+                  <th className="py-2 px-4 font-medium text-white"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100">
