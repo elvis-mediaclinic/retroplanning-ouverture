@@ -19,15 +19,24 @@ export default async function AnnoncesPage() {
     supabase.auth.getUser(),
   ]);
 
-  // Lien de parrainage : uniquement proposé aux comptes du rôle "consultant"
+  // Lien de parrainage : uniquement proposé aux comptes du rôle "consultant",
+  // et seulement pour les annonces qui leur ont été explicitement partagées.
   let consultantId: string | null = null;
+  let sharedAnnonceIds: Set<string> = new Set();
   if (user) {
     const { data: profile } = await supabase
       .from("profiles")
       .select("id, role")
       .eq("id", user.id)
       .maybeSingle();
-    if (profile?.role === "consultant") consultantId = profile.id;
+    if (profile?.role === "consultant") {
+      consultantId = profile.id;
+      const { data: shares } = await supabase
+        .from("annonce_consultants")
+        .select("annonce_id")
+        .eq("consultant_id", profile.id);
+      sharedAnnonceIds = new Set((shares ?? []).map((s) => s.annonce_id));
+    }
   }
 
   const rows = data ?? [];
@@ -57,6 +66,7 @@ export default async function AnnoncesPage() {
       isCession: a.type_annonce === "cession",
       ville,
       magasin,
+      sharedWithConsultant: sharedAnnonceIds.has(a.id),
     };
   });
 

@@ -39,6 +39,7 @@ type Annonce = {
   isCession: boolean;
   ville: { nom: string; departement: string | null; region: string | null } | null;
   magasin: { nom: string; ville: string | null; code_postal: string | null } | null;
+  sharedWithConsultant?: boolean;
 };
 
 function InteretSpontaneModal() {
@@ -212,7 +213,7 @@ export function OpportunitesExplorer({ annonces, consultantId }: { annonces: Ann
               <span className="mt-4 inline-block text-sm font-medium text-white">
                 En savoir plus →
               </span>
-              {consultantId && <CopyLienButton annonceId={a.id} consultantId={consultantId} />}
+              {consultantId && a.sharedWithConsultant && <CopyLienButton annonceId={a.id} consultantId={consultantId} />}
             </div>
           ))}
         </div>

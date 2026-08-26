@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { NewAnnonceModal } from "./NewAnnonceModal";
 import { AnnonceRow, VoirArticleLink } from "./AnnonceRow";
 import { CopyConsultantLink } from "./CopyConsultantLink";
+import { ShareAnnonceModal } from "./ShareAnnonceModal";
 
 export const metadata = { title: "Annonces — Mediaclinic" };
 
@@ -18,6 +19,8 @@ export default async function AnnoncesAdminPage() {
     { data: allViews },
     { data: allCandidatures },
     { data: toutesVilles },
+    { data: annonceConsultants },
+    { data: consultantsData },
   ] = await Promise.all([
     supabase
       .from("annonces")
@@ -32,7 +35,22 @@ export default async function AnnoncesAdminPage() {
     supabase.from("annonce_views").select("annonce_id, visitor_id"),
     supabase.from("candidatures").select("annonce_id"),
     supabase.from("villes").select("id, nom, departement").order("nom"),
+    isConsultant
+      ? supabase.from("annonce_consultants").select("annonce_id").eq("consultant_id", profile.id)
+      : supabase.from("annonce_consultants").select("annonce_id, consultant_id"),
+    isConsultant
+      ? Promise.resolve({ data: null })
+      : supabase.from("profiles").select("id, prenom, nom").eq("role", "consultant").order("prenom"),
   ]);
+
+  const consultants = consultantsData ?? [];
+  const sharedAnnonceIds = new Set((annonceConsultants ?? []).map((ac) => ac.annonce_id));
+  const consultantsByAnnonce = new Map<string, string[]>();
+  for (const ac of (annonceConsultants ?? []) as { annonce_id: string; consultant_id?: string }[]) {
+    if (!ac.consultant_id) continue;
+    if (!consultantsByAnnonce.has(ac.annonce_id)) consultantsByAnnonce.set(ac.annonce_id, []);
+    consultantsByAnnonce.get(ac.annonce_id)!.push(ac.consultant_id);
+  }
 
   function getVille(a: { villes: unknown }) {
     const raw = a.villes;
@@ -101,19 +119,20 @@ export default async function AnnoncesAdminPage() {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://retroplanning-ouverture.vercel.app";
 
   if (isConsultant) {
+    const partagees = publiees.filter((a) => sharedAnnonceIds.has(a.id));
     return (
       <div className="space-y-8">
         <div className="page-header">
           <h1 className="page-header-title">Annonces</h1>
           <p className="page-header-subtitle">
-            {publiees.length} annonce{publiees.length !== 1 ? "s" : ""} publiée{publiees.length !== 1 ? "s" : ""} — copiez votre lien pour être identifié comme apporteur
+            {partagees.length} annonce{partagees.length !== 1 ? "s" : ""} partagée{partagees.length !== 1 ? "s" : ""} avec vous — copiez votre lien pour être identifié comme apporteur
           </p>
         </div>
 
         <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm">
           {/* Mobile : cartes */}
           <div className="sm:hidden divide-y divide-zinc-100">
-            {publiees.map((a) => (
+            {partagees.map((a) => (
               <div key={a.id} className="px-4 py-3">
                 <div className="flex items-center gap-2">
                   <p className="font-medium text-zinc-900">{a.titre}</p>
@@ -143,8 +162,8 @@ export default async function AnnoncesAdminPage() {
                 </div>
               </div>
             ))}
-            {publiees.length === 0 && (
-              <p className="py-6 px-4 text-center text-zinc-400">Aucune annonce publiée pour l&apos;instant.</p>
+            {partagees.length === 0 && (
+              <p className="py-6 px-4 text-center text-zinc-400">Aucune annonce partagée avec vous pour l&apos;instant.</p>
             )}
           </div>
 
@@ -158,7 +177,7 @@ export default async function AnnoncesAdminPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-100">
-              {publiees.map((a) => (
+              {partagees.map((a) => (
                 <tr key={a.id}>
                   <td className="py-3 px-4 text-zinc-600">
                     {a.lieu ? (
@@ -201,9 +220,9 @@ export default async function AnnoncesAdminPage() {
                   </td>
                 </tr>
               ))}
-              {publiees.length === 0 && (
+              {partagees.length === 0 && (
                 <tr>
-                  <td colSpan={3} className="py-6 px-4 text-center text-zinc-400">Aucune annonce publiée pour l&apos;instant.</td>
+                  <td colSpan={3} className="py-6 px-4 text-center text-zinc-400">Aucune annonce partagée avec vous pour l&apos;instant.</td>
                 </tr>
               )}
             </tbody>
@@ -283,6 +302,11 @@ export default async function AnnoncesAdminPage() {
                       >
                         Voir l&apos;article ↗
                       </a>
+                      <ShareAnnonceModal
+                        annonceId={a.id}
+                        consultants={consultants}
+                        sharedWith={consultantsByAnnonce.get(a.id) ?? []}
+                      />
                       {a.href && (
                         <Link
                           href={a.href}
@@ -306,6 +330,7 @@ export default async function AnnoncesAdminPage() {
                   <th className="py-2 px-4 font-medium text-white text-right">Vues</th>
                   <th className="py-2 px-4 font-medium text-white text-right">Visiteurs</th>
                   <th className="py-2 px-4 font-medium text-white text-right">Contacts</th>
+                  <th className="py-2 px-4 font-medium text-white"></th>
                   <th className="py-2 px-4 font-medium text-white"></th>
                 </tr>
               </thead>
@@ -350,6 +375,13 @@ export default async function AnnoncesAdminPage() {
                         <VoirArticleLink
                           href={`${baseUrl}/annonce/${a.id}`}
                           className="text-xs text-zinc-400 hover:text-zinc-700"
+                        />
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        <ShareAnnonceModal
+                          annonceId={a.id}
+                          consultants={consultants}
+                          sharedWith={consultantsByAnnonce.get(a.id) ?? []}
                         />
                       </td>
                     </AnnonceRow>
