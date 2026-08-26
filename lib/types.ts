@@ -273,6 +273,25 @@ export const STATUT_CANDIDAT_LABELS: Record<StatutCandidat, string> = {
   refuse: "Refusé",
 };
 
+export type TypeConcurrent = "reparateur" | "cash" | "revendeur" | "autre";
+
+export const TYPE_CONCURRENT_LABELS: Record<TypeConcurrent, string> = {
+  reparateur: "Réparateur",
+  cash: "Acteur du cash",
+  revendeur: "Revendeur",
+  autre: "Autre",
+};
+
+export type VilleConcurrent = {
+  id: string;
+  ville_id: string;
+  enseigne: string;
+  type: TypeConcurrent;
+  franchise: boolean;
+  notes: string | null;
+  created_at: string;
+};
+
 export const TYPE_INTERACTION_LABELS: Record<TypeInteraction, string> = {
   appel: "Appel",
   email: "Envoi plaquette",

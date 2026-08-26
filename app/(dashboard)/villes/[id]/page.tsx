@@ -5,7 +5,9 @@ import { createClient } from "@/lib/supabase/server";
 import { updateVille } from "../actions";
 import { VilleInfoPanel } from "./VilleInfoPanel";
 import { AnnonceEditor } from "./AnnonceEditor";
+import { ConcurrentsPanel } from "./ConcurrentsPanel";
 import { BoldText } from "@/components/BoldText";
+import type { VilleConcurrent } from "@/lib/types";
 
 export default async function EditVillePage({
   params,
@@ -17,7 +19,7 @@ export default async function EditVillePage({
   const { id } = await params;
   const supabase = await createClient();
 
-  const [{ data: ville }, { data: annonce }, { data: candidatures }] = await Promise.all([
+  const [{ data: ville }, { data: annonce }, { data: candidatures }, { data: concurrents }] = await Promise.all([
     supabase.from("villes").select("*").eq("id", id).single(),
     supabase.from("annonces").select("id, titre, accroche, contenu, contenu_json, sections, actif, hero_bleu, hero_carte, hero_titre_centre, hero_accroche_centre").eq("ville_id", id).maybeSingle(),
     supabase
@@ -25,6 +27,7 @@ export default async function EditVillePage({
       .select("id, prenom, nom, email, telephone, apport_personnel, message, traite, created_at")
       .eq("ville_id", id)
       .order("created_at", { ascending: false }),
+    supabase.from("ville_concurrents").select("*").eq("ville_id", id),
   ]);
 
   if (!ville) notFound();
@@ -67,6 +70,12 @@ export default async function EditVillePage({
       {/* Infos ville */}
       <section className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
         <VilleInfoPanel ville={ville} action={action} canEdit={canEdit} />
+      </section>
+
+      {/* Concurrents en place */}
+      <section className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
+        <h2 className="text-sm font-semibold text-zinc-900 mb-4">Concurrents en place</h2>
+        <ConcurrentsPanel villeId={id} concurrents={(concurrents ?? []) as VilleConcurrent[]} />
       </section>
 
       {/* Annonce publique */}
