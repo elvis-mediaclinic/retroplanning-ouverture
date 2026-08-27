@@ -7,10 +7,23 @@ import { CandidatForm } from "../CandidatForm";
 export default async function NewCandidatPage() {
   await requireMC();
   const supabase = await createClient();
-  const { data: villes } = await supabase
-    .from("villes")
-    .select("id, nom")
-    .order("nom");
+  const [{ data: villes }, { data: cessionAnnonces }] = await Promise.all([
+    supabase.from("villes").select("id, nom").order("nom"),
+    supabase
+      .from("annonces")
+      .select("magasin_id, magasins(id, nom, ville)")
+      .eq("type_annonce", "cession")
+      .eq("actif", true),
+  ]);
+
+  const magasinsCession = (cessionAnnonces ?? [])
+    .map((a) => {
+      const raw = a.magasins as unknown;
+      return Array.isArray(raw)
+        ? (raw[0] as { id: string; nom: string; ville: string | null } | undefined)
+        : (raw as { id: string; nom: string; ville: string | null } | null);
+    })
+    .filter((m): m is { id: string; nom: string; ville: string | null } => !!m);
 
   return (
     <div className="space-y-6">
@@ -23,7 +36,7 @@ export default async function NewCandidatPage() {
         </Link>
       </div>
       <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
-        <CandidatForm action={createCandidat} villes={villes ?? []} submitLabel="Créer" />
+        <CandidatForm action={createCandidat} villes={villes ?? []} magasinsCession={magasinsCession} submitLabel="Créer" />
       </div>
     </div>
   );

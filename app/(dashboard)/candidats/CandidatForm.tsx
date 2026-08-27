@@ -4,12 +4,15 @@ import { useActionState, useState } from "react";
 import type { Candidat, CandidatAssocie } from "@/lib/types";
 
 type Ville = { id: string; nom: string };
+type MagasinCession = { id: string; nom: string; ville: string | null };
 
 type Props = {
   action: (state: { error?: string } | undefined, formData: FormData) => Promise<{ error?: string } | undefined>;
   defaultValues?: Partial<Candidat>;
   villes?: Ville[];
   selectedVilleIds?: string[];
+  magasinsCession?: MagasinCession[];
+  selectedMagasinIds?: string[];
   associes?: CandidatAssocie[];
   submitLabel?: string;
   readOnly?: boolean;
@@ -21,7 +24,7 @@ type AssocieDraft = { id: string; prenom: string; nom: string; email: string; te
 
 const inputCls = "w-full rounded-md border border-zinc-300 px-3 py-2 text-sm";
 
-export function CandidatForm({ action, defaultValues, villes = [], selectedVilleIds = [], associes = [], submitLabel = "Enregistrer", readOnly = false }: Props) {
+export function CandidatForm({ action, defaultValues, villes = [], selectedVilleIds = [], magasinsCession = [], selectedMagasinIds = [], associes = [], submitLabel = "Enregistrer", readOnly = false }: Props) {
   const [state, formAction, pending] = useActionState(action, undefined);
   const [associeDrafts, setAssocieDrafts] = useState<AssocieDraft[]>(
     associes.map((a) => ({ id: a.id, prenom: a.prenom, nom: a.nom, email: a.email ?? "", telephone: a.telephone ?? "" }))
@@ -170,6 +173,26 @@ export function CandidatForm({ action, defaultValues, villes = [], selectedVille
                     className="rounded border-zinc-300 text-brand accent-brand"
                   />
                   {v.nom}
+                </label>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {magasinsCession.length > 0 && (
+          <div className="col-span-2 space-y-2">
+            <label className="text-sm font-medium text-zinc-700">Cessions souhaitées</label>
+            <div className="max-h-40 overflow-y-auto rounded-md border border-zinc-200 bg-zinc-50 p-3 grid grid-cols-2 gap-y-1.5 gap-x-4">
+              {magasinsCession.map((m) => (
+                <label key={m.id} className="flex items-center gap-2 text-sm text-zinc-700 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    name="magasin_ids"
+                    value={m.id}
+                    defaultChecked={selectedMagasinIds.includes(m.id)}
+                    className="rounded border-zinc-300 text-brand accent-brand"
+                  />
+                  {m.nom}{m.ville ? ` (${m.ville})` : ""}
                 </label>
               ))}
             </div>

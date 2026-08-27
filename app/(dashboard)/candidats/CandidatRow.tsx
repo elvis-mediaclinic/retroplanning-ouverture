@@ -19,6 +19,7 @@ type Candidat = {
   apport_personnel: number | null;
   profil_id: string | null;
   candidat_villes: Array<{ villes: { nom: string } | { nom: string }[] | null }> | null;
+  candidat_magasins: Array<{ magasins: { nom: string } | { nom: string }[] | null }> | null;
   projets: Array<{ id: string; statut: string }> | null;
   candidat_associes: Associe[] | null;
   consultant?: { prenom: string; nom: string } | null;
@@ -30,7 +31,14 @@ function getVilles(c: Candidat) {
     const v = cv.villes;
     return Array.isArray(v) ? v[0]?.nom : v?.nom;
   }).filter(Boolean) as string[];
-  return noms.length > 0 ? noms.join(", ") : (c.zone_souhaitee ?? "—");
+  const cms = c.candidat_magasins ?? [];
+  const cessionNoms = cms.map((cm) => {
+    const m = cm.magasins;
+    const nom = Array.isArray(m) ? m[0]?.nom : m?.nom;
+    return nom ? `${nom} (cession)` : null;
+  }).filter(Boolean) as string[];
+  const all = [...noms, ...cessionNoms];
+  return all.length > 0 ? all.join(", ") : (c.zone_souhaitee ?? "—");
 }
 
 export function CandidatRow({ c, showProjet }: { c: Candidat; showProjet?: boolean }) {

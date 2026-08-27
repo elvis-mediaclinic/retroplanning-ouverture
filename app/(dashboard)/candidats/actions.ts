@@ -41,6 +41,7 @@ export async function createCandidat(
   }
 
   const villeIds = formData.getAll("ville_ids") as string[];
+  const magasinIds = formData.getAll("magasin_ids") as string[];
   const associes = parseAssocies(formData);
 
   const supabase = await createClient();
@@ -61,6 +62,12 @@ export async function createCandidat(
   if (newCandidat && villeIds.length > 0) {
     await supabase.from("candidat_villes").insert(
       villeIds.map((ville_id) => ({ candidat_id: newCandidat.id, ville_id }))
+    );
+  }
+
+  if (newCandidat && magasinIds.length > 0) {
+    await supabase.from("candidat_magasins").insert(
+      magasinIds.map((magasin_id) => ({ candidat_id: newCandidat.id, magasin_id }))
     );
   }
 
@@ -119,6 +126,7 @@ export async function updateCandidat(
   }
 
   const villeIds = formData.getAll("ville_ids") as string[];
+  const magasinIds = formData.getAll("magasin_ids") as string[];
   const associes = parseAssocies(formData);
 
   const supabase = await createClient();
@@ -143,6 +151,14 @@ export async function updateCandidat(
   if (villeIds.length > 0) {
     await supabase.from("candidat_villes").insert(
       villeIds.map((ville_id) => ({ candidat_id: id, ville_id }))
+    );
+  }
+
+  // Remplace les cessions liées
+  await supabase.from("candidat_magasins").delete().eq("candidat_id", id);
+  if (magasinIds.length > 0) {
+    await supabase.from("candidat_magasins").insert(
+      magasinIds.map((magasin_id) => ({ candidat_id: id, magasin_id }))
     );
   }
 

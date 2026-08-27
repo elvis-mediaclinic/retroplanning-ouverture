@@ -18,12 +18,18 @@ export default async function EditCandidatPage({
   const { id } = await params;
   const supabase = await createClient();
 
-  const [{ data: candidat }, { data: villes }, { data: candidatVilles }, { data: interactions }, { data: associes }] = await Promise.all([
+  const [{ data: candidat }, { data: villes }, { data: candidatVilles }, { data: interactions }, { data: associes }, { data: cessionAnnonces }, { data: candidatMagasins }] = await Promise.all([
     supabase.from("candidats").select("*").eq("id", id).single(),
     supabase.from("villes").select("id, nom").order("nom"),
     supabase.from("candidat_villes").select("ville_id").eq("candidat_id", id),
     supabase.from("candidat_interactions").select("*").eq("candidat_id", id).order("created_at", { ascending: false }),
     supabase.from("candidat_associes").select("*").eq("candidat_id", id).order("ordre"),
+    supabase
+      .from("annonces")
+      .select("magasin_id, magasins(id, nom, ville)")
+      .eq("type_annonce", "cession")
+      .eq("actif", true),
+    supabase.from("candidat_magasins").select("magasin_id").eq("candidat_id", id),
   ]);
 
   if (!candidat) notFound();
@@ -42,6 +48,15 @@ export default async function EditCandidatPage({
     : (consultantRaw as { prenom: string; nom: string } | null);
 
   const selectedVilleIds = (candidatVilles ?? []).map((cv) => cv.ville_id);
+  const selectedMagasinIds = (candidatMagasins ?? []).map((cm) => cm.magasin_id);
+  const magasinsCession = (cessionAnnonces ?? [])
+    .map((a) => {
+      const raw = a.magasins as unknown;
+      return Array.isArray(raw)
+        ? (raw[0] as { id: string; nom: string; ville: string | null } | undefined)
+        : (raw as { id: string; nom: string; ville: string | null } | null);
+    })
+    .filter((m): m is { id: string; nom: string; ville: string | null } => !!m);
   const associesList = (associes ?? []) as CandidatAssocie[];
   const allNames = [`${candidat.prenom} ${candidat.nom}`, ...associesList.map((a) => `${a.prenom} ${a.nom}`)].join(", ");
 
@@ -75,6 +90,8 @@ export default async function EditCandidatPage({
           defaultValues={candidat}
           villes={villes ?? []}
           selectedVilleIds={selectedVilleIds}
+          magasinsCession={magasinsCession}
+          selectedMagasinIds={selectedMagasinIds}
           associes={associesList}
           readOnly={!canEdit}
         />
