@@ -12,8 +12,7 @@ export default async function NewCandidatPage() {
     supabase
       .from("annonces")
       .select("magasin_id, magasins(id, nom, ville)")
-      .eq("type_annonce", "cession")
-      .eq("actif", true),
+      .eq("type_annonce", "cession"),
   ]);
 
   const magasinsCession = (cessionAnnonces ?? [])

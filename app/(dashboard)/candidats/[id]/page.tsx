@@ -27,8 +27,7 @@ export default async function EditCandidatPage({
     supabase
       .from("annonces")
       .select("magasin_id, magasins(id, nom, ville)")
-      .eq("type_annonce", "cession")
-      .eq("actif", true),
+      .eq("type_annonce", "cession"),
     supabase.from("candidat_magasins").select("magasin_id").eq("candidat_id", id),
   ]);
 
