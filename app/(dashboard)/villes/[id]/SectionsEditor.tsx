@@ -4,6 +4,7 @@ import { useId, useState } from "react";
 import dynamic from "next/dynamic";
 import { svgUseCurrentColor } from "@/lib/utils";
 import { MediaPicker } from "./MediaPicker";
+import { SvgIconPicker } from "./SvgIconPicker";
 
 const BlockEditor = dynamic(() => import("./BlockEditor").then((m) => m.BlockEditor), {
   ssr: false,
@@ -623,16 +624,14 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
                     </button>
                   )}
                 </div>
-                <textarea
+                <SvgIconPicker
                   value={(section as { icone?: string }).icone ?? ""}
-                  onChange={(e) => update(section.id, { icone: e.target.value || undefined } as Partial<Section>)}
-                  placeholder='<svg viewBox="0 0 24 24" fill="black">...</svg>'
-                  rows={3}
-                  className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-xs font-mono"
+                  onChange={(svg) => update(section.id, { icone: svg } as Partial<Section>)}
                 />
                 <p className="text-xs text-zinc-400">
-                  Collez le code d&apos;un pictogramme SVG, quelle que soit sa couleur d&apos;origine :
-                  elle est automatiquement adaptée (blanc sur fond bleu, bleu sur fond clair).
+                  Choisissez une icône déjà enregistrée, ou collez le code d&apos;un nouveau pictogramme SVG
+                  (quelle que soit sa couleur d&apos;origine, elle est automatiquement adaptée — blanc sur
+                  fond bleu, bleu sur fond clair) puis « + Bibliothèque » pour la réutiliser ailleurs.
                 </p>
               </div>
             )}
