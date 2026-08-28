@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { requireMCOrConsultant, getProfile } from "@/lib/dal";
 import { createClient } from "@/lib/supabase/server";
 import { updateCandidat } from "../actions";
-import { CandidatForm } from "../CandidatForm";
+import { CandidatDetailView } from "./CandidatDetailView";
 import { InteractionTimeline } from "./InteractionTimeline";
 import type { CandidatInteraction, CandidatAssocie } from "@/lib/types";
 
@@ -84,15 +84,15 @@ export default async function EditCandidatPage({
         </Link>
       </div>
       <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
-        <CandidatForm
-          action={action}
-          defaultValues={candidat}
+        <CandidatDetailView
+          candidat={candidat}
+          associes={associesList}
           villes={villes ?? []}
           selectedVilleIds={selectedVilleIds}
           magasinsCession={magasinsCession}
           selectedMagasinIds={selectedMagasinIds}
-          associes={associesList}
-          readOnly={!canEdit}
+          action={action}
+          canEdit={canEdit}
         />
       </div>
 

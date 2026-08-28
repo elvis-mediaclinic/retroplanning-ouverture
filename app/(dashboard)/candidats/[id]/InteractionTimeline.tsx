@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useState, type TextareaHTMLAttributes } from "react";
 import {
   createInteraction,
   updateInteraction,
@@ -23,17 +23,44 @@ const TYPE_ICONS: Record<TypeInteraction, string> = {
   autre: "•",
 };
 
-function formatDateTime(iso: string) {
-  return new Date(iso).toLocaleString("fr-FR", {
-    day: "2-digit", month: "short", year: "numeric",
-    hour: "2-digit", minute: "2-digit",
-  });
-}
-
 function toLocalInputValue(iso?: string) {
   const d = iso ? new Date(iso) : new Date();
   const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+// Petit badge "calendrier" : mois en tête, jour en grand.
+function CalendarBadge({ iso }: { iso: string }) {
+  const d = new Date(iso);
+  const mois = d.toLocaleDateString("fr-FR", { month: "short" }).replace(".", "");
+  return (
+    <div className="shrink-0 w-11 overflow-hidden rounded-md border border-zinc-200 text-center">
+      <div className="bg-brand py-0.5 text-[9px] font-semibold uppercase tracking-wide text-white">
+        {mois}
+      </div>
+      <div className="py-1 text-base font-bold leading-none text-zinc-800">
+        {d.getDate()}
+      </div>
+    </div>
+  );
+}
+
+// Textarea qui grandit avec son contenu, plutôt qu'une hauteur fixe.
+function AutoGrowTextarea(props: TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  return (
+    <textarea
+      {...props}
+      rows={2}
+      onInput={(e) => {
+        const el = e.currentTarget;
+        el.style.height = "auto";
+        el.style.height = `${el.scrollHeight}px`;
+      }}
+      ref={(el) => {
+        if (el) { el.style.height = "auto"; el.style.height = `${el.scrollHeight}px`; }
+      }}
+    />
+  );
 }
 
 function InteractionForm({
@@ -73,7 +100,7 @@ function InteractionForm({
           <label className="text-xs font-medium text-zinc-600">Date</label>
           <input
             name="date_realisee"
-            type="datetime-local"
+            type="date"
             defaultValue={toLocalInputValue(interaction?.date_realisee)}
             required
             className="input w-full text-sm"
@@ -82,11 +109,10 @@ function InteractionForm({
       </div>
       <div className="space-y-1">
         <label className="text-xs font-medium text-zinc-600">Notes</label>
-        <textarea
+        <AutoGrowTextarea
           name="notes"
-          rows={2}
           defaultValue={interaction?.notes ?? ""}
-          className="input w-full text-sm resize-none"
+          className="input w-full text-sm resize-none overflow-hidden"
           placeholder="Créneaux proposés, retours du candidat…"
         />
       </div>
@@ -170,13 +196,13 @@ export function InteractionTimeline({
           }
           return (
             <li key={it.id} className="flex items-start gap-3 rounded-md border border-zinc-200 bg-white p-3">
-              <span className="text-lg leading-none mt-0.5">{TYPE_ICONS[it.type]}</span>
+              <CalendarBadge iso={it.date_realisee} />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-lg leading-none">{TYPE_ICONS[it.type]}</span>
                   <span className="text-sm font-medium text-zinc-900">
                     {TYPE_INTERACTION_LABELS[it.type]}
                   </span>
-                  <span className="text-xs text-zinc-400">{formatDateTime(it.date_realisee)}</span>
                 </div>
                 {it.notes && <p className="mt-1 text-sm text-zinc-600 whitespace-pre-line">{it.notes}</p>}
               </div>
