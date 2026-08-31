@@ -6,7 +6,8 @@ import { requireMC } from "@/lib/dal";
 import { createClient } from "@/lib/supabase/server";
 
 const InteractionSchema = z.object({
-  type: z.enum(["appel", "email", "visio", "visite_siege", "autre"]),
+  type: z.enum(["appel", "email", "visio", "visite_siege", "immersion_magasin", "visite_ville_candidat", "autre"]),
+  libelle: z.string().optional(),
   date_realisee: z.string().min(1, { error: "Date requise." }),
   notes: z.string().optional(),
 });
@@ -21,6 +22,7 @@ export async function createInteraction(
   const session = await requireMC();
   const parsed = InteractionSchema.safeParse({
     type: formData.get("type"),
+    libelle: formData.get("libelle") || undefined,
     date_realisee: formData.get("date_realisee"),
     notes: formData.get("notes") || undefined,
   });
@@ -33,6 +35,7 @@ export async function createInteraction(
   const { error } = await supabase.from("candidat_interactions").insert({
     candidat_id: candidatId,
     type: parsed.data.type,
+    libelle: parsed.data.type === "autre" ? parsed.data.libelle ?? null : null,
     date_realisee: parsed.data.date_realisee,
     notes: parsed.data.notes ?? null,
     created_by: session.id,
@@ -53,6 +56,7 @@ export async function updateInteraction(
   await requireMC();
   const parsed = InteractionSchema.safeParse({
     type: formData.get("type"),
+    libelle: formData.get("libelle") || undefined,
     date_realisee: formData.get("date_realisee"),
     notes: formData.get("notes") || undefined,
   });
@@ -66,6 +70,7 @@ export async function updateInteraction(
     .from("candidat_interactions")
     .update({
       type: parsed.data.type,
+      libelle: parsed.data.type === "autre" ? parsed.data.libelle ?? null : null,
       date_realisee: parsed.data.date_realisee,
       notes: parsed.data.notes ?? null,
       updated_at: new Date().toISOString(),

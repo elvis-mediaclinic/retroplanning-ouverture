@@ -21,7 +21,7 @@ const TYPE_ICONS: Record<TypeInteraction, string> = {
   visite_siege: "🏢",
   immersion_magasin: "🛍️",
   visite_ville_candidat: "📍",
-  autre: "•",
+  autre: "📝",
 };
 
 function toLocalInputValue(iso?: string) {
@@ -30,20 +30,8 @@ function toLocalInputValue(iso?: string) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
-// Petit badge "calendrier" : mois en tête, jour en grand.
-function CalendarBadge({ iso }: { iso: string }) {
-  const d = new Date(iso);
-  const mois = d.toLocaleDateString("fr-FR", { month: "short" }).replace(".", "");
-  return (
-    <div className="shrink-0 w-11 overflow-hidden rounded-md border border-zinc-200 text-center">
-      <div className="bg-brand py-0.5 text-[9px] font-semibold uppercase tracking-wide text-white">
-        {mois}
-      </div>
-      <div className="py-1 text-base font-bold leading-none text-zinc-800">
-        {d.getDate()}
-      </div>
-    </div>
-  );
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" });
 }
 
 // Textarea qui grandit avec son contenu, plutôt qu'une hauteur fixe.
@@ -79,6 +67,7 @@ function InteractionForm({
     ? updateInteraction.bind(null, interaction.id, candidatId)
     : createInteraction.bind(null, candidatId);
   const [state, formAction, pending] = useActionState<InteractionState, FormData>(action, undefined);
+  const [type, setType] = useState<TypeInteraction>(interaction?.type ?? defaultType);
 
   return (
     <form
@@ -91,7 +80,12 @@ function InteractionForm({
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
           <label className="text-xs font-medium text-zinc-600">Type</label>
-          <select name="type" defaultValue={interaction?.type ?? defaultType} className="input w-full text-sm">
+          <select
+            name="type"
+            value={type}
+            onChange={(e) => setType(e.target.value as TypeInteraction)}
+            className="input w-full text-sm"
+          >
             {(Object.entries(TYPE_INTERACTION_LABELS) as [TypeInteraction, string][]).map(([k, v]) => (
               <option key={k} value={k}>{v}</option>
             ))}
@@ -107,6 +101,18 @@ function InteractionForm({
           />
         </div>
       </div>
+      {type === "autre" && (
+        <div className="space-y-1">
+          <label className="text-xs font-medium text-zinc-600">Nom de l&apos;échange</label>
+          <input
+            type="text"
+            name="libelle"
+            defaultValue={interaction?.libelle ?? ""}
+            placeholder="ex : Envoi NDA"
+            className="input w-full text-sm"
+          />
+        </div>
+      )}
       <div className="space-y-1">
         <label className="text-xs font-medium text-zinc-600">Notes</label>
         <AutoGrowTextarea
@@ -141,6 +147,15 @@ export function InteractionTimeline({
   const [adding, setAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [quickType, setQuickType] = useState<TypeInteraction>("autre");
+  const [notesOpenIds, setNotesOpenIds] = useState<Set<string>>(new Set());
+
+  function toggleNotes(id: string) {
+    setNotesOpenIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }
 
   const sorted = [...interactions].sort((a, b) => (a.date_realisee < b.date_realisee ? 1 : -1));
 
@@ -194,17 +209,29 @@ export function InteractionTimeline({
               </li>
             );
           }
+          const notesOpen = notesOpenIds.has(it.id);
           return (
             <li key={it.id} className="flex items-start gap-3 rounded-md border border-zinc-200 bg-white p-3">
-              <CalendarBadge iso={it.date_realisee} />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-lg leading-none">{TYPE_ICONS[it.type]}</span>
                   <span className="text-sm font-medium text-zinc-900">
-                    {TYPE_INTERACTION_LABELS[it.type]}
+                    {it.type === "autre" && it.libelle ? it.libelle : TYPE_INTERACTION_LABELS[it.type]}
                   </span>
+                  <span className="text-xs text-zinc-400">{formatDate(it.date_realisee)}</span>
+                  {it.notes && (
+                    <button
+                      type="button"
+                      onClick={() => toggleNotes(it.id)}
+                      className="text-xs text-brand hover:text-brand-dark"
+                    >
+                      {notesOpen ? "Masquer la note" : "Voir la note"}
+                    </button>
+                  )}
                 </div>
-                {it.notes && <p className="mt-1 text-sm text-zinc-600 whitespace-pre-line">{it.notes}</p>}
+                {it.notes && notesOpen && (
+                  <p className="mt-1 text-sm text-zinc-600 whitespace-pre-line">{it.notes}</p>
+                )}
               </div>
               {!readOnly && (
                 <div className="flex items-center gap-2 shrink-0">

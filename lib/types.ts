@@ -97,6 +97,7 @@ export type CandidatInteraction = {
   id: string;
   candidat_id: string;
   type: TypeInteraction;
+  libelle: string | null;
   date_realisee: string;
   notes: string | null;
   created_by: string | null;
