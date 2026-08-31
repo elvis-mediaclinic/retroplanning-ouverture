@@ -3,19 +3,23 @@ import { notFound } from "next/navigation";
 import { requireMCOrConsultant, getProfile } from "@/lib/dal";
 import { createClient } from "@/lib/supabase/server";
 import { updateCandidat } from "../actions";
+import { CandidatForm } from "../CandidatForm";
 import { CandidatDetailView } from "./CandidatDetailView";
 import { InteractionTimeline } from "./InteractionTimeline";
 import type { CandidatInteraction, CandidatAssocie } from "@/lib/types";
 
 export default async function EditCandidatPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ edit?: string }>;
 }) {
   await requireMCOrConsultant();
   const profile = await getProfile();
   const canEdit = profile.role !== "consultant";
   const { id } = await params;
+  const editMode = canEdit && (await searchParams).edit === "1";
   const supabase = await createClient();
 
   const [{ data: candidat }, { data: villes }, { data: candidatVilles }, { data: interactions }, { data: associes }, { data: cessionAnnonces }, { data: candidatMagasins }] = await Promise.all([
@@ -63,19 +67,26 @@ export default async function EditCandidatPage({
 
   return (
     <div className="space-y-6">
-      <div className="page-header flex items-center gap-3">
-        <h1 className="page-header-title">
-          {allNames}
-        </h1>
-        {candidat.profil_id && (
-          <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
-            ✓ Compte actif
-          </span>
-        )}
-        {consultant && (
-          <span className="rounded-full bg-violet-100 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-violet-700">
-            Consultant — {consultant.prenom} {consultant.nom}
-          </span>
+      <div className="page-header flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <h1 className="page-header-title">
+            {allNames}
+          </h1>
+          {candidat.profil_id && (
+            <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
+              ✓ Compte actif
+            </span>
+          )}
+          {consultant && (
+            <span className="rounded-full bg-violet-100 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-violet-700">
+              Consultant — {consultant.prenom} {consultant.nom}
+            </span>
+          )}
+        </div>
+        {canEdit && !editMode && (
+          <Link href={`/candidats/${id}?edit=1`} className="btn-secondary text-sm shrink-0">
+            Modifier
+          </Link>
         )}
       </div>
       <div>
@@ -84,16 +95,31 @@ export default async function EditCandidatPage({
         </Link>
       </div>
       <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
-        <CandidatDetailView
-          candidat={candidat}
-          associes={associesList}
-          villes={villes ?? []}
-          selectedVilleIds={selectedVilleIds}
-          magasinsCession={magasinsCession}
-          selectedMagasinIds={selectedMagasinIds}
-          action={action}
-          canEdit={canEdit}
-        />
+        {editMode ? (
+          <div className="space-y-3">
+            <CandidatForm
+              action={action}
+              defaultValues={candidat}
+              villes={villes ?? []}
+              selectedVilleIds={selectedVilleIds}
+              magasinsCession={magasinsCession}
+              selectedMagasinIds={selectedMagasinIds}
+              associes={associesList}
+            />
+            <Link href={`/candidats/${id}`} className="text-xs text-zinc-500 hover:text-zinc-900">
+              ← Revenir à l&apos;affichage
+            </Link>
+          </div>
+        ) : (
+          <CandidatDetailView
+            candidat={candidat}
+            associes={associesList}
+            villes={villes ?? []}
+            selectedVilleIds={selectedVilleIds}
+            magasinsCession={magasinsCession}
+            selectedMagasinIds={selectedMagasinIds}
+          />
+        )}
       </div>
 
       <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">

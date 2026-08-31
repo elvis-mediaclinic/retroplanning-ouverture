@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { CandidatForm } from "../CandidatForm";
 import { CopyEmail } from "../CopyEmail";
 import { STATUT_CANDIDAT_LABELS, type Candidat, type CandidatAssocie } from "@/lib/types";
 import { STATUT_CANDIDAT_COLORS } from "@/lib/utils";
 
 type Ville = { id: string; nom: string };
 type MagasinCession = { id: string; nom: string; ville: string | null };
-type CandidatAction = (state: { error?: string } | undefined, formData: FormData) => Promise<{ error?: string } | undefined>;
+
+const sectionTitleCls = "text-xs font-semibold uppercase tracking-wide text-brand mb-3";
 
 export function CandidatDetailView({
   candidat,
@@ -17,8 +17,6 @@ export function CandidatDetailView({
   selectedVilleIds,
   magasinsCession,
   selectedMagasinIds,
-  action,
-  canEdit,
 }: {
   candidat: Candidat;
   associes: CandidatAssocie[];
@@ -26,29 +24,8 @@ export function CandidatDetailView({
   selectedVilleIds: string[];
   magasinsCession: MagasinCession[];
   selectedMagasinIds: string[];
-  action: CandidatAction;
-  canEdit: boolean;
 }) {
-  const [editing, setEditing] = useState(false);
-
-  if (canEdit && editing) {
-    return (
-      <div className="space-y-3">
-        <CandidatForm
-          action={action}
-          defaultValues={candidat}
-          villes={villes}
-          selectedVilleIds={selectedVilleIds}
-          magasinsCession={magasinsCession}
-          selectedMagasinIds={selectedMagasinIds}
-          associes={associes}
-        />
-        <button type="button" onClick={() => setEditing(false)} className="text-xs text-zinc-500 hover:text-zinc-900">
-          ← Revenir à l&apos;affichage
-        </button>
-      </div>
-    );
-  }
+  const [notesOpen, setNotesOpen] = useState(false);
 
   const villesNoms = villes.filter((v) => selectedVilleIds.includes(v.id)).map((v) => v.nom);
   const magasinsNoms = magasinsCession
@@ -64,20 +41,12 @@ export function CandidatDetailView({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-end">
-        {canEdit && (
-          <button type="button" onClick={() => setEditing(true)} className="btn-secondary text-sm">
-            Modifier
-          </button>
-        )}
-      </div>
-
       {/* Contact */}
       <section>
-        <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400 mb-3">Contact</p>
+        <p className={sectionTitleCls}>Contact</p>
         <div className="space-y-3">
           {personnes.map((p, i) => (
-            <dl key={p.id} className={`grid grid-cols-2 gap-4 sm:grid-cols-3 text-sm ${i > 0 ? "border-t border-zinc-100 pt-3" : ""}`}>
+            <dl key={p.id} className={`grid grid-cols-2 gap-4 sm:grid-cols-3 text-sm ${i > 0 ? "border-t border-dashed border-zinc-200 pt-3" : ""}`}>
               <div className="col-span-full sm:col-span-1">
                 <dt className="text-xs text-zinc-400 mb-0.5">Nom</dt>
                 <dd className="font-medium text-zinc-900">{p.prenom} {p.nom}</dd>
@@ -96,8 +65,8 @@ export function CandidatDetailView({
       </section>
 
       {/* Candidature */}
-      <section className="border-t border-zinc-100 pt-6">
-        <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400 mb-3">Candidature</p>
+      <section className="border-t border-zinc-200 pt-6">
+        <p className={sectionTitleCls}>Candidature</p>
         <dl className="grid grid-cols-2 gap-4 sm:grid-cols-3 text-sm">
           <div>
             <dt className="text-xs text-zinc-400 mb-0.5">Statut</dt>
@@ -123,8 +92,8 @@ export function CandidatDetailView({
       </section>
 
       {/* Opportunités */}
-      <section className="border-t border-zinc-100 pt-6">
-        <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400 mb-3">Opportunités souhaitées</p>
+      <section className="border-t border-zinc-200 pt-6">
+        <p className={sectionTitleCls}>Opportunités souhaitées</p>
         <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2 text-sm">
           <div>
             <dt className="text-xs text-zinc-400 mb-0.5">Villes</dt>
@@ -141,9 +110,23 @@ export function CandidatDetailView({
 
       {/* Notes */}
       {candidat.notes && (
-        <section className="border-t border-zinc-100 pt-6">
-          <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400 mb-3">Notes</p>
-          <p className="text-sm text-zinc-600 whitespace-pre-line">{candidat.notes}</p>
+        <section className="border-t border-zinc-200 pt-6">
+          <div className="flex items-center gap-2">
+            <p className={`${sectionTitleCls} mb-0`}>Notes</p>
+            <button
+              type="button"
+              onClick={() => setNotesOpen((v) => !v)}
+              className="flex items-center gap-1 text-xs text-brand hover:text-brand-dark"
+            >
+              {notesOpen ? "Masquer" : "Afficher"}
+              <span className={`inline-block transition-transform ${notesOpen ? "rotate-180" : ""}`}>▾</span>
+            </button>
+          </div>
+          {notesOpen && (
+            <p className="mt-3 pt-3 border-t border-zinc-100 text-sm text-zinc-600 whitespace-pre-line leading-relaxed">
+              {candidat.notes}
+            </p>
+          )}
         </section>
       )}
     </div>
