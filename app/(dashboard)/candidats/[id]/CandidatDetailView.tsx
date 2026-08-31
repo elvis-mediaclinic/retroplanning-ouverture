@@ -112,7 +112,7 @@ export function CandidatDetailView({
       {candidat.notes && (
         <section className="border-t border-zinc-200 pt-6">
           <div className="flex items-center gap-2">
-            <p className={`${sectionTitleCls} mb-0`}>Notes</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-brand">Notes</p>
             <button
               type="button"
               onClick={() => setNotesOpen((v) => !v)}

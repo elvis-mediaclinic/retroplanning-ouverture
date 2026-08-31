@@ -84,7 +84,7 @@ export default async function EditCandidatPage({
           )}
         </div>
         {canEdit && !editMode && (
-          <Link href={`/candidats/${id}?edit=1`} className="btn-secondary text-sm shrink-0">
+          <Link href={`/candidats/${id}?edit=1`} className="btn-primary text-sm shrink-0">
             Modifier
           </Link>
         )}
