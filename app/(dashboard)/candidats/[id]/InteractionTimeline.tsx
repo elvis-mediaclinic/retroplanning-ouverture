@@ -211,7 +211,7 @@ export function InteractionTimeline({
           }
           const notesOpen = notesOpenIds.has(it.id);
           return (
-            <li key={it.id} className="flex items-start gap-3 rounded-md border border-zinc-200 bg-white p-3">
+            <li key={it.id} className={`flex items-start gap-3 rounded-md border border-zinc-200 bg-white ${notesOpen ? "p-4" : "p-3"}`}>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-lg leading-none">{TYPE_ICONS[it.type]}</span>
@@ -223,14 +223,15 @@ export function InteractionTimeline({
                     <button
                       type="button"
                       onClick={() => toggleNotes(it.id)}
-                      className="text-xs text-brand hover:text-brand-dark"
+                      className="flex items-center gap-1 text-xs text-brand hover:text-brand-dark"
                     >
                       {notesOpen ? "Masquer la note" : "Voir la note"}
+                      <span className={`inline-block transition-transform ${notesOpen ? "rotate-180" : ""}`}>▾</span>
                     </button>
                   )}
                 </div>
                 {it.notes && notesOpen && (
-                  <p className="mt-1 text-sm text-zinc-600 whitespace-pre-line">{it.notes}</p>
+                  <p className="mt-3 pt-3 border-t border-zinc-100 text-sm text-zinc-600 whitespace-pre-line leading-relaxed">{it.notes}</p>
                 )}
               </div>
               {!readOnly && (
