@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { DatePicker } from "@/components/DatePicker";
 
 type SelectItem = { id: string; nom: string; prenom?: string };
 
@@ -92,11 +93,10 @@ export function ProjetForm({
           <label className="text-sm font-medium text-zinc-700">
             Date cible d&apos;ouverture
           </label>
-          <input
+          <DatePicker
             name="date_cible_ouverture"
-            type="date"
             defaultValue={(defaultValues?.date_cible_ouverture as string) ?? ""}
-            className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
+            className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-left"
           />
         </div>
 

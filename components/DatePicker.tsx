@@ -24,27 +24,39 @@ function weekdayMondayFirst(y: number, m: number, d: number) {
   return (new Date(y, m, d).getDay() + 6) % 7;
 }
 
+/**
+ * Calendrier maison pour un champ date de formulaire — remplace le picker
+ * natif du navigateur (mois par mois + sélecteur d'année par blocs de 12).
+ * Uncontrolled par défaut (comme un <input type="date">, un champ caché
+ * porte la valeur), avec un onChange optionnel pour réagir aux changements
+ * (auto-submit, etc.).
+ */
 export function DatePicker({
   name,
-  value,
-  onChange,
+  defaultValue,
+  className,
   required,
+  allowClear = true,
+  onChange,
 }: {
   name: string;
-  value: string;
-  onChange: (value: string) => void;
+  defaultValue?: string | null;
+  className?: string;
   required?: boolean;
+  allowClear?: boolean;
+  onChange?: (value: string) => void;
 }) {
-  const parsed = parseISO(value) ?? (() => {
-    const today = new Date();
-    return { y: today.getFullYear(), m: today.getMonth(), d: today.getDate() };
-  })();
+  const [value, setValue] = useState(defaultValue ?? "");
 
   const [open, setOpen] = useState(false);
   const [yearPicker, setYearPicker] = useState(false);
-  const [viewY, setViewY] = useState(parsed.y);
-  const [viewM, setViewM] = useState(parsed.m);
-  const [decadeStart, setDecadeStart] = useState(Math.floor(parsed.y / 12) * 12);
+  const initial = parseISO(value ?? "") ?? (() => {
+    const today = new Date();
+    return { y: today.getFullYear(), m: today.getMonth(), d: today.getDate() };
+  })();
+  const [viewY, setViewY] = useState(initial.y);
+  const [viewM, setViewM] = useState(initial.m);
+  const [decadeStart, setDecadeStart] = useState(Math.floor(initial.y / 12) * 12);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -58,6 +70,11 @@ export function DatePicker({
     return () => document.removeEventListener("mousedown", onClickOutside);
   }, []);
 
+  function commit(v: string) {
+    setValue(v);
+    onChange?.(v);
+  }
+
   function openCalendar() {
     const p = parseISO(value);
     if (p) { setViewY(p.y); setViewM(p.m); setDecadeStart(Math.floor(p.y / 12) * 12); }
@@ -66,7 +83,7 @@ export function DatePicker({
   }
 
   function selectDay(d: number) {
-    onChange(toISO(viewY, viewM, d));
+    commit(toISO(viewY, viewM, d));
     setOpen(false);
   }
 
@@ -100,7 +117,8 @@ export function DatePicker({
       <button
         type="button"
         onClick={openCalendar}
-        className="input w-full text-sm text-left"
+        className={className ?? "input w-full text-sm text-left"}
+        style={!value ? { borderStyle: "dashed", opacity: 0.6 } : undefined}
       >
         {displayValue || <span className="text-zinc-400">jj/mm/aaaa</span>}
       </button>
@@ -163,13 +181,24 @@ export function DatePicker({
                   </button>
                 ))}
               </div>
-              <button
-                type="button"
-                onClick={() => { const t = new Date(); onChange(toISO(t.getFullYear(), t.getMonth(), t.getDate())); setOpen(false); }}
-                className="mt-2 w-full rounded-md border border-zinc-200 py-1 text-xs text-zinc-500 hover:bg-zinc-50"
-              >
-                Aujourd&apos;hui
-              </button>
+              <div className="mt-2 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => { const t = new Date(); commit(toISO(t.getFullYear(), t.getMonth(), t.getDate())); setOpen(false); }}
+                  className="flex-1 rounded-md border border-zinc-200 py-1 text-xs text-zinc-500 hover:bg-zinc-50"
+                >
+                  Aujourd&apos;hui
+                </button>
+                {allowClear && value && (
+                  <button
+                    type="button"
+                    onClick={() => { commit(""); setOpen(false); }}
+                    className="flex-1 rounded-md border border-zinc-200 py-1 text-xs text-zinc-500 hover:bg-zinc-50"
+                  >
+                    Effacer
+                  </button>
+                )}
+              </div>
             </>
           )}
         </div>

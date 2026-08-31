@@ -6,7 +6,7 @@ import type { EtapeProjet, MCUser, StatutEtape } from "@/lib/types";
 import { STATUT_ETAPE_LABELS } from "@/lib/types";
 import { STATUT_ETAPE_COLORS, formatDate } from "@/lib/utils";
 import { MultiSelect, type SelectOption } from "./MultiSelect";
-import { DateInput } from "./DateInput";
+import { DatePicker } from "@/components/DatePicker";
 
 export function EtapeRow({
   etape,
@@ -182,12 +182,12 @@ export function EtapeRow({
 
               <div className="space-y-1">
                 <label className="text-xs font-medium text-zinc-600">Date cible</label>
-                <DateInput name="date_cible" defaultValue={etape.date_cible ?? ""} onChange={scheduleSubmit} className="w-full rounded border border-zinc-300 px-2 py-1.5 text-xs" />
+                <DatePicker name="date_cible" defaultValue={etape.date_cible ?? ""} onChange={() => scheduleSubmit()} className="w-full rounded border border-zinc-300 px-2 py-1.5 text-xs text-left" />
               </div>
 
               <div className="space-y-1">
                 <label className="text-xs font-medium text-zinc-600">Date de réalisation</label>
-                <DateInput name="date_realisation" defaultValue={etape.date_realisation ?? ""} onChange={scheduleSubmit} className="w-full rounded border border-zinc-300 px-2 py-1.5 text-xs" />
+                <DatePicker name="date_realisation" defaultValue={etape.date_realisation ?? ""} onChange={() => scheduleSubmit()} className="w-full rounded border border-zinc-300 px-2 py-1.5 text-xs text-left" />
               </div>
             </div>
 

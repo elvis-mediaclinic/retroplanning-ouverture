@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import { enregistrerCession } from "../actions";
 import type { Magasin, Franchise, TypeCession } from "@/lib/types";
+import { DatePicker } from "@/components/DatePicker";
 
 const TYPE_LABELS: Record<TypeCession, string> = {
   franchise_a_franchise: "Franchisé → Franchisé",
@@ -73,7 +74,7 @@ export function CessionModal({ magasin, franchises, siretActuel }: Props) {
               {/* Date */}
               <div className="space-y-1">
                 <label className="text-sm font-medium text-zinc-700">Date de cession *</label>
-                <input name="date_cession" type="date" required className="input w-full" />
+                <DatePicker name="date_cession" required allowClear={false} className="input w-full text-left" />
               </div>
 
               {/* Cédant (franchise → franchise seulement) */}

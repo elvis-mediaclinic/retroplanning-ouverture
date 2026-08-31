@@ -4,6 +4,7 @@ import { useActionState, useState, useId, useRef } from "react";
 import { saveMagasin } from "./actions";
 import { FranchiseModal } from "./FranchiseModal";
 import { CodePostalAutocomplete } from "@/components/CodePostalAutocomplete";
+import { DatePicker } from "@/components/DatePicker";
 import type { Magasin, Franchise } from "@/lib/types";
 import { FORMAT_LABELS } from "@/lib/types";
 
@@ -138,13 +139,13 @@ export function MagasinForm({ magasin, projetId = null, projetNom, franchises: i
             {type === "franchise" && (
               <div className="space-y-1">
                 <label className="text-sm font-medium text-zinc-700">Date de signature du contrat</label>
-                <input name="date_signature_contrat" type="date" defaultValue={magasin?.date_signature_contrat ?? ""} className="input w-full" />
+                <DatePicker name="date_signature_contrat" defaultValue={magasin?.date_signature_contrat ?? ""} className="input w-full text-left" />
               </div>
             )}
 
             <div className="space-y-1">
               <label className="text-sm font-medium text-zinc-700">Date d'ouverture</label>
-              <input name="date_ouverture" type="date" defaultValue={magasin?.date_ouverture ?? ""} className="input w-full" />
+              <DatePicker name="date_ouverture" defaultValue={magasin?.date_ouverture ?? ""} className="input w-full text-left" />
             </div>
 
             <div className="sm:col-span-2 space-y-1">
@@ -216,11 +217,10 @@ export function MagasinForm({ magasin, projetId = null, projetNom, franchises: i
           {archive && (
             <div className="space-y-1">
               <label className="text-sm font-medium text-zinc-700">Date de fermeture</label>
-              <input
+              <DatePicker
                 name="date_fermeture"
-                type="date"
                 defaultValue={magasin?.date_fermeture ?? ""}
-                className="input w-48"
+                className="input w-48 text-left"
               />
             </div>
           )}

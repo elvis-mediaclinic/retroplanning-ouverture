@@ -12,7 +12,7 @@ import {
   type CandidatInteraction,
   type TypeInteraction,
 } from "@/lib/types";
-import { DatePicker } from "./DatePicker";
+import { DatePicker } from "@/components/DatePicker";
 
 const TYPE_ICONS: Record<TypeInteraction, string> = {
   appel: "📞",
@@ -79,7 +79,6 @@ function InteractionForm({
     ? updateInteraction.bind(null, interaction.id, candidatId)
     : createInteraction.bind(null, candidatId);
   const [state, formAction, pending] = useActionState<InteractionState, FormData>(action, undefined);
-  const [date, setDate] = useState(toLocalInputValue(interaction?.date_realisee));
 
   return (
     <form
@@ -100,7 +99,12 @@ function InteractionForm({
         </div>
         <div className="space-y-1">
           <label className="text-xs font-medium text-zinc-600">Date</label>
-          <DatePicker name="date_realisee" value={date} onChange={setDate} required />
+          <DatePicker
+            name="date_realisee"
+            defaultValue={toLocalInputValue(interaction?.date_realisee)}
+            required
+            allowClear={false}
+          />
         </div>
       </div>
       <div className="space-y-1">
