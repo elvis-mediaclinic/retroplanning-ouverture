@@ -63,7 +63,7 @@ export function CandidatDetailView({
   ];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex items-center justify-end">
         {canEdit && (
           <button type="button" onClick={() => setEditing(true)} className="btn-secondary text-sm">
@@ -72,61 +72,80 @@ export function CandidatDetailView({
         )}
       </div>
 
-      {personnes.map((p, i) => (
-        <dl key={p.id} className={`grid grid-cols-2 gap-4 sm:grid-cols-3 text-sm ${i > 0 ? "border-t border-zinc-100 pt-4" : ""}`}>
-          <div className="col-span-full sm:col-span-1">
-            <dt className="text-xs text-zinc-400 mb-0.5">Nom</dt>
-            <dd className="font-medium text-zinc-900">{p.prenom} {p.nom}</dd>
+      {/* Contact */}
+      <section>
+        <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400 mb-3">Contact</p>
+        <div className="space-y-3">
+          {personnes.map((p, i) => (
+            <dl key={p.id} className={`grid grid-cols-2 gap-4 sm:grid-cols-3 text-sm ${i > 0 ? "border-t border-zinc-100 pt-3" : ""}`}>
+              <div className="col-span-full sm:col-span-1">
+                <dt className="text-xs text-zinc-400 mb-0.5">Nom</dt>
+                <dd className="font-medium text-zinc-900">{p.prenom} {p.nom}</dd>
+              </div>
+              <div>
+                <dt className="text-xs text-zinc-400 mb-0.5">Email</dt>
+                <dd className="font-medium text-zinc-900">{p.email ? <CopyEmail email={p.email} /> : "—"}</dd>
+              </div>
+              <div>
+                <dt className="text-xs text-zinc-400 mb-0.5">Téléphone</dt>
+                <dd className="font-medium text-zinc-900">{p.telephone ?? "—"}</dd>
+              </div>
+            </dl>
+          ))}
+        </div>
+      </section>
+
+      {/* Candidature */}
+      <section className="border-t border-zinc-100 pt-6">
+        <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400 mb-3">Candidature</p>
+        <dl className="grid grid-cols-2 gap-4 sm:grid-cols-3 text-sm">
+          <div>
+            <dt className="text-xs text-zinc-400 mb-0.5">Statut</dt>
+            <dd>
+              <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                STATUT_CANDIDAT_COLORS[candidat.statut as keyof typeof STATUT_CANDIDAT_COLORS]
+              }`}>
+                {STATUT_CANDIDAT_LABELS[candidat.statut as keyof typeof STATUT_CANDIDAT_LABELS]}
+              </span>
+            </dd>
           </div>
           <div>
-            <dt className="text-xs text-zinc-400 mb-0.5">Email</dt>
-            <dd className="font-medium text-zinc-900">{p.email ? <CopyEmail email={p.email} /> : "—"}</dd>
+            <dt className="text-xs text-zinc-400 mb-0.5">Apport personnel</dt>
+            <dd className="font-medium text-zinc-900">
+              {candidat.apport_personnel ? `${candidat.apport_personnel.toLocaleString("fr-FR")} €` : "—"}
+            </dd>
           </div>
           <div>
-            <dt className="text-xs text-zinc-400 mb-0.5">Téléphone</dt>
-            <dd className="font-medium text-zinc-900">{p.telephone ?? "—"}</dd>
+            <dt className="text-xs text-zinc-400 mb-0.5">Zone souhaitée</dt>
+            <dd className="font-medium text-zinc-900">{candidat.zone_souhaitee ?? "—"}</dd>
           </div>
         </dl>
-      ))}
+      </section>
 
-      <dl className="grid grid-cols-2 gap-4 sm:grid-cols-3 text-sm border-t border-zinc-100 pt-4">
-        <div>
-          <dt className="text-xs text-zinc-400 mb-0.5">Statut</dt>
-          <dd>
-            <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-              STATUT_CANDIDAT_COLORS[candidat.statut as keyof typeof STATUT_CANDIDAT_COLORS]
-            }`}>
-              {STATUT_CANDIDAT_LABELS[candidat.statut as keyof typeof STATUT_CANDIDAT_LABELS]}
-            </span>
-          </dd>
-        </div>
-        <div>
-          <dt className="text-xs text-zinc-400 mb-0.5">Apport personnel</dt>
-          <dd className="font-medium text-zinc-900">
-            {candidat.apport_personnel ? `${candidat.apport_personnel.toLocaleString("fr-FR")} €` : "—"}
-          </dd>
-        </div>
-        <div>
-          <dt className="text-xs text-zinc-400 mb-0.5">Zone souhaitée</dt>
-          <dd className="font-medium text-zinc-900">{candidat.zone_souhaitee ?? "—"}</dd>
-        </div>
-        <div className="col-span-full">
-          <dt className="text-xs text-zinc-400 mb-0.5">Villes souhaitées</dt>
-          <dd className="text-zinc-700">{villesNoms.length > 0 ? villesNoms.join(", ") : "—"}</dd>
-        </div>
-        {magasinsCession.length > 0 && (
-          <div className="col-span-full">
-            <dt className="text-xs text-zinc-400 mb-0.5">Cessions souhaitées</dt>
-            <dd className="text-zinc-700">{magasinsNoms.length > 0 ? magasinsNoms.join(", ") : "—"}</dd>
+      {/* Opportunités */}
+      <section className="border-t border-zinc-100 pt-6">
+        <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400 mb-3">Opportunités souhaitées</p>
+        <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2 text-sm">
+          <div>
+            <dt className="text-xs text-zinc-400 mb-0.5">Villes</dt>
+            <dd className="text-zinc-700">{villesNoms.length > 0 ? villesNoms.join(", ") : "—"}</dd>
           </div>
-        )}
-        {candidat.notes && (
-          <div className="col-span-full">
-            <dt className="text-xs text-zinc-400 mb-0.5">Notes</dt>
-            <dd className="text-zinc-600 whitespace-pre-line">{candidat.notes}</dd>
-          </div>
-        )}
-      </dl>
+          {magasinsCession.length > 0 && (
+            <div>
+              <dt className="text-xs text-zinc-400 mb-0.5">Cessions</dt>
+              <dd className="text-zinc-700">{magasinsNoms.length > 0 ? magasinsNoms.join(", ") : "—"}</dd>
+            </div>
+          )}
+        </dl>
+      </section>
+
+      {/* Notes */}
+      {candidat.notes && (
+        <section className="border-t border-zinc-100 pt-6">
+          <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400 mb-3">Notes</p>
+          <p className="text-sm text-zinc-600 whitespace-pre-line">{candidat.notes}</p>
+        </section>
+      )}
     </div>
   );
 }
