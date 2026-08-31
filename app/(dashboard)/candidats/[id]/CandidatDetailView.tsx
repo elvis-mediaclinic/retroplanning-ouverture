@@ -55,10 +55,16 @@ export function CandidatDetailView({
     .filter((m) => selectedMagasinIds.includes(m.id))
     .map((m) => `${m.nom}${m.ville ? ` (${m.ville})` : ""}`);
 
+  // Toutes les personnes portant la candidature, au même niveau — aucune
+  // n'est prioritaire sur les autres (cf. formulaire).
+  const personnes = [
+    { id: candidat.id, prenom: candidat.prenom, nom: candidat.nom, email: candidat.email as string | null, telephone: candidat.telephone },
+    ...associes,
+  ];
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <p className="font-semibold text-zinc-900">{candidat.prenom} {candidat.nom}</p>
+      <div className="flex items-center justify-end">
         {canEdit && (
           <button type="button" onClick={() => setEditing(true)} className="btn-secondary text-sm">
             Modifier
@@ -66,15 +72,24 @@ export function CandidatDetailView({
         )}
       </div>
 
-      <dl className="grid grid-cols-2 gap-4 sm:grid-cols-3 text-sm">
-        <div>
-          <dt className="text-xs text-zinc-400 mb-0.5">Email</dt>
-          <dd className="font-medium text-zinc-900"><CopyEmail email={candidat.email} /></dd>
-        </div>
-        <div>
-          <dt className="text-xs text-zinc-400 mb-0.5">Téléphone</dt>
-          <dd className="font-medium text-zinc-900">{candidat.telephone ?? "—"}</dd>
-        </div>
+      {personnes.map((p, i) => (
+        <dl key={p.id} className={`grid grid-cols-2 gap-4 sm:grid-cols-3 text-sm ${i > 0 ? "border-t border-zinc-100 pt-4" : ""}`}>
+          <div className="col-span-full sm:col-span-1">
+            <dt className="text-xs text-zinc-400 mb-0.5">Nom</dt>
+            <dd className="font-medium text-zinc-900">{p.prenom} {p.nom}</dd>
+          </div>
+          <div>
+            <dt className="text-xs text-zinc-400 mb-0.5">Email</dt>
+            <dd className="font-medium text-zinc-900">{p.email ? <CopyEmail email={p.email} /> : "—"}</dd>
+          </div>
+          <div>
+            <dt className="text-xs text-zinc-400 mb-0.5">Téléphone</dt>
+            <dd className="font-medium text-zinc-900">{p.telephone ?? "—"}</dd>
+          </div>
+        </dl>
+      ))}
+
+      <dl className="grid grid-cols-2 gap-4 sm:grid-cols-3 text-sm border-t border-zinc-100 pt-4">
         <div>
           <dt className="text-xs text-zinc-400 mb-0.5">Statut</dt>
           <dd>
@@ -91,7 +106,7 @@ export function CandidatDetailView({
             {candidat.apport_personnel ? `${candidat.apport_personnel.toLocaleString("fr-FR")} €` : "—"}
           </dd>
         </div>
-        <div className="col-span-2 sm:col-span-1">
+        <div>
           <dt className="text-xs text-zinc-400 mb-0.5">Zone souhaitée</dt>
           <dd className="font-medium text-zinc-900">{candidat.zone_souhaitee ?? "—"}</dd>
         </div>
@@ -112,28 +127,6 @@ export function CandidatDetailView({
           </div>
         )}
       </dl>
-
-      {associes.length > 0 && (
-        <div className="space-y-3 border-t border-zinc-100 pt-4">
-          <p className="text-xs text-zinc-400">Associés</p>
-          {associes.map((a) => (
-            <dl key={a.id} className="grid grid-cols-2 gap-4 sm:grid-cols-3 text-sm">
-              <div className="col-span-full sm:col-span-1">
-                <dt className="text-xs text-zinc-400 mb-0.5">Nom</dt>
-                <dd className="font-medium text-zinc-900">{a.prenom} {a.nom}</dd>
-              </div>
-              <div>
-                <dt className="text-xs text-zinc-400 mb-0.5">Email</dt>
-                <dd className="font-medium text-zinc-900">{a.email ? <CopyEmail email={a.email} /> : "—"}</dd>
-              </div>
-              <div>
-                <dt className="text-xs text-zinc-400 mb-0.5">Téléphone</dt>
-                <dd className="font-medium text-zinc-900">{a.telephone ?? "—"}</dd>
-              </div>
-            </dl>
-          ))}
-        </div>
-      )}
     </div>
   );
 }
