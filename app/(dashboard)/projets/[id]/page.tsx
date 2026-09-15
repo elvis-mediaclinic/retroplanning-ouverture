@@ -46,7 +46,7 @@ export default async function ProjetPage({
     supabase
       .from("projets")
       .select(
-        `*, villes(nom, departement), candidats(nom, prenom, telephone, email),
+        `*, villes(nom, departement), candidats(nom, prenom, telephone, email), franchises(nom),
          profiles!projets_franchisee_id_fkey(nom, prenom, email)`
       )
       .eq("id", id)
@@ -102,6 +102,7 @@ export default async function ProjetPage({
 
   const ville = projet.villes as { nom: string; departement: string | null } | null;
   const candidat = projet.candidats as { nom: string; prenom: string; telephone: string | null; email: string } | null;
+  const franchiseExistant = projet.franchises as { nom: string } | null;
   const franchisee = projet.profiles as { nom: string; prenom: string; email: string } | null;
 
   return (
@@ -181,7 +182,7 @@ export default async function ProjetPage({
         <div className="rounded-xl bg-gradient-to-br from-[#00729e] to-[#0089bd] p-4 shadow-sm">
           <p className="text-xs text-white/70">Franchisé</p>
           <p className="mt-1 text-sm font-semibold text-white">
-            {candidat ? `${candidat.prenom} ${candidat.nom}` : franchisee ? `${franchisee.prenom} ${franchisee.nom}` : "—"}
+            {candidat ? `${candidat.prenom} ${candidat.nom}` : franchiseExistant ? franchiseExistant.nom : franchisee ? `${franchisee.prenom} ${franchisee.nom}` : "—"}
           </p>
         </div>
         <div className="rounded-xl bg-gradient-to-br from-[#00729e] to-[#0089bd] p-4 shadow-sm">

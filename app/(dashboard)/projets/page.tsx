@@ -20,7 +20,7 @@ export default async function ProjetsPage() {
   const [{ data: projets }, { data: etapes }] = await Promise.all([
     supabase
       .from("projets")
-      .select(`id, nom, type_magasin, format_magasin, statut, date_cible_ouverture, progression_pct, villes(nom), candidats(nom, prenom)`)
+      .select(`id, nom, type_magasin, format_magasin, statut, date_cible_ouverture, progression_pct, villes(nom), candidats(nom, prenom), franchises(nom)`)
       .order("created_at", { ascending: false }),
     isConsultant
       ? Promise.resolve({ data: null })
@@ -70,6 +70,9 @@ export default async function ProjetsPage() {
             const ville = Array.isArray(villeRaw) ? (villeRaw[0] as { nom: string } | undefined) ?? null : (villeRaw as { nom: string } | null);
             const candidatRaw = p.candidats as unknown;
             const candidat = Array.isArray(candidatRaw) ? (candidatRaw[0] as { nom: string; prenom: string } | undefined) ?? null : (candidatRaw as { nom: string; prenom: string } | null);
+            const franchiseRaw = p.franchises as unknown;
+            const franchise = Array.isArray(franchiseRaw) ? (franchiseRaw[0] as { nom: string } | undefined) ?? null : (franchiseRaw as { nom: string } | null);
+            const franchiseNom = candidat ? `${candidat.prenom} ${candidat.nom}` : franchise?.nom ?? null;
             const { progression, total, retard, aFaire } = statsForProjet(p.id, p.progression_pct ?? 0);
 
             const cardContent = (
@@ -84,7 +87,7 @@ export default async function ProjetsPage() {
                   {TYPE_LABELS[p.type_magasin as keyof typeof TYPE_LABELS]} · {FORMAT_LABELS[p.format_magasin as keyof typeof FORMAT_LABELS]}
                 </p>
                 <p className="mt-1.5 text-xs text-zinc-500">
-                  {ville?.nom ?? "—"} · {candidat ? `${candidat.prenom} ${candidat.nom}` : "—"} · {formatDate(p.date_cible_ouverture)}
+                  {ville?.nom ?? "—"} · {franchiseNom ?? "—"} · {formatDate(p.date_cible_ouverture)}
                 </p>
                 <div className="mt-2 flex items-center gap-3">
                   {total > 0 ? (
@@ -141,6 +144,9 @@ export default async function ProjetsPage() {
               const ville = Array.isArray(villeRaw) ? (villeRaw[0] as { nom: string } | undefined) ?? null : (villeRaw as { nom: string } | null);
               const candidatRaw = p.candidats as unknown;
               const candidat = Array.isArray(candidatRaw) ? (candidatRaw[0] as { nom: string; prenom: string } | undefined) ?? null : (candidatRaw as { nom: string; prenom: string } | null);
+              const franchiseRaw = p.franchises as unknown;
+              const franchise = Array.isArray(franchiseRaw) ? (franchiseRaw[0] as { nom: string } | undefined) ?? null : (franchiseRaw as { nom: string } | null);
+              const franchiseNom = candidat ? `${candidat.prenom} ${candidat.nom}` : franchise?.nom ?? null;
               const { progression, total, retard, aFaire } = statsForProjet(p.id, p.progression_pct ?? 0);
 
               return (
@@ -161,7 +167,7 @@ export default async function ProjetsPage() {
                     {ville?.nom ?? <span className="text-zinc-300">—</span>}
                   </td>
                   <td className="py-3 px-4 text-zinc-500">
-                    {candidat ? `${candidat.prenom} ${candidat.nom}` : <span className="text-zinc-300">—</span>}
+                    {franchiseNom ?? <span className="text-zinc-300">—</span>}
                   </td>
                   <td className="py-3 px-4">
                     <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUT_PROJET_COLORS[p.statut as keyof typeof STATUT_PROJET_COLORS]}`}>

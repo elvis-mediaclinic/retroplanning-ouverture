@@ -14,11 +14,12 @@ export default async function EditProjetPage({
   const { id } = await params;
   const supabase = await createClient();
 
-  const [{ data: projet }, { data: villes }, { data: candidats }, { data: franchisees }] =
+  const [{ data: projet }, { data: villes }, { data: candidats }, { data: franchises }, { data: franchisees }] =
     await Promise.all([
       supabase.from("projets").select("*").eq("id", id).single(),
       supabase.from("villes").select("id, nom").order("nom"),
       supabase.from("candidats").select("id, nom, prenom").order("nom"),
+      supabase.from("franchises").select("id, nom").order("nom"),
       supabase.from("profiles").select("id, nom, prenom").eq("role", "franchise").order("nom"),
     ]);
 
@@ -47,6 +48,7 @@ export default async function EditProjetPage({
           defaultValues={projet}
           villes={villes ?? []}
           candidats={candidats ?? []}
+          franchises={franchises ?? []}
           franchisees={franchisees ?? []}
         />
       </div>

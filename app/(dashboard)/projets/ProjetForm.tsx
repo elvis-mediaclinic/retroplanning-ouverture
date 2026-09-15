@@ -13,6 +13,7 @@ type Props = {
   defaultValues?: Record<string, string | number | null | undefined>;
   villes: SelectItem[];
   candidats: SelectItem[];
+  franchises: SelectItem[];
   franchisees: SelectItem[];
   submitLabel?: string;
 };
@@ -22,6 +23,7 @@ export function ProjetForm({
   defaultValues,
   villes,
   candidats,
+  franchises,
   franchisees,
   submitLabel = "Enregistrer",
 }: Props) {
@@ -130,6 +132,27 @@ export function ProjetForm({
               </option>
             ))}
           </select>
+        </div>
+
+        <div className="space-y-1">
+          <label className="text-sm font-medium text-zinc-700">
+            Franchisé existant (nouveau magasin)
+          </label>
+          <select
+            name="franchise_id"
+            defaultValue={(defaultValues?.franchise_id as string) ?? ""}
+            className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
+          >
+            <option value="">— Aucun —</option>
+            {franchises.map((f) => (
+              <option key={f.id} value={f.id}>
+                {f.nom}
+              </option>
+            ))}
+          </select>
+          <p className="text-xs text-zinc-400">
+            À renseigner plutôt qu&apos;un candidat quand un franchisé déjà en place ouvre un magasin supplémentaire.
+          </p>
         </div>
 
         <div className="space-y-1">
