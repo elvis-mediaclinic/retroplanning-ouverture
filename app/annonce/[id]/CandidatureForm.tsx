@@ -17,6 +17,10 @@ export function CandidatureForm({
   const action = submitCandidature.bind(null, annonceId, villeId, magasinId ?? "", consultantId ?? "");
   const [state, formAction, pending] = useActionState(action, undefined);
 
+  const fieldCls =
+    "w-full rounded-lg border border-[#D0D5DD] px-4 py-3 text-sm text-[#1D1D1D] shadow-[0_1px_2px_rgba(16,24,40,0.05)] focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand";
+  const labelCls = "text-sm font-medium text-[#344054]";
+
   if (state?.success) {
     return (
       <div className="rounded-xl border border-green-200 bg-green-50 p-6 text-center">
@@ -30,65 +34,44 @@ export function CandidatureForm({
   }
 
   return (
-    <form action={formAction} className="space-y-4">
+    <form action={formAction} className="space-y-6">
       {/* Ligne 1 : Prénom · Nom · Email · Téléphone */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="space-y-1">
-          <label className="text-sm font-medium text-zinc-700">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="space-y-2">
+          <label className={labelCls}>
             Prénom <span className="text-red-500">*</span>
           </label>
-          <input
-            name="prenom"
-            required
-            autoComplete="given-name"
-            className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
-          />
+          <input name="prenom" required autoComplete="given-name" className={fieldCls} />
         </div>
-        <div className="space-y-1">
-          <label className="text-sm font-medium text-zinc-700">
+        <div className="space-y-2">
+          <label className={labelCls}>
             Nom <span className="text-red-500">*</span>
           </label>
-          <input
-            name="nom"
-            required
-            autoComplete="family-name"
-            className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
-          />
+          <input name="nom" required autoComplete="family-name" className={fieldCls} />
         </div>
-        <div className="space-y-1">
-          <label className="text-sm font-medium text-zinc-700">
+        <div className="space-y-2">
+          <label className={labelCls}>
             Email <span className="text-red-500">*</span>
           </label>
-          <input
-            name="email"
-            type="email"
-            required
-            autoComplete="email"
-            className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
-          />
+          <input name="email" type="email" required autoComplete="email" className={fieldCls} />
         </div>
-        <div className="space-y-1">
-          <label className="text-sm font-medium text-zinc-700">Téléphone</label>
-          <input
-            name="telephone"
-            type="tel"
-            autoComplete="tel"
-            className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
-          />
+        <div className="space-y-2">
+          <label className={labelCls}>Téléphone</label>
+          <input name="telephone" type="tel" autoComplete="tel" className={fieldCls} />
         </div>
       </div>
 
       {/* Ligne 2 : Message */}
-      <div className="space-y-1">
-        <label className="text-sm font-medium text-zinc-700">
+      <div className="space-y-2">
+        <label className={labelCls}>
           Message
           <span className="ml-1 text-xs text-zinc-400">optionnel</span>
         </label>
         <textarea
           name="message"
-          rows={3}
+          rows={4}
           placeholder="Parlez-nous de votre parcours, vos motivations…"
-          className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
+          className={fieldCls}
         />
       </div>
 
@@ -96,7 +79,11 @@ export function CandidatureForm({
         <p className="text-sm text-red-600" role="alert">{state.error}</p>
       )}
 
-      <button type="submit" disabled={pending} className="btn-primary">
+      <button
+        type="submit"
+        disabled={pending}
+        className="w-full rounded-full bg-brand px-8 py-4 text-lg font-bold text-white shadow-[0_1px_2px_rgba(16,24,40,0.05)] hover:bg-brand-dark disabled:opacity-50 transition-colors"
+      >
         {pending ? "Envoi…" : "Envoyer ma candidature"}
       </button>
     </form>

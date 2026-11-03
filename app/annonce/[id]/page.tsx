@@ -112,7 +112,7 @@ export default async function AnnoncePage({
 
       <PublicNavbar active="opportunites" />
 
-      <main className="flex-1 mx-auto w-full max-w-[1600px] px-6 pt-3 pb-8 space-y-6">
+      <main className="flex-1 mx-auto w-full max-w-[1600px] px-6 pt-3 pb-8 space-y-6" style={{ fontFamily: "var(--font-poppins)" }}>
 
         {!annonce.actif && (
           <div className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
@@ -131,7 +131,7 @@ export default async function AnnoncePage({
               className="h-[100px] w-auto object-contain"
             />
           </div>
-          <p className="text-xl sm:text-2xl font-semibold uppercase tracking-widest text-[#0089bd]">
+          <p className="text-xl sm:text-2xl font-semibold uppercase tracking-widest text-brand" style={{ fontFamily: "var(--font-poppins)" }}>
             {isCession
               ? `Cession de magasin${magasin?.nom ? ` — ${magasin.nom}` : ""}`
               : `Opportunité de franchise${ville?.nom ? ` — ${ville.nom}` : ""}`}
@@ -146,15 +146,18 @@ export default async function AnnoncePage({
         <hr className="border-t border-zinc-200 my-12" />
 
         {/* Hero — titre + accroche */}
-        <div className={`${!annonce.hero_carte ? "" : annonce.hero_bleu
-          ? "rounded-2xl bg-gradient-to-br from-[#00729e] to-[#0089bd] shadow-sm px-6 py-8 sm:px-10 sm:py-10"
-          : `${cardCls} py-8 sm:py-10`
-        }`}>
-          <h1 className={`text-3xl sm:text-4xl font-bold leading-tight ${annonce.hero_titre_centre ? "text-center" : ""} ${annonce.hero_carte && annonce.hero_bleu ? "text-white" : "text-[#0089bd]"}`}>
+        <div
+          style={{ fontFamily: "var(--font-poppins)" }}
+          className={`${!annonce.hero_carte ? "" : annonce.hero_bleu
+            ? "rounded-[25px] bg-brand shadow-[2px_2px_5px_rgba(0,0,0,0.05)] px-6 py-8 sm:px-10 sm:py-12"
+            : `${cardCls} py-8 sm:py-12`
+          }`}
+        >
+          <h1 className={`text-4xl sm:text-5xl font-bold leading-[1.1] tracking-tight ${annonce.hero_titre_centre ? "text-center" : ""} ${annonce.hero_carte && annonce.hero_bleu ? "text-white" : "text-[#1D1D1D]"}`}>
             {annonce.titre}
           </h1>
           {annonce.accroche && (
-            <p className={`mt-4 text-lg sm:text-xl leading-relaxed ${annonce.hero_accroche_centre ? "text-center" : ""} ${annonce.hero_carte && annonce.hero_bleu ? "text-white/80" : "text-zinc-500"}`}>
+            <p className={`mt-4 text-lg sm:text-xl leading-relaxed ${annonce.hero_accroche_centre ? "text-center" : ""} ${annonce.hero_carte && annonce.hero_bleu ? "text-white/85" : "text-[#5C5C6F]"}`}>
               <BoldText text={annonce.accroche} />
             </p>
           )}
@@ -235,8 +238,8 @@ export default async function AnnoncePage({
 
         {/* Formulaire */}
         <div className={`${cardCls}`}>
-          <h2 className="text-xl font-semibold text-zinc-900 mb-1">Je candidate</h2>
-          <p className="text-sm text-zinc-500 mb-6">
+          <h2 className="text-2xl font-bold text-[#1D1D1D] mb-1">Je candidate</h2>
+          <p className="text-sm text-[#5C5C6F] mb-6">
             Remplissez ce formulaire et l&apos;équipe Mediaclinic vous recontactera rapidement.
           </p>
           <CandidatureForm
