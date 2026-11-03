@@ -60,7 +60,7 @@ function InteretSpontaneModal() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="rounded-md bg-white px-4 py-2 text-sm font-medium text-[#0089bd] hover:bg-white/90 transition-colors shrink-0"
+        className="rounded-full bg-brand px-5 py-2.5 text-sm font-bold text-white hover:bg-brand-dark transition-colors shrink-0 whitespace-nowrap"
       >
         Ma ville n&apos;est pas dans la liste →
       </button>
@@ -168,21 +168,27 @@ export function OpportunitesExplorer({ annonces, consultantId }: { annonces: Ann
   }, [annonces, search]);
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+    <div className="space-y-6" style={{ fontFamily: "var(--font-poppins)" }}>
+      <div className="mx-auto flex w-full max-w-3xl flex-col sm:flex-row items-stretch sm:items-center gap-3 rounded-full bg-white px-3 py-2 sm:py-2.5 shadow-[0px_1px_3px_rgba(0,0,0,0.1)]">
         {/* Leurres pour Safari qui détecte les champs texte comme des logins */}
         <input type="text" name="fake_user" style={{ display: "none" }} aria-hidden="true" readOnly tabIndex={-1} />
         <input type="password" name="fake_pass" style={{ display: "none" }} aria-hidden="true" readOnly tabIndex={-1} />
-        <input
-          type="text"
-          placeholder="Rechercher une ville, un département…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          autoComplete="off"
-          data-form-type="other"
-          data-lpignore="true"
-          className="input flex-1"
-        />
+        <div className="flex flex-1 items-center gap-2 px-3">
+          <svg width="18" height="18" viewBox="0 0 20 20" fill="none" className="shrink-0 text-[#AAAABE]">
+            <circle cx="9" cy="9" r="6" stroke="currentColor" strokeWidth="1.5" />
+            <path d="M18 18l-4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+          <input
+            type="text"
+            placeholder="Rechercher une ville, un département…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            autoComplete="off"
+            data-form-type="other"
+            data-lpignore="true"
+            className="w-full border-0 bg-transparent text-sm text-[#1D1D1D] placeholder:text-[#AAAABE] focus:outline-none"
+          />
+        </div>
         <InteretSpontaneModal />
       </div>
 

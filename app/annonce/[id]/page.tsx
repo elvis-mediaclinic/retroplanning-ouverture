@@ -1,5 +1,4 @@
 import { notFound } from "next/navigation";
-import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { PublicNavbar } from "@/components/PublicNavbar";
@@ -94,9 +93,9 @@ export default async function AnnoncePage({
   }
 
   return (
-    <div className="min-h-dvh flex flex-col bg-zinc-100">
+    <div className="min-h-dvh flex flex-col bg-white">
       <style>{`
-        body { background: #0089bd; }
+        body { background: #FFFFFF; }
         [data-text-color="gray"]   { color: #9b9a97 !important; }
         [data-text-color="brown"]  { color: #64473a !important; }
         [data-text-color="red"]    { color: #e03e3e !important; }
@@ -112,7 +111,7 @@ export default async function AnnoncePage({
 
       <PublicNavbar active="opportunites" />
 
-      <main className="flex-1 mx-auto w-full max-w-[1600px] px-6 pt-3 pb-8 space-y-6" style={{ fontFamily: "var(--font-poppins)" }}>
+      <main className="flex-1 mx-auto w-full max-w-[1600px] px-6 pt-10 pb-8 space-y-6" style={{ fontFamily: "var(--font-poppins)" }}>
 
         {!annonce.actif && (
           <div className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
@@ -120,50 +119,31 @@ export default async function AnnoncePage({
           </div>
         )}
 
-        {/* Header automatique — logo + fil d'ariane "Opportunité de franchise — ville" */}
-        <div className="text-center mt-10">
-          <div className="flex justify-center mb-6">
-            <Image
-              src="/Logo-MediaClinic-Noir.png"
-              alt="Mediaclinic"
-              width={400}
-              height={100}
-              className="h-[100px] w-auto object-contain"
-            />
-          </div>
-          <p className="text-xl sm:text-2xl font-semibold uppercase tracking-widest text-brand" style={{ fontFamily: "var(--font-poppins)" }}>
-            {isCession
-              ? `Cession de magasin${magasin?.nom ? ` — ${magasin.nom}` : ""}`
-              : `Opportunité de franchise${ville?.nom ? ` — ${ville.nom}` : ""}`}
-          </p>
-          {isCession && (
-            <span className="mt-3 inline-block rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-amber-700">
-              Cession
-            </span>
-          )}
-        </div>
-
-        <hr className="border-t border-zinc-200 my-12" />
-
         {/* Hero — titre centré + bannière photo */}
-        <div style={{ fontFamily: "var(--font-poppins)" }} className="space-y-8">
+        <div className="space-y-8 pt-6">
+          {isCession && (
+            <div className="flex justify-center">
+              <span className="inline-block rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-amber-700">
+                Cession{magasin?.nom ? ` — ${magasin.nom}` : ""}
+              </span>
+            </div>
+          )}
           <h1 className="text-4xl sm:text-6xl font-bold leading-[1.1] tracking-tight text-center text-[#1D1D1D] max-w-4xl mx-auto">
             {annonce.titre}
           </h1>
 
-          <div className="relative mx-auto max-w-5xl aspect-[21/9] overflow-hidden rounded-[25px] bg-brand shadow-[2px_2px_5px_rgba(0,0,0,0.08)]">
+          <div className="relative mx-auto max-w-5xl aspect-[16/9] sm:aspect-[21/9] overflow-hidden rounded-[25px] bg-brand shadow-[2px_2px_5px_rgba(0,0,0,0.08)]">
             {annonce.image_url && (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={annonce.image_url} alt="" className="h-full w-full object-cover" />
             )}
-            {annonce.accroche && (
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent px-6 py-6 sm:px-10 sm:py-8">
-                <p className="text-base sm:text-lg leading-relaxed text-white">
-                  <BoldText text={annonce.accroche} />
-                </p>
-              </div>
-            )}
           </div>
+
+          {annonce.accroche && (
+            <p className="max-w-3xl mx-auto text-center text-lg sm:text-xl leading-relaxed text-[#5C5C6F]">
+              <BoldText text={annonce.accroche} />
+            </p>
+          )}
         </div>
 
         {/* Sections de contenu de l'annonce */}
@@ -227,7 +207,7 @@ export default async function AnnoncePage({
           <details className="group">
             <summary className="flex cursor-pointer list-none items-center gap-3 px-1 [&::-webkit-details-marker]:hidden">
               <div className="h-px flex-1 bg-zinc-200" />
-              <span className="inline-flex items-center gap-2 rounded-full border border-zinc-300 px-5 py-2 text-base font-medium text-zinc-500 hover:border-[#0089bd] hover:text-[#0089bd] transition-colors select-none whitespace-nowrap">
+              <span className="inline-flex items-center gap-2 rounded-full border border-[#1D1D1D] px-5 py-2.5 text-sm font-bold text-[#1D1D1D] hover:bg-[#1D1D1D] hover:text-white transition-colors select-none whitespace-nowrap">
                 <span className="group-open:hidden">Découvrir le concept Mediaclinic →</span>
                 <span className="hidden group-open:inline">Masquer le concept Mediaclinic ↑</span>
               </span>
@@ -240,17 +220,21 @@ export default async function AnnoncePage({
         )}
 
         {/* Formulaire */}
-        <div className={`${cardCls}`}>
-          <h2 className="text-2xl font-bold text-[#1D1D1D] mb-1">Je candidate</h2>
-          <p className="text-sm text-[#5C5C6F] mb-6">
-            Remplissez ce formulaire et l&apos;équipe Mediaclinic vous recontactera rapidement.
-          </p>
-          <CandidatureForm
-            annonceId={annonce.id}
-            villeId={ville?.id ?? ""}
-            magasinId={annonce.magasin_id ?? ""}
-            consultantId={consultantId ?? ""}
-          />
+        <div id="candidater" className="pt-10 space-y-8">
+          <div className="text-center space-y-2">
+            <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-[#1D1D1D]">Candidater</h2>
+            <p className="text-[#5C5C6F]">
+              Remplissez ce formulaire et l&apos;équipe Mediaclinic vous recontactera rapidement.
+            </p>
+          </div>
+          <div className="rounded-[25px] bg-white shadow-[1px_1px_4px_1px_rgba(0,0,0,0.2)] px-5 py-8 sm:px-10 sm:py-10">
+            <CandidatureForm
+              annonceId={annonce.id}
+              villeId={ville?.id ?? ""}
+              magasinId={annonce.magasin_id ?? ""}
+              consultantId={consultantId ?? ""}
+            />
+          </div>
         </div>
       </main>
 

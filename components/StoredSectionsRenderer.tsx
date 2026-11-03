@@ -159,7 +159,10 @@ export const contentCls =
   "[&_h2]:text-xl [&_h2]:font-semibold [&_h2]:text-brand [&_h2]:mb-3 " +
   "[&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-[#1D1D1D] [&_h3]:mb-2 " +
   "[&_p]:mb-3 " +
-  "[&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1.5 [&_ul]:mb-3 " +
+  "[&_ul]:list-none [&_ul]:pl-0 [&_ul]:space-y-2 [&_ul]:mb-3 " +
+  "[&_ul>li]:relative [&_ul>li]:pl-6 " +
+  "[&_ul>li]:before:content-[''] [&_ul>li]:before:absolute [&_ul>li]:before:left-0 [&_ul>li]:before:top-[0.55em] " +
+  "[&_ul>li]:before:w-2.5 [&_ul>li]:before:h-2.5 [&_ul>li]:before:rounded-full [&_ul>li]:before:bg-brand " +
   "[&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:space-y-1.5 [&_ol]:mb-3 " +
   "[&_blockquote]:border-l-4 [&_blockquote]:border-brand/40 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-[#5C5C6F] [&_blockquote]:my-4 " +
   "[&_a]:text-brand [&_a]:underline " +
@@ -170,7 +173,10 @@ export const contentClsDark =
   "[&_h2]:text-xl [&_h2]:font-semibold [&_h2]:text-white [&_h2]:mb-3 " +
   "[&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-white [&_h3]:mb-2 " +
   "[&_p]:mb-3 " +
-  "[&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1.5 [&_ul]:mb-3 " +
+  "[&_ul]:list-none [&_ul]:pl-0 [&_ul]:space-y-2 [&_ul]:mb-3 " +
+  "[&_ul>li]:relative [&_ul>li]:pl-6 " +
+  "[&_ul>li]:before:content-[''] [&_ul>li]:before:absolute [&_ul>li]:before:left-0 [&_ul>li]:before:top-[0.55em] " +
+  "[&_ul>li]:before:w-2.5 [&_ul>li]:before:h-2.5 [&_ul>li]:before:rounded-full [&_ul>li]:before:bg-white " +
   "[&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:space-y-1.5 [&_ol]:mb-3 " +
   "[&_blockquote]:border-l-4 [&_blockquote]:border-white/40 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-white/70 [&_blockquote]:my-4 " +
   "[&_a]:text-white [&_a]:underline " +
@@ -178,7 +184,7 @@ export const contentClsDark =
 
 export const bleuCardCls = "rounded-[25px] bg-brand shadow-[2px_2px_5px_rgba(0,0,0,0.05)] px-5 py-5 sm:px-8 sm:py-8";
 
-export const colCardCls = "rounded-[25px] bg-white border border-[#E3E8EF] border-l-2 border-l-brand shadow-[2px_2px_5px_rgba(0,0,0,0.05)] px-5 py-5 sm:px-8 sm:py-8";
+export const colCardCls = "rounded-[25px] bg-[#F6F6F6] shadow-[2px_2px_5px_rgba(0,0,0,0.05)] px-5 py-5 sm:px-8 sm:py-8";
 
 // ── Types de sections stockées ───────────────────────────────────────────────
 
@@ -275,31 +281,28 @@ export function renderStoredSections(list: StoredSection[], keyPrefix: string) {
     if (row.kind === "full" && row.s.type === "stats") {
       const s = row.s as Extract<StoredSection, { type: "stats" }>;
       const cols = s.colonnes ?? 3;
-      const centré = s.alignement === "centre";
-      const bleu = s.bleu ?? false;
+      // Rendu toujours sobre et centré façon maquette : chiffre en grand, label en dessous,
+      // colonnes séparées par un simple trait vertical — le fond bleu n'est plus utilisé ici.
       return (
-        <div key={`${keyPrefix}-${ri}`} className={bleu ? bleuCardCls : "py-2"}>
+        <div key={`${keyPrefix}-${ri}`} className="py-2">
           {s.titre && (
-            <h2 className={`flex items-center gap-2 text-2xl font-bold mb-6 ${bleu ? "text-white" : "text-brand"} ${centré ? "justify-center text-center" : ""}`}>
+            <h2 className="flex items-center justify-center gap-2 text-2xl font-bold mb-6 text-brand text-center">
               <SectionIcon svg={s.icone} />
               {s.titre}
             </h2>
           )}
-          <div className={`${STATS_GRID[cols] ?? STATS_GRID[3]} gap-y-4 ${s.separateurs ? "" : "gap-x-4"}`}>
-            {s.stats.map((stat, idx) => {
-              // Sur mobile (1 colonne) : séparateur horizontal au-dessus de chaque
-              // élément sauf le premier. À partir de sm (grille en colonnes) :
-              // séparateur vertical entre colonnes, pas de trait horizontal.
-              const borderCls = s.separateurs
-                ? `${idx > 0 ? "border-t pt-4 sm:border-t-0 sm:pt-0" : ""} ${idx % cols !== 0 ? "sm:border-l" : ""} ${bleu ? "border-white/20" : "border-zinc-200"}`
-                : "";
-              return (
-                <div key={stat.id} className={`flex flex-col gap-1 px-4 sm:px-6 ${centré ? "items-center text-center" : ""} ${borderCls}`}>
-                  <span className={`text-base leading-snug ${bleu ? "text-white/80" : "text-zinc-600"}`}>{stat.label}</span>
-                  <span className={`text-5xl font-extrabold leading-none ${bleu ? "text-white" : "text-brand"}`}>{stat.valeur}</span>
-                </div>
-              );
-            })}
+          <div className={`${STATS_GRID[cols] ?? STATS_GRID[3]} gap-y-6`}>
+            {s.stats.map((stat, idx) => (
+              <div
+                key={stat.id}
+                className={`flex flex-col items-center text-center gap-2 px-6 ${
+                  idx % cols !== 0 ? "sm:border-l sm:border-[#A4A4A4]/50" : ""
+                } ${idx > 0 ? "border-t pt-6 sm:border-t-0 sm:pt-0 border-zinc-200" : ""}`}
+              >
+                <span className="text-4xl sm:text-5xl font-extrabold leading-none text-brand">{stat.valeur}</span>
+                <span className="text-base sm:text-lg leading-snug text-[#5C5C6F]">{stat.label}</span>
+              </div>
+            ))}
           </div>
         </div>
       );

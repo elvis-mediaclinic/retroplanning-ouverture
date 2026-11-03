@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { PublicNavbar } from "@/components/PublicNavbar";
@@ -72,34 +71,18 @@ export default async function AnnoncesPage() {
   });
 
   return (
-    <div className="min-h-dvh flex flex-col bg-zinc-100">
-      <style>{`
-        body { background: #0089bd; }
-      `}</style>
-
+    <div className="min-h-dvh flex flex-col bg-white">
       <PublicNavbar active="opportunites" />
 
-      <main className="flex-1 mx-auto w-full max-w-[1600px] px-6 pt-3 pb-8 space-y-6">
-        {/* Header automatique — logo + "Opportunités de franchise" */}
-        <div className="text-center mt-10">
-          <div className="flex justify-center mb-6">
-            <Image
-              src="/Logo-MediaClinic-Noir.png"
-              alt="Mediaclinic"
-              width={400}
-              height={100}
-              className="h-[100px] w-auto object-contain"
-            />
-          </div>
-          <p className="text-xl sm:text-2xl font-semibold uppercase tracking-widest text-[#0089bd]">
+      <main
+        className="flex-1 mx-auto w-full max-w-[1600px] px-6 pt-16 pb-8 space-y-10"
+        style={{ fontFamily: "var(--font-poppins)" }}
+      >
+        <div className="text-center space-y-4 max-w-3xl mx-auto">
+          <h1 className="text-4xl sm:text-6xl font-bold leading-[1.1] tracking-tight text-[#1D1D1D]">
             Opportunités de franchise
-          </p>
-        </div>
-
-        <hr className="border-t border-zinc-200 my-12" />
-
-        <div className="text-center">
-          <p className="text-lg text-zinc-500 max-w-2xl mx-auto">
+          </h1>
+          <p className="text-lg text-[#5C5C6F]">
             Découvrez les villes où Mediaclinic recherche un franchisé pour ouvrir un magasin spécialisé dans le multimédia reconditionné.
           </p>
         </div>
