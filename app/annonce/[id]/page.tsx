@@ -111,7 +111,7 @@ export default async function AnnoncePage({
 
       <PublicNavbar active="opportunites" />
 
-      <main className="flex-1 mx-auto w-full max-w-[1320px] px-6 pt-10 pb-8 space-y-6" style={{ fontFamily: "var(--font-poppins)" }}>
+      <main className="flex-1 mx-auto w-full max-w-[1320px] px-6 pt-10 pb-8 space-y-16 sm:space-y-20" style={{ fontFamily: "var(--font-poppins)" }}>
 
         {!annonce.actif && (
           <div className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
@@ -120,7 +120,7 @@ export default async function AnnoncePage({
         )}
 
         {/* Hero — titre centré + bannière photo */}
-        <div className="space-y-8 pt-6">
+        <div className="space-y-8">
           {isCession && (
             <div className="flex justify-center">
               <span className="inline-block rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-amber-700">
@@ -226,7 +226,7 @@ export default async function AnnoncePage({
         )}
 
         {/* Formulaire */}
-        <div id="candidater" className="pt-10 space-y-8">
+        <div id="candidater" className="space-y-8">
           <div className="text-center space-y-2">
             <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-[#1D1D1D]">Candidater</h2>
             <p className="text-[#5C5C6F]">
