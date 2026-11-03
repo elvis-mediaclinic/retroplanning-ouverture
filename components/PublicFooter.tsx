@@ -13,7 +13,7 @@ export function PublicFooter() {
       className="mt-16 rounded-t-[80px] bg-[#1D1D1D] px-6 sm:px-16 py-12 sm:py-16"
       style={{ fontFamily: "var(--font-poppins)" }}
     >
-      <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-10">
+      <div className="mx-auto flex w-full max-w-[1320px] flex-col gap-10">
         <div className="flex flex-col items-center gap-10 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex flex-col items-center sm:items-start gap-4 max-w-xs text-center sm:text-left">
             <Image

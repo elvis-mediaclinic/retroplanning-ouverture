@@ -12,7 +12,7 @@ type ActiveKey = (typeof NAV)[number]["key"];
 export function PublicNavbar({ active }: { active?: ActiveKey }) {
   return (
     <div className="sticky top-8 z-40 px-4 sm:px-6" style={{ fontFamily: "var(--font-poppins)" }}>
-      <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 rounded-full bg-[#FCFCFC] px-4 py-2.5 sm:px-6 shadow-[1px_1px_4px_rgba(0,0,0,0.25)]">
+      <div className="mx-auto flex w-full max-w-[1320px] items-center justify-between gap-4 rounded-full bg-[#FCFCFC] px-4 py-2.5 sm:px-6 shadow-[1px_1px_4px_rgba(0,0,0,0.25)]">
         <Link href="/opportunites" className="shrink-0">
           <Image
             src="/Logo-MediaClinic-Noir.png"

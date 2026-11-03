@@ -75,7 +75,7 @@ export default async function AnnoncesPage() {
       <PublicNavbar active="opportunites" />
 
       <main
-        className="flex-1 mx-auto w-full max-w-[1600px] px-6 pt-16 pb-8 space-y-10"
+        className="flex-1 mx-auto w-full max-w-[1320px] px-6 pt-16 pb-8 space-y-10"
         style={{ fontFamily: "var(--font-poppins)" }}
       >
         <div className="text-center space-y-4 max-w-3xl mx-auto">
