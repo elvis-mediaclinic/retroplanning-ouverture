@@ -400,9 +400,10 @@ export function renderStoredSections(
       );
     }
 
-    if (row.kind === "group" && row.cols === 2) {
-      // Paire de sections (ex. "Le marché" / "Le local") : rendu interactif
-      // 2/3 - 1/3, on bascule la carte réduite en grand au clic.
+    if (row.kind === "group" && (row.cols === 2 || row.cols === 3)) {
+      // Groupe de 2 ou 3 sections (ex. "Le marché" / "Le local" [/ un 3e critère]) :
+      // rendu interactif, la carte active prend la plus grande part de la largeur,
+      // les autres se replient et s'échangent au clic.
       const panels = row.pair.map((s) => {
         const { titre, bodyHtml } = renderTextSection(s as Extract<StoredSection, { type?: "texte" }>);
         return { id: s.id, titre: titre || "", bodyHtml, icone: (s as { icone?: string }).icone };

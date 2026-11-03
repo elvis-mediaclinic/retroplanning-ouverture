@@ -8,11 +8,12 @@ export type SplitPanel = {
   titre: string;
   bodyHtml: string;
   icone?: string;
-  bleu?: boolean;
 };
 
-// Deux cartes côte à côte : celle active prend 2/3 de la largeur et affiche son
-// contenu complet, l'autre se replie à 1/3 (titre seul, cliquable pour l'ouvrir).
+// 2 ou 3 cartes côte à côte : la carte active occupe la plus grande part de la
+// largeur et affiche son contenu complet (fond gris clair). Les autres se
+// replient (fond bleu clair texturé, titre + bouton "voir plus"), toute la
+// carte étant cliquable pour l'ouvrir à son tour.
 export function ExpandableSplitGroup({ panels, contentCls }: { panels: SplitPanel[]; contentCls: string }) {
   const [activeId, setActiveId] = useState(panels[0]?.id);
 
@@ -20,32 +21,56 @@ export function ExpandableSplitGroup({ panels, contentCls }: { panels: SplitPane
     <div className="flex flex-col sm:flex-row gap-4 items-stretch">
       {panels.map((p) => {
         const active = p.id === activeId;
+
+        if (active) {
+          return (
+            <div
+              key={p.id}
+              className="rounded-[25px] bg-[#F6F6F6] shadow-[2px_2px_5px_rgba(0,0,0,0.05)] px-5 py-5 sm:px-8 sm:py-8 transition-all duration-300 sm:flex-[2]"
+            >
+              <h2 className="flex items-center gap-2 text-2xl font-bold mb-4 text-brand">
+                {p.icone && (
+                  <span
+                    className="inline-flex shrink-0 w-6 h-6 [&_svg]:w-full [&_svg]:h-full"
+                    dangerouslySetInnerHTML={{ __html: svgUseCurrentColor(p.icone) }}
+                  />
+                )}
+                {p.titre}
+              </h2>
+              <div className={contentCls} dangerouslySetInnerHTML={{ __html: p.bodyHtml }} />
+            </div>
+          );
+        }
+
         return (
           <div
             key={p.id}
-            onClick={() => !active && setActiveId(p.id)}
-            role={active ? undefined : "button"}
-            tabIndex={active ? undefined : 0}
-            onKeyDown={(e) => { if (!active && e.key === "Enter") setActiveId(p.id); }}
-            className={`rounded-[25px] bg-[#F6F6F6] shadow-[2px_2px_5px_rgba(0,0,0,0.05)] px-5 py-5 sm:px-8 sm:py-8 transition-all duration-300 ${
-              active ? "sm:flex-[2]" : "sm:flex-[1] cursor-pointer hover:bg-[#EFEFEF]"
-            }`}
+            onClick={() => setActiveId(p.id)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => { if (e.key === "Enter") setActiveId(p.id); }}
+            className="relative overflow-hidden flex flex-col justify-between gap-6 min-h-[220px] rounded-[25px] bg-[#CCF1FF] shadow-[2px_2px_5px_rgba(0,0,0,0.05)] px-5 py-5 sm:px-8 sm:py-8 transition-all duration-300 sm:flex-1 cursor-pointer hover:brightness-[0.97]"
           >
-            <h2
-              className={`flex items-center gap-2 text-2xl font-bold ${active ? "mb-4" : "mb-0"} text-brand`}
-            >
+            {/* Texture décorative : cercles translucides, façon maquette */}
+            <span className="pointer-events-none absolute -left-12 bottom-4 h-40 w-40 rounded-full bg-white/40" />
+            <span className="pointer-events-none absolute left-14 -bottom-4 h-24 w-24 rounded-full bg-white/40" />
+
+            <h2 className="relative flex items-center gap-2 text-xl sm:text-2xl font-bold text-[#1D1D1D]">
               {p.icone && (
                 <span
-                  className="inline-flex shrink-0 w-6 h-6 [&_svg]:w-full [&_svg]:h-full"
+                  className="inline-flex shrink-0 w-5 h-5 [&_svg]:w-full [&_svg]:h-full"
                   dangerouslySetInnerHTML={{ __html: svgUseCurrentColor(p.icone) }}
                 />
               )}
               {p.titre}
-              {!active && (
-                <span className="ml-auto text-xl text-[#5C5C6F] leading-none">+</span>
-              )}
             </h2>
-            {active && <div className={contentCls} dangerouslySetInnerHTML={{ __html: p.bodyHtml }} />}
+
+            <span className="relative inline-flex w-fit items-center gap-2 rounded-xl bg-brand px-4 py-2.5 text-sm font-medium text-white">
+              voir plus
+              <svg width="14" height="14" viewBox="0 0 20 20" fill="none" className="shrink-0">
+                <path d="M5 15L15 5M15 5H7M15 5V13" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </span>
           </div>
         );
       })}
