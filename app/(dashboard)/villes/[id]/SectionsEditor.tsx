@@ -366,6 +366,7 @@ function OngletsEditor({ section, onUpdate }: { section: Extract<Section, { type
           </div>
 
           <BlockEditor
+            key={active.id}
             defaultJson={active.contenu_json || null}
             onJsonChange={(json) => updateOnglet(active.id, { contenu_json: json })}
           />
