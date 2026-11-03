@@ -28,7 +28,7 @@ export function ExpandableSplitGroup({ panels, contentCls }: { panels: SplitPane
               key={p.id}
               className="rounded-[25px] bg-[#F6F6F6] shadow-[2px_2px_5px_rgba(0,0,0,0.05)] px-5 py-5 sm:px-8 sm:py-8 transition-all duration-300 sm:flex-[2]"
             >
-              <h2 className="flex items-center gap-2 text-2xl font-bold mb-4 text-brand">
+              <h2 className="flex items-center gap-2 text-2xl sm:text-3xl font-bold mb-4 text-brand">
                 {p.icone && (
                   <span
                     className="inline-flex shrink-0 w-6 h-6 [&_svg]:w-full [&_svg]:h-full"
@@ -55,7 +55,7 @@ export function ExpandableSplitGroup({ panels, contentCls }: { panels: SplitPane
             <span className="pointer-events-none absolute -left-12 bottom-4 h-40 w-40 rounded-full bg-white/40" />
             <span className="pointer-events-none absolute left-14 -bottom-4 h-24 w-24 rounded-full bg-white/40" />
 
-            <h2 className="relative flex items-center gap-2 text-xl sm:text-2xl font-bold text-[#1D1D1D]">
+            <h2 className="relative flex items-center gap-2 text-2xl sm:text-3xl font-bold text-[#1D1D1D]">
               {p.icone && (
                 <span
                   className="inline-flex shrink-0 w-5 h-5 [&_svg]:w-full [&_svg]:h-full"
