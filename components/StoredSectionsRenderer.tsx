@@ -1,4 +1,5 @@
 import { svgUseCurrentColor } from "@/lib/utils";
+import { ExpandableSplitGroup } from "./ExpandableSplitGroup";
 
 // ── BlockNote JSON renderer ──────────────────────────────────────────────────
 
@@ -377,6 +378,16 @@ export function renderStoredSections(
         </div>
       );
     }
+    if (row.kind === "group" && row.cols === 2) {
+      // Paire de sections (ex. "Le marché" / "Le local") : rendu interactif
+      // 2/3 - 1/3, on bascule la carte réduite en grand au clic.
+      const panels = row.pair.map((s) => {
+        const { titre, bodyHtml } = renderTextSection(s as Extract<StoredSection, { type?: "texte" }>);
+        return { id: s.id, titre: titre || "", bodyHtml, icone: (s as { icone?: string }).icone };
+      });
+      return <ExpandableSplitGroup key={`${keyPrefix}-${ri}`} panels={panels} contentCls={contentCls} />;
+    }
+
     if (row.kind === "group") {
       return (
         <div key={`${keyPrefix}-${ri}`} className={GROUP_GRID[row.cols]}>
