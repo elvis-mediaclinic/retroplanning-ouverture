@@ -33,7 +33,7 @@ export default async function AnnoncePage({
   const [{ data: annonce }, { data: conceptPage }, { data: { user } }] = await Promise.all([
     supabase
       .from("annonces")
-      .select("id, titre, accroche, contenu, contenu_json, sections, actif, hero_bleu, hero_carte, hero_titre_centre, hero_accroche_centre, magasin_id, type_annonce, villes(id, nom)")
+      .select("id, titre, accroche, image_url, contenu, contenu_json, sections, actif, hero_bleu, hero_carte, hero_titre_centre, hero_accroche_centre, magasin_id, type_annonce, villes(id, nom)")
       .eq("id", id)
       .single(),
     supabase.from("pages").select("sections").eq("key", "concept").maybeSingle(),
@@ -145,22 +145,25 @@ export default async function AnnoncePage({
 
         <hr className="border-t border-zinc-200 my-12" />
 
-        {/* Hero — titre + accroche */}
-        <div
-          style={{ fontFamily: "var(--font-poppins)" }}
-          className={`${!annonce.hero_carte ? "" : annonce.hero_bleu
-            ? "rounded-[25px] bg-brand shadow-[2px_2px_5px_rgba(0,0,0,0.05)] px-6 py-8 sm:px-10 sm:py-12"
-            : `${cardCls} py-8 sm:py-12`
-          }`}
-        >
-          <h1 className={`text-4xl sm:text-5xl font-bold leading-[1.1] tracking-tight ${annonce.hero_titre_centre ? "text-center" : ""} ${annonce.hero_carte && annonce.hero_bleu ? "text-white" : "text-[#1D1D1D]"}`}>
+        {/* Hero — titre centré + bannière photo */}
+        <div style={{ fontFamily: "var(--font-poppins)" }} className="space-y-8">
+          <h1 className="text-4xl sm:text-6xl font-bold leading-[1.1] tracking-tight text-center text-[#1D1D1D] max-w-4xl mx-auto">
             {annonce.titre}
           </h1>
-          {annonce.accroche && (
-            <p className={`mt-4 text-lg sm:text-xl leading-relaxed ${annonce.hero_accroche_centre ? "text-center" : ""} ${annonce.hero_carte && annonce.hero_bleu ? "text-white/85" : "text-[#5C5C6F]"}`}>
-              <BoldText text={annonce.accroche} />
-            </p>
-          )}
+
+          <div className="relative mx-auto max-w-5xl aspect-[21/9] overflow-hidden rounded-[25px] bg-brand shadow-[2px_2px_5px_rgba(0,0,0,0.08)]">
+            {annonce.image_url && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={annonce.image_url} alt="" className="h-full w-full object-cover" />
+            )}
+            {annonce.accroche && (
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent px-6 py-6 sm:px-10 sm:py-8">
+                <p className="text-base sm:text-lg leading-relaxed text-white">
+                  <BoldText text={annonce.accroche} />
+                </p>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Sections de contenu de l'annonce */}
