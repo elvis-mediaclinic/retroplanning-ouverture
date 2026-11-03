@@ -21,6 +21,7 @@ export async function upsertCessionAnnonce(
     type_annonce: "cession" as const,
     titre: (formData.get("titre") as string).trim(),
     accroche: (formData.get("accroche") as string | null)?.trim() || null,
+    image_url: (formData.get("image_url") as string | null)?.trim() || null,
     sections: sectionsRaw ? JSON.parse(sectionsRaw) : null,
     actif: formData.get("actif") === "true",
     hero_bleu: formData.get("hero_bleu") === "true",

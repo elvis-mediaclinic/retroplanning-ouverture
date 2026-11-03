@@ -18,7 +18,7 @@ export default async function CessionAnnoncePage({
     supabase.from("magasins").select("id, nom, archive").eq("id", id).single(),
     supabase
       .from("annonces")
-      .select("id, titre, accroche, contenu, contenu_json, sections, actif, hero_bleu, hero_carte, hero_titre_centre, hero_accroche_centre")
+      .select("id, titre, accroche, image_url, contenu, contenu_json, sections, actif, hero_bleu, hero_carte, hero_titre_centre, hero_accroche_centre")
       .eq("magasin_id", id)
       .eq("type_annonce", "cession")
       .maybeSingle(),

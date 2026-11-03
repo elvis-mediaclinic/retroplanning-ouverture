@@ -25,10 +25,18 @@ function CopyLienButton({ annonceId, consultantId }: { annonceId: string; consul
     <button
       type="button"
       onClick={handleClick}
-      className="mt-4 inline-flex items-center gap-1 rounded-md bg-white/15 px-2.5 py-1 text-xs font-medium text-white hover:bg-white/25 transition-colors"
+      className="mt-3 inline-flex items-center gap-1 rounded-md bg-[#00B9FF]/10 px-2.5 py-1 text-xs font-medium text-[#00729e] hover:bg-[#00B9FF]/20 transition-colors"
     >
       {copied ? "Lien copié !" : "Copier mon lien"}
     </button>
+  );
+}
+
+function ArrowRight() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" className="shrink-0">
+      <path d="M4 10h12M11 5l5 5-5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
   );
 }
 
@@ -36,6 +44,7 @@ type Annonce = {
   id: string;
   titre: string;
   accroche: string | null;
+  imageUrl: string | null;
   isCession: boolean;
   ville: { nom: string; departement: string | null; region: string | null } | null;
   magasin: { nom: string; ville: string | null; code_postal: string | null } | null;
@@ -180,42 +189,71 @@ export function OpportunitesExplorer({ annonces, consultantId }: { annonces: Ann
       {filtered.length === 0 ? (
         <p className="text-zinc-500 text-center py-8">Aucune opportunité ne correspond à votre recherche.</p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map((a) => (
-            <div
-              key={a.id}
-              role="link"
-              tabIndex={0}
-              onClick={() => router.push(`/annonce/${a.id}`)}
-              onKeyDown={(e) => { if (e.key === "Enter") router.push(`/annonce/${a.id}`); }}
-              className="block rounded-2xl bg-gradient-to-br from-[#00729e] to-[#0089bd] p-6 shadow-sm hover:brightness-110 transition-all cursor-pointer"
-            >
-              <div className="flex items-center justify-between gap-2 mb-2">
-                {a.ville ? (
-                  <p className="text-xs font-semibold uppercase tracking-widest text-white/70">
-                    {a.ville.nom}{a.ville.departement ? ` · ${a.ville.departement}` : ""}
-                  </p>
-                ) : a.magasin ? (
-                  <p className="text-xs font-semibold uppercase tracking-widest text-white/70">
-                    {[a.magasin.ville, a.magasin.code_postal].filter(Boolean).join(" · ")}
-                  </p>
-                ) : <span />}
-                {a.isCession && (
-                  <span className="shrink-0 rounded-full bg-amber-400/90 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-950">
-                    Cession
-                  </span>
-                )}
+        <div
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+          style={{ fontFamily: "var(--font-poppins)" }}
+        >
+          {filtered.map((a) => {
+            const cityLabel = a.ville?.nom ?? a.magasin?.ville ?? null;
+            const dept = a.ville?.departement ?? a.magasin?.code_postal?.slice(0, 2) ?? null;
+
+            return (
+              <div
+                key={a.id}
+                role="link"
+                tabIndex={0}
+                onClick={() => router.push(`/annonce/${a.id}`)}
+                onKeyDown={(e) => { if (e.key === "Enter") router.push(`/annonce/${a.id}`); }}
+                className="group flex flex-col overflow-hidden rounded-[27px] border border-[#E3E8EF] bg-white shadow-[2px_2px_5px_rgba(0,0,0,0.05)] cursor-pointer transition-transform hover:-translate-y-0.5"
+              >
+                <div className="relative h-[220px] w-full shrink-0 overflow-hidden bg-[#00B9FF]">
+                  {a.imageUrl && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={a.imageUrl}
+                      alt=""
+                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                  )}
+                  {a.isCession && (
+                    <span className="absolute top-3 right-3 rounded-full bg-amber-400/90 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-950">
+                      Cession
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex flex-1 flex-col px-5 py-5">
+                  <h2 className="text-xl font-bold leading-snug text-[#1D1D1D] line-clamp-2">{a.titre}</h2>
+                  {a.accroche && (
+                    <p className="mt-2 text-sm leading-relaxed text-[#6B7281] line-clamp-3">
+                      <BoldText text={a.accroche} />
+                    </p>
+                  )}
+
+                  <div className="mt-4 border-t border-[#6B7281]/25" />
+
+                  <div className="mt-4 flex items-center justify-between gap-3">
+                    <div className="flex min-w-0 items-center gap-3">
+                      {dept && (
+                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#00B9FF] text-sm font-bold text-white">
+                          {dept}
+                        </span>
+                      )}
+                      {cityLabel && (
+                        <span className="truncate text-base font-bold text-[#1D1D1D]">{cityLabel}</span>
+                      )}
+                    </div>
+                    <span className="flex shrink-0 items-center gap-1.5 text-sm font-bold text-[#00B9FF]">
+                      Voir l&apos;annonce complète
+                      <ArrowRight />
+                    </span>
+                  </div>
+
+                  {consultantId && a.sharedWithConsultant && <CopyLienButton annonceId={a.id} consultantId={consultantId} />}
+                </div>
               </div>
-              <h2 className="text-lg font-bold text-white leading-snug mb-2">{a.titre}</h2>
-              {a.accroche && (
-                <p className="text-sm text-white/80 leading-relaxed line-clamp-3"><BoldText text={a.accroche} /></p>
-              )}
-              <span className="mt-4 inline-block text-sm font-medium text-white">
-                En savoir plus →
-              </span>
-              {consultantId && a.sharedWithConsultant && <CopyLienButton annonceId={a.id} consultantId={consultantId} />}
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

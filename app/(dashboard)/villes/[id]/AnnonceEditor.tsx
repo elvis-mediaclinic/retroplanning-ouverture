@@ -4,6 +4,7 @@ import { useActionState, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { upsertAnnonce, type AnnonceState } from "./annonce-actions";
 import { BoldText } from "@/components/BoldText";
+import { MediaPicker } from "./MediaPicker";
 import type { Section } from "./SectionsEditor";
 
 const SectionsEditor = dynamic(() => import("./SectionsEditor").then((m) => m.SectionsEditor), {
@@ -15,6 +16,7 @@ type Annonce = {
   id: string;
   titre: string;
   accroche: string | null;
+  image_url?: string | null;
   contenu: string | null;
   contenu_json: string | null;
   sections: string | null;
@@ -41,6 +43,8 @@ export function AnnonceEditor({
   const [actif, setActif] = useState(annonce?.actif ?? false);
   const [accroche, setAccroche] = useState(annonce?.accroche ?? "");
   const accrocheRef = useRef<HTMLTextAreaElement>(null);
+  const [imageUrl, setImageUrl] = useState(annonce?.image_url ?? "");
+  const [mediaPickerOpen, setMediaPickerOpen] = useState(false);
   const [heroBleu, setHeroBleu] = useState(annonce?.hero_bleu ?? true);
   const [heroCarte, setHeroCarte] = useState(annonce?.hero_carte ?? true);
   const [heroTitreCentre, setHeroTitreCentre] = useState(annonce?.hero_titre_centre ?? false);
@@ -184,6 +188,44 @@ export function AnnonceEditor({
             <p className="text-xs text-zinc-400">
               Sélectionnez du texte puis cliquez sur « G » pour le mettre en gras.
             </p>
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-zinc-700">
+              Photo de la carte
+              <span className="ml-1 text-xs text-zinc-400">(affichée sur la page des opportunités)</span>
+            </label>
+            <input type="hidden" name="image_url" value={imageUrl} />
+            <div className="flex items-center gap-3">
+              {imageUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={imageUrl} alt="" className="h-20 w-28 rounded-md object-cover border border-zinc-200" />
+              ) : (
+                <div className="h-20 w-28 rounded-md border border-dashed border-zinc-300 bg-zinc-50 flex items-center justify-center text-xs text-zinc-400">
+                  Aucune
+                </div>
+              )}
+              <div className="flex flex-col gap-1">
+                <button type="button" onClick={() => setMediaPickerOpen(true)} className="btn-secondary text-xs">
+                  {imageUrl ? "Changer l'image" : "Choisir une image"}
+                </button>
+                {imageUrl && (
+                  <button
+                    type="button"
+                    onClick={() => setImageUrl("")}
+                    className="text-xs text-zinc-400 hover:text-red-600 text-left"
+                  >
+                    Retirer l&apos;image
+                  </button>
+                )}
+              </div>
+            </div>
+            {mediaPickerOpen && (
+              <MediaPicker
+                onSelect={(url) => { setImageUrl(url); setMediaPickerOpen(false); }}
+                onClose={() => setMediaPickerOpen(false)}
+              />
+            )}
           </div>
 
           <div className="flex flex-wrap items-center gap-4">

@@ -13,7 +13,7 @@ export default async function AnnoncesPage() {
   const [{ data }, { data: { user } }] = await Promise.all([
     supabase
       .from("annonces")
-      .select("id, titre, accroche, type_annonce, magasin_id, villes(nom, departement, region)")
+      .select("id, titre, accroche, type_annonce, magasin_id, image_url, villes(nom, departement, region)")
       .eq("actif", true)
       .order("created_at", { ascending: false }),
     supabase.auth.getUser(),
@@ -63,6 +63,7 @@ export default async function AnnoncesPage() {
       id: a.id,
       titre: a.titre,
       accroche: a.accroche,
+      imageUrl: a.image_url,
       isCession: a.type_annonce === "cession",
       ville,
       magasin,
