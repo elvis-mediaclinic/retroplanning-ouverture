@@ -233,9 +233,13 @@ function renderTextSection(s: Extract<StoredSection, { type?: "texte" }>) {
 }
 
 // Rend un tableau de StoredSection en JSX (annonces, concept, page franchise…)
-// `defaultStatsTitle` : titre affiché au-dessus d'une section "stats" qui n'a pas
-// de titre propre (ex. "La ville de Vierzon en quelques chiffres").
-export function renderStoredSections(list: StoredSection[], keyPrefix: string, defaultStatsTitle?: string) {
+// `defaultStatsTitle` : titre bicolore affiché au-dessus d'une section "stats" qui
+// n'a pas de titre propre, ex. { black: "La ville de Vierzon", blue: "en quelques chiffres" }.
+export function renderStoredSections(
+  list: StoredSection[],
+  keyPrefix: string,
+  defaultStatsTitle?: { black: string; blue: string }
+) {
   const rows: Array<{ kind: "full"; s: StoredSection } | { kind: "group"; cols: 2 | 3; pair: StoredSection[] }> = [];
   let i = 0;
   while (i < list.length) {
@@ -283,17 +287,21 @@ export function renderStoredSections(list: StoredSection[], keyPrefix: string, d
     if (row.kind === "full" && row.s.type === "stats") {
       const s = row.s as Extract<StoredSection, { type: "stats" }>;
       const cols = s.colonnes ?? 3;
-      const titre = s.titre || defaultStatsTitle;
-      // Rendu toujours sobre et centré façon maquette : chiffre en grand, label en dessous,
+      // Rendu toujours sobre et centré façon maquette : chiffre en grand (noir), label en dessous,
       // colonnes séparées par un simple trait vertical — le fond bleu n'est plus utilisé ici.
       return (
         <div key={`${keyPrefix}-${ri}`} className="py-2">
-          {titre && (
-            <h2 className="flex items-center justify-center gap-2 text-2xl sm:text-3xl font-bold mb-6 text-[#1D1D1D] text-center">
+          {s.titre ? (
+            <h2 className="flex items-center justify-center gap-2 text-2xl sm:text-3xl font-bold mb-8 text-[#1D1D1D] text-center">
               <SectionIcon svg={s.icone} />
-              {titre}
+              {s.titre}
             </h2>
-          )}
+          ) : defaultStatsTitle ? (
+            <h2 className="flex flex-col items-center gap-1 text-2xl sm:text-4xl font-bold mb-8 text-center leading-tight">
+              <span className="text-[#1D1D1D]">{defaultStatsTitle.black}</span>
+              <span className="text-brand">{defaultStatsTitle.blue}</span>
+            </h2>
+          ) : null}
           <div className={`${STATS_GRID[cols] ?? STATS_GRID[3]} gap-y-6`}>
             {s.stats.map((stat, idx) => (
               <div
@@ -302,7 +310,7 @@ export function renderStoredSections(list: StoredSection[], keyPrefix: string, d
                   idx % cols !== 0 ? "sm:border-l sm:border-[#A4A4A4]/50" : ""
                 } ${idx > 0 ? "border-t pt-6 sm:border-t-0 sm:pt-0 border-zinc-200" : ""}`}
               >
-                <span className="text-4xl sm:text-5xl font-extrabold leading-none text-brand">{stat.valeur}</span>
+                <span className="text-4xl sm:text-5xl font-extrabold leading-none text-[#1D1D1D]">{stat.valeur}</span>
                 <span className="text-base sm:text-lg leading-snug text-[#5C5C6F]">{stat.label}</span>
               </div>
             ))}

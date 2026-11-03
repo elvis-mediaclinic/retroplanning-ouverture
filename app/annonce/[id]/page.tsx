@@ -151,7 +151,9 @@ export default async function AnnoncePage({
           ? renderStoredSections(
               storedSections,
               "annonce",
-              (ville?.nom ?? magasin?.ville) ? `La ville de ${ville?.nom ?? magasin?.ville} en quelques chiffres` : undefined
+              (ville?.nom ?? magasin?.ville)
+                ? { black: `La ville de ${ville?.nom ?? magasin?.ville}`, blue: "en quelques chiffres" }
+                : undefined
             )
 
           : /* Fallback legacy : ancien contenu_json plat */
