@@ -13,17 +13,20 @@ const BlockEditor = dynamic(() => import("./BlockEditor").then((m) => m.BlockEdi
 
 export type Stat = { id: string; valeur: string; label: string };
 export type Membre = { id: string; photo?: string; nom: string; texte?: string };
+export type OngletBouton = { id: string; label: string; href: string };
+export type Onglet = { id: string; label: string; contenu_json: string; image?: string; boutons?: OngletBouton[] };
 
 export type Section =
   | { id: string; type?: "texte"; titre: string; contenu_json: string; disposition?: "pleine" | "moitie" | "tiers"; bleu?: boolean; icone?: string; dansAnnonces?: boolean; titreCentre?: boolean; carte?: boolean; separateurDroite?: boolean }
   | { id: string; type: "stats"; titre: string; stats: Stat[]; colonnes: 2 | 3 | 4; alignement?: "gauche" | "centre"; bleu?: boolean; icone?: string; dansAnnonces?: boolean; separateurs?: boolean }
   | { id: string; type: "titre"; titre: string; icone?: string; dansAnnonces?: boolean }
   | { id: string; type: "separateur"; espacement?: "petit" | "moyen" | "grand"; dansAnnonces?: boolean }
-  | { id: string; type: "equipe"; titre: string; membres: Membre[]; colonnes?: 2 | 3 | 4; bleu?: boolean; icone?: string; dansAnnonces?: boolean; titreCentre?: boolean; carte?: boolean };
+  | { id: string; type: "equipe"; titre: string; membres: Membre[]; colonnes?: 2 | 3 | 4; bleu?: boolean; icone?: string; dansAnnonces?: boolean; titreCentre?: boolean; carte?: boolean }
+  | { id: string; type: "onglets"; titre: string; onglets: Onglet[]; dansAnnonces?: boolean };
 
 function uid() { return Math.random().toString(36).slice(2); }
 
-function makeSection(type: "texte" | "stats" | "titre" | "separateur" | "equipe"): Section {
+function makeSection(type: "texte" | "stats" | "titre" | "separateur" | "equipe" | "onglets"): Section {
   if (type === "stats") {
     return { id: uid(), type: "stats", titre: "", stats: [{ id: uid(), valeur: "", label: "" }], colonnes: 3 };
   }
@@ -36,23 +39,31 @@ function makeSection(type: "texte" | "stats" | "titre" | "separateur" | "equipe"
   if (type === "equipe") {
     return { id: uid(), type: "equipe", titre: "", membres: [{ id: uid(), nom: "", texte: "" }], colonnes: 3 };
   }
+  if (type === "onglets") {
+    return { id: uid(), type: "onglets", titre: "", onglets: [{ id: uid(), label: "", contenu_json: "" }] };
+  }
   return { id: uid(), type: "texte", titre: "", contenu_json: "" };
 }
 
 type Row = { kind: "full"; index: number } | { kind: "group"; cols: 2 | 3; indices: number[] };
+
+const NO_DISPOSITION_TYPES = ["stats", "titre", "separateur", "equipe", "onglets"] as const;
+function hasDisposition(s: Section): s is Extract<Section, { disposition?: string }> {
+  return !(NO_DISPOSITION_TYPES as readonly string[]).includes(s.type ?? "texte");
+}
 
 function computeRows(sections: Section[]): Row[] {
   const rows: Row[] = [];
   let i = 0;
   while (i < sections.length) {
     const s = sections[i];
-    const disp = s.type !== "stats" && s.type !== "titre" && s.type !== "separateur" && s.type !== "equipe" ? s.disposition : undefined;
+    const disp = hasDisposition(s) ? s.disposition : undefined;
     if (disp === "moitie" || disp === "tiers") {
       const maxCols = disp === "moitie" ? 2 : 3;
       const indices = [i];
       while (indices.length < maxCols) {
         const next = sections[i + 1];
-        if (next && next.type !== "stats" && next.type !== "titre" && next.type !== "separateur" && next.type !== "equipe" && next.disposition === disp) {
+        if (next && hasDisposition(next) && next.disposition === disp) {
           indices.push(i + 1);
           i++;
         } else break;
@@ -71,7 +82,7 @@ const GROUP_GRID: Record<2 | 3, string> = {
   3: "grid grid-cols-1 sm:grid-cols-3 gap-3",
 };
 
-function InsertRow({ onInsert }: { onInsert: (type: "texte" | "stats" | "titre" | "separateur" | "equipe") => void }) {
+function InsertRow({ onInsert }: { onInsert: (type: "texte" | "stats" | "titre" | "separateur" | "equipe" | "onglets") => void }) {
   const [open, setOpen] = useState(false);
 
   if (!open) {
@@ -107,6 +118,10 @@ function InsertRow({ onInsert }: { onInsert: (type: "texte" | "stats" | "titre" 
       <button type="button" onClick={() => { onInsert("equipe"); setOpen(false); }}
         className="flex-1 rounded-lg border border-dashed border-emerald-300 py-1.5 text-xs text-emerald-600 hover:border-emerald-400 hover:text-emerald-700 transition-colors">
         + Équipe
+      </button>
+      <button type="button" onClick={() => { onInsert("onglets"); setOpen(false); }}
+        className="flex-1 rounded-lg border border-dashed border-sky-300 py-1.5 text-xs text-sky-600 hover:border-sky-400 hover:text-sky-700 transition-colors">
+        + Onglets
       </button>
       <button type="button" onClick={() => { onInsert("separateur"); setOpen(false); }}
         className="flex-1 rounded-lg border border-dashed border-zinc-400 py-1.5 text-xs text-zinc-600 hover:border-zinc-500 hover:text-zinc-800 transition-colors">
@@ -289,6 +304,145 @@ function EquipeEditor({ section, onUpdate }: { section: Extract<Section, { type:
   );
 }
 
+function OngletsEditor({ section, onUpdate }: { section: Extract<Section, { type: "onglets" }>; onUpdate: (patch: Partial<Extract<Section, { type: "onglets" }>>) => void }) {
+  const [activeId, setActiveId] = useState(section.onglets[0]?.id);
+  const [photoPickerId, setPhotoPickerId] = useState<string | null>(null);
+  const active = section.onglets.find((o) => o.id === activeId) ?? section.onglets[0];
+
+  function updateOnglet(id: string, patch: Partial<Onglet>) {
+    onUpdate({ onglets: section.onglets.map((o) => (o.id === id ? { ...o, ...patch } : o)) });
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-1.5 flex-wrap">
+        {section.onglets.map((o, i) => (
+          <button
+            key={o.id}
+            type="button"
+            onClick={() => setActiveId(o.id)}
+            className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium ${
+              active?.id === o.id ? "border-sky-400 bg-sky-100 text-sky-700" : "border-zinc-300 bg-white text-zinc-500"
+            }`}
+          >
+            {o.label || `Onglet ${i + 1}`}
+          </button>
+        ))}
+        <button
+          type="button"
+          onClick={() => {
+            const o: Onglet = { id: uid(), label: "", contenu_json: "" };
+            onUpdate({ onglets: [...section.onglets, o] });
+            setActiveId(o.id);
+          }}
+          className="text-xs text-sky-600 hover:text-sky-800"
+        >
+          + Ajouter un onglet
+        </button>
+      </div>
+
+      {active && (
+        <div className="space-y-3 rounded-md border border-sky-200 bg-white p-3">
+          <div className="flex items-center gap-2">
+            <input
+              value={active.label}
+              onChange={(e) => updateOnglet(active.id, { label: e.target.value })}
+              placeholder="Libellé de l'onglet (ex. Ce que nous recherchons)"
+              className="flex-1 rounded-md border border-zinc-300 px-2 py-1 text-sm font-medium"
+            />
+            {section.onglets.length > 1 && (
+              <button
+                type="button"
+                onClick={() => {
+                  const next = section.onglets.filter((o) => o.id !== active.id);
+                  onUpdate({ onglets: next });
+                  setActiveId(next[0]?.id);
+                }}
+                className="text-xs text-red-400 hover:text-red-600 shrink-0"
+              >
+                Supprimer cet onglet
+              </button>
+            )}
+          </div>
+
+          <BlockEditor
+            defaultJson={active.contenu_json || null}
+            onJsonChange={(json) => updateOnglet(active.id, { contenu_json: json })}
+          />
+
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setPhotoPickerId(active.id)}
+              className="shrink-0 h-14 w-20 rounded-md overflow-hidden border border-zinc-300 bg-zinc-100 flex items-center justify-center text-zinc-400 hover:border-brand text-[10px]"
+              title="Photo de l'onglet (optionnelle)"
+            >
+              {active.image ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={active.image} alt="" className="h-full w-full object-cover" />
+              ) : "Photo"}
+            </button>
+            {active.image && (
+              <button type="button" onClick={() => updateOnglet(active.id, { image: undefined })} className="text-xs text-zinc-400 hover:text-red-600">
+                Retirer la photo
+              </button>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs text-zinc-500">Boutons (optionnels)</label>
+            {(active.boutons ?? []).map((b, i) => (
+              <div key={b.id} className="flex items-center gap-2">
+                <input
+                  value={b.label}
+                  onChange={(e) => {
+                    const next = [...(active.boutons ?? [])];
+                    next[i] = { ...b, label: e.target.value };
+                    updateOnglet(active.id, { boutons: next });
+                  }}
+                  placeholder="Candidater pour cette ville →"
+                  className="flex-1 rounded-md border border-zinc-300 px-2 py-1 text-xs"
+                />
+                <input
+                  value={b.href}
+                  onChange={(e) => {
+                    const next = [...(active.boutons ?? [])];
+                    next[i] = { ...b, href: e.target.value };
+                    updateOnglet(active.id, { boutons: next });
+                  }}
+                  placeholder="#candidater ou https://…"
+                  className="flex-1 rounded-md border border-zinc-300 px-2 py-1 text-xs"
+                />
+                <button
+                  type="button"
+                  onClick={() => updateOnglet(active.id, { boutons: (active.boutons ?? []).filter((_, j) => j !== i) })}
+                  className="text-xs text-red-400 hover:text-red-600 shrink-0"
+                >✕</button>
+              </div>
+            ))}
+            {(active.boutons ?? []).length < 2 && (
+              <button
+                type="button"
+                onClick={() => updateOnglet(active.id, { boutons: [...(active.boutons ?? []), { id: uid(), label: "", href: "" }] })}
+                className="text-xs text-brand hover:text-brand-dark"
+              >
+                + Ajouter un bouton
+              </button>
+            )}
+          </div>
+
+          {photoPickerId && (
+            <MediaPicker
+              onSelect={(url) => { updateOnglet(photoPickerId, { image: url }); setPhotoPickerId(null); }}
+              onClose={() => setPhotoPickerId(null)}
+            />
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSections?: Section[]; annonceToggle?: boolean }) {
   const inputId = useId();
   const [sections, setSections] = useState<Section[]>(
@@ -336,7 +490,7 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
     setSections((prev) => prev.filter((s) => s.id !== id));
   }
 
-  function insertAt(index: number, type: "texte" | "stats" | "titre" | "separateur" | "equipe") {
+  function insertAt(index: number, type: "texte" | "stats" | "titre" | "separateur" | "equipe" | "onglets") {
     setSections((prev) => {
       const next = [...prev];
       next.splice(index, 0, makeSection(type));
@@ -352,6 +506,7 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
         id: uid(),
         ...(original.type === "stats" ? { stats: original.stats.map((s) => ({ ...s, id: uid() })) } : {}),
         ...(original.type === "equipe" ? { membres: original.membres.map((m) => ({ ...m, id: uid() })) } : {}),
+        ...(original.type === "onglets" ? { onglets: original.onglets.map((o) => ({ ...o, id: uid() })) } : {}),
       };
       const next = [...prev];
       next.splice(index + 1, 0, clone);
@@ -374,7 +529,8 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
     const isTitre = section.type === "titre";
     const isSeparateur = section.type === "separateur";
     const isEquipe = section.type === "equipe";
-    const disposition = !isStats && !isTitre && !isSeparateur && !isEquipe ? (section as { disposition?: string }).disposition : undefined;
+    const isOnglets = section.type === "onglets";
+    const disposition = hasDisposition(section) ? section.disposition : undefined;
     const collapsed = collapsedIds.has(section.id);
 
     if (isSeparateur) {
@@ -460,7 +616,7 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
           setDragIndex(null);
           setDragOverIndex(null);
         }}
-        className={`rounded-lg border p-4 space-y-3 transition-colors ${isStats ? "border-amber-200 bg-amber-50/40" : isTitre ? "border-violet-200 bg-violet-50/40" : isEquipe ? "border-emerald-200 bg-emerald-50/40" : "border-zinc-200 bg-zinc-50"} ${
+        className={`rounded-lg border p-4 space-y-3 transition-colors ${isStats ? "border-amber-200 bg-amber-50/40" : isTitre ? "border-violet-200 bg-violet-50/40" : isEquipe ? "border-emerald-200 bg-emerald-50/40" : isOnglets ? "border-sky-200 bg-sky-50/40" : "border-zinc-200 bg-zinc-50"} ${
           dragOverIndex === i && dragIndex !== null && dragIndex !== i ? "ring-2 ring-brand" : ""
         } ${dragIndex === i ? "opacity-40" : ""}`}
       >
@@ -485,8 +641,8 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
               {collapsed ? "▶" : "▼"}
             </button>
             <div className="flex items-center gap-1.5 shrink-0">
-              <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${isStats ? "bg-amber-100 text-amber-700" : isTitre ? "bg-violet-100 text-violet-700" : isEquipe ? "bg-emerald-100 text-emerald-700" : "bg-zinc-200 text-zinc-500"}`}>
-                {isStats ? "Stats" : isTitre ? "Titre" : isEquipe ? "Équipe" : "Texte"}
+              <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${isStats ? "bg-amber-100 text-amber-700" : isTitre ? "bg-violet-100 text-violet-700" : isEquipe ? "bg-emerald-100 text-emerald-700" : isOnglets ? "bg-sky-100 text-sky-700" : "bg-zinc-200 text-zinc-500"}`}>
+                {isStats ? "Stats" : isTitre ? "Titre" : isEquipe ? "Équipe" : isOnglets ? "Onglets" : "Texte"}
               </span>
             </div>
             <input
@@ -516,7 +672,7 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
               ) : null}
               Icône
             </button>
-            {!isTitre && (
+            {!isTitre && !isOnglets && (
               <label className="flex items-center gap-1 rounded border border-zinc-300 bg-white px-2 py-1 text-xs font-medium text-zinc-500 cursor-pointer">
                 <input
                   type="checkbox"
@@ -527,7 +683,7 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
                 Fond bleu
               </label>
             )}
-            {!isStats && !isTitre && (
+            {!isStats && !isTitre && !isOnglets && (
               <label className="flex items-center gap-1 rounded border border-zinc-300 bg-white px-2 py-1 text-xs font-medium text-zinc-500 cursor-pointer">
                 <input
                   type="checkbox"
@@ -538,7 +694,7 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
                 Titre centré
               </label>
             )}
-            {!isStats && !isTitre && (
+            {!isStats && !isTitre && !isOnglets && (
               <label className="flex items-center gap-1 rounded border border-zinc-300 bg-white px-2 py-1 text-xs font-medium text-zinc-500 cursor-pointer">
                 <input
                   type="checkbox"
@@ -549,7 +705,7 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
                 {isEquipe ? "Chaque élément dans une carte" : "Carte"}
               </label>
             )}
-            {!isStats && !isTitre && !isEquipe && (disposition === "moitie" || disposition === "tiers") && (
+            {!isStats && !isTitre && !isEquipe && !isOnglets && (disposition === "moitie" || disposition === "tiers") && (
               <label className="flex items-center gap-1 rounded border border-zinc-300 bg-white px-2 py-1 text-xs font-medium text-zinc-500 cursor-pointer">
                 <input
                   type="checkbox"
@@ -571,7 +727,7 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
                 Dans les annonces
               </label>
             )}
-            {!isStats && !isEquipe && (
+            {!isStats && !isEquipe && !isOnglets && (
               <>
                 {(["pleine", "moitie", "tiers"] as const).map((d) => (
                   <button
@@ -649,6 +805,11 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
               />
             ) : isTitre ? (
               <p className="text-xs text-violet-500/70 italic">Le titre saisi ci-dessus s&apos;affichera centré sans carte.</p>
+            ) : isOnglets ? (
+              <OngletsEditor
+                section={section as Extract<Section, { type: "onglets" }>}
+                onUpdate={(patch) => update(section.id, patch as Partial<Section>)}
+              />
             ) : (
               <BlockEditor
                 defaultJson={(section as { contenu_json: string }).contenu_json || null}
@@ -701,6 +862,10 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
         <button type="button" onClick={() => insertAt(sections.length, "equipe")}
           className="flex-1 rounded-lg border border-dashed border-emerald-300 py-2.5 text-sm text-emerald-600 hover:border-emerald-400 hover:text-emerald-700 transition-colors">
           + Équipe
+        </button>
+        <button type="button" onClick={() => insertAt(sections.length, "onglets")}
+          className="flex-1 rounded-lg border border-dashed border-sky-300 py-2.5 text-sm text-sky-600 hover:border-sky-400 hover:text-sky-700 transition-colors">
+          + Onglets
         </button>
         <button type="button" onClick={() => insertAt(sections.length, "separateur")}
           className="flex-1 rounded-lg border border-dashed border-zinc-400 py-2.5 text-sm text-zinc-600 hover:border-zinc-500 hover:text-zinc-800 transition-colors">

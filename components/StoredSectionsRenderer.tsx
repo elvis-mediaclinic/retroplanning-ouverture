@@ -1,5 +1,6 @@
 import { svgUseCurrentColor } from "@/lib/utils";
 import { ExpandableSplitGroup } from "./ExpandableSplitGroup";
+import { TabsSection } from "./TabsSection";
 
 // ── BlockNote JSON renderer ──────────────────────────────────────────────────
 
@@ -191,13 +192,16 @@ export const colCardCls = "rounded-[25px] bg-[#F6F6F6] shadow-[2px_2px_5px_rgba(
 
 export type StatItem = { id: string; valeur: string; label: string };
 export type MembreItem = { id: string; photo?: string; nom: string; texte?: string };
+export type OngletBouton = { id: string; label: string; href: string };
+export type OngletItem = { id: string; label: string; contenu_json: string; image?: string; boutons?: OngletBouton[] };
 
 export type StoredSection =
   | { id: string; type?: "texte"; titre: string; contenu_json: string; disposition?: "pleine" | "moitie" | "tiers"; bleu?: boolean; icone?: string; dansAnnonces?: boolean; titreCentre?: boolean; carte?: boolean; separateurDroite?: boolean }
   | { id: string; type: "stats"; titre: string; stats: StatItem[]; colonnes: 2 | 3 | 4; alignement?: "gauche" | "centre"; bleu?: boolean; icone?: string; dansAnnonces?: boolean; separateurs?: boolean }
   | { id: string; type: "titre"; titre: string; icone?: string; dansAnnonces?: boolean }
   | { id: string; type: "separateur"; espacement?: "petit" | "moyen" | "grand"; dansAnnonces?: boolean }
-  | { id: string; type: "equipe"; titre: string; membres: MembreItem[]; colonnes?: 2 | 3 | 4; bleu?: boolean; icone?: string; dansAnnonces?: boolean; titreCentre?: boolean; carte?: boolean };
+  | { id: string; type: "equipe"; titre: string; membres: MembreItem[]; colonnes?: 2 | 3 | 4; bleu?: boolean; icone?: string; dansAnnonces?: boolean; titreCentre?: boolean; carte?: boolean }
+  | { id: string; type: "onglets"; titre: string; onglets: OngletItem[]; dansAnnonces?: boolean };
 
 function SectionIcon({ svg, className }: { svg?: string; className?: string }) {
   if (!svg) return null;
@@ -245,14 +249,14 @@ export function renderStoredSections(
   let i = 0;
   while (i < list.length) {
     const s = list[i];
-    const disp = (s.type !== "stats" && s.type !== "titre" && s.type !== "separateur" && s.type !== "equipe") ? s.disposition : undefined;
+    const disp = (s.type !== "stats" && s.type !== "titre" && s.type !== "separateur" && s.type !== "equipe" && s.type !== "onglets") ? s.disposition : undefined;
     if (disp === "moitie" || disp === "tiers") {
       const targetDisp = disp;
       const maxCols = disp === "moitie" ? 2 : 3;
       const group: StoredSection[] = [s];
       while (group.length < maxCols) {
         const next = list[i + 1];
-        if (next && next.type !== "stats" && next.type !== "titre" && next.type !== "separateur" && next.type !== "equipe" && next.disposition === targetDisp) {
+        if (next && next.type !== "stats" && next.type !== "titre" && next.type !== "separateur" && next.type !== "equipe" && next.type !== "onglets" && next.disposition === targetDisp) {
           group.push(next); i++;
         } else break;
       }
@@ -378,6 +382,24 @@ export function renderStoredSections(
         </div>
       );
     }
+    if (row.kind === "full" && row.s.type === "onglets") {
+      const s = row.s as Extract<StoredSection, { type: "onglets" }>;
+      const tabs = s.onglets.map((o) => {
+        let blocks: Block[] = [];
+        try { blocks = JSON.parse(o.contenu_json); } catch { /* ignore */ }
+        const bodyHtml = renderBlocks(blocks);
+        return { id: o.id, label: o.label || "Onglet", bodyHtml, image: o.image, boutons: o.boutons };
+      });
+      return (
+        <div key={`${keyPrefix}-${ri}`} className="space-y-6">
+          {s.titre && (
+            <h2 className="text-2xl sm:text-3xl font-bold text-center text-[#1D1D1D]">{s.titre}</h2>
+          )}
+          <TabsSection tabs={tabs} contentCls={contentCls} />
+        </div>
+      );
+    }
+
     if (row.kind === "group" && row.cols === 2) {
       // Paire de sections (ex. "Le marché" / "Le local") : rendu interactif
       // 2/3 - 1/3, on bascule la carte réduite en grand au clic.
