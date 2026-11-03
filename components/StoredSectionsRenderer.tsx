@@ -233,7 +233,9 @@ function renderTextSection(s: Extract<StoredSection, { type?: "texte" }>) {
 }
 
 // Rend un tableau de StoredSection en JSX (annonces, concept, page franchise…)
-export function renderStoredSections(list: StoredSection[], keyPrefix: string) {
+// `defaultStatsTitle` : titre affiché au-dessus d'une section "stats" qui n'a pas
+// de titre propre (ex. "La ville de Vierzon en quelques chiffres").
+export function renderStoredSections(list: StoredSection[], keyPrefix: string, defaultStatsTitle?: string) {
   const rows: Array<{ kind: "full"; s: StoredSection } | { kind: "group"; cols: 2 | 3; pair: StoredSection[] }> = [];
   let i = 0;
   while (i < list.length) {
@@ -281,14 +283,15 @@ export function renderStoredSections(list: StoredSection[], keyPrefix: string) {
     if (row.kind === "full" && row.s.type === "stats") {
       const s = row.s as Extract<StoredSection, { type: "stats" }>;
       const cols = s.colonnes ?? 3;
+      const titre = s.titre || defaultStatsTitle;
       // Rendu toujours sobre et centré façon maquette : chiffre en grand, label en dessous,
       // colonnes séparées par un simple trait vertical — le fond bleu n'est plus utilisé ici.
       return (
         <div key={`${keyPrefix}-${ri}`} className="py-2">
-          {s.titre && (
-            <h2 className="flex items-center justify-center gap-2 text-2xl font-bold mb-6 text-brand text-center">
+          {titre && (
+            <h2 className="flex items-center justify-center gap-2 text-2xl sm:text-3xl font-bold mb-6 text-[#1D1D1D] text-center">
               <SectionIcon svg={s.icone} />
-              {s.titre}
+              {titre}
             </h2>
           )}
           <div className={`${STATS_GRID[cols] ?? STATS_GRID[3]} gap-y-6`}>

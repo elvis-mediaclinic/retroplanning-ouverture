@@ -148,7 +148,11 @@ export default async function AnnoncePage({
 
         {/* Sections de contenu de l'annonce */}
         {storedSections
-          ? renderStoredSections(storedSections, "annonce")
+          ? renderStoredSections(
+              storedSections,
+              "annonce",
+              (ville?.nom ?? magasin?.ville) ? `La ville de ${ville?.nom ?? magasin?.ville} en quelques chiffres` : undefined
+            )
 
           : /* Fallback legacy : ancien contenu_json plat */
             legacySections.length > 0
