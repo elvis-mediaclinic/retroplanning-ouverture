@@ -1,3 +1,7 @@
+"use client";
+
+import { useLayoutEffect, useRef, useState } from "react";
+
 export type TimelineEvent = { id: string; date: string; titre: string; description?: string };
 
 function EventContent({ e, align }: { e: TimelineEvent; align?: "left" | "right" }) {
@@ -15,9 +19,48 @@ function EventContent({ e, align }: { e: TimelineEvent; align?: "left" | "right"
 }
 
 // Frise chronologique : liste simple à gauche sur mobile. À partir de sm,
-// ligne centrale avec événements en quinconce qui se chevauchent légèrement
-// (le suivant démarre à mi-hauteur du précédent, pas en dessous).
+// ligne centrale avec événements en quinconce, positionnés en absolu d'après
+// leur hauteur réelle mesurée au rendu : un élément démarre à la moitié de la
+// hauteur du précédent, mais jamais avant la fin du précédent élément de son
+// propre côté (sinon deux éléments du même côté se chevaucheraient).
 export function TimelineSection({ evenements }: { evenements: TimelineEvent[] }) {
+  const refs = useRef<(HTMLDivElement | null)[]>([]);
+  const [tops, setTops] = useState<number[]>(() => evenements.map((_, i) => i * 120));
+  const [containerHeight, setContainerHeight] = useState(0);
+
+  useLayoutEffect(() => {
+    const els = refs.current;
+
+    const GAP = 24; // espace minimal entre deux éléments consécutifs du même côté
+
+    function recompute() {
+      const heights = els.map((el) => el?.offsetHeight ?? 0);
+      const nextTops: number[] = [];
+      let leftNext = 0;
+      let rightNext = 0;
+      evenements.forEach((_, i) => {
+        const onRight = i % 2 === 0;
+        const top = onRight ? rightNext : leftNext;
+        nextTops[i] = top;
+        const half = heights[i] / 2;
+        if (onRight) {
+          rightNext = top + heights[i] + GAP;
+          leftNext = Math.max(leftNext, top + half);
+        } else {
+          leftNext = top + heights[i] + GAP;
+          rightNext = Math.max(rightNext, top + half);
+        }
+      });
+      setTops(nextTops);
+      setContainerHeight(Math.max(leftNext, rightNext) - GAP);
+    }
+
+    recompute();
+    const ro = new ResizeObserver(recompute);
+    els.forEach((el) => el && ro.observe(el));
+    return () => ro.disconnect();
+  }, [evenements]);
+
   return (
     <>
       {/* Mobile : ligne à gauche, événements empilés */}
@@ -35,22 +78,23 @@ export function TimelineSection({ evenements }: { evenements: TimelineEvent[] })
         ))}
       </div>
 
-      {/* Desktop : ligne centrale, événements en quinconce qui se chevauchent */}
-      <div className="hidden sm:block relative">
+      {/* Desktop : ligne centrale, événements en quinconce, positions mesurées */}
+      <div className="hidden sm:block relative" style={{ height: containerHeight || undefined }}>
         <div className="absolute left-1/2 top-0 bottom-0 w-0.5 -translate-x-1/2 bg-brand/20" />
         {evenements.map((e, i) => {
           const onRight = i % 2 === 0;
           return (
             <div
               key={e.id}
-              className={`relative flex ${onRight ? "justify-end" : "justify-start"} ${i > 0 ? "-mt-10" : ""}`}
+              ref={(el) => { refs.current[i] = el; }}
+              style={{ position: "absolute", top: tops[i], [onRight ? "left" : "right"]: "50%" }}
+              className={`w-1/2 ${onRight ? "pl-8" : "pr-8"}`}
             >
-              <span className="absolute left-1/2 top-2 h-4 w-4 -translate-x-1/2 rounded-full bg-brand ring-4 ring-white z-10" />
-              <div
-                className={`w-1/2 ${onRight ? "pl-10" : "pr-10"}`}
-              >
-                <EventContent e={e} align={onRight ? "left" : "right"} />
-              </div>
+              <span
+                className="absolute top-2 h-4 w-4 rounded-full bg-brand ring-4 ring-white z-10"
+                style={onRight ? { left: 0, transform: "translateX(-50%)" } : { right: 0, transform: "translateX(50%)" }}
+              />
+              <EventContent e={e} align={onRight ? "left" : "right"} />
             </div>
           );
         })}
