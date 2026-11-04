@@ -34,6 +34,9 @@ export function TabsSection({ tabs, contentCls }: { tabs: Tab[]; contentCls: str
       <div className="rounded-[25px] bg-[#F6F6F6] px-5 py-8 sm:px-10 sm:py-10">
         <div className={`flex flex-col sm:flex-row items-center gap-8 ${active.image ? "" : "sm:justify-center"}`}>
           <div className="flex-1 min-w-0 w-full space-y-4">
+            {active.label && (
+              <h3 className="text-2xl sm:text-3xl font-bold text-[#1D1D1D]">{active.label}</h3>
+            )}
             {active.bodyHtml.trim() && (
               <div className={contentCls} dangerouslySetInnerHTML={{ __html: active.bodyHtml }} />
             )}

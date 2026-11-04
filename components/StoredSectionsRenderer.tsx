@@ -302,7 +302,7 @@ export function renderStoredSections(
               {s.titre}
             </h2>
           ) : defaultStatsTitle ? (
-            <h2 className="flex flex-col items-center gap-1 text-3xl sm:text-5xl font-bold mb-8 text-center leading-tight">
+            <h2 className="flex flex-col items-center gap-0 text-3xl sm:text-5xl font-bold mb-8 text-center leading-[1.05]">
               <span className="text-[#1D1D1D]">{defaultStatsTitle.black}</span>
               <span className="text-brand">{defaultStatsTitle.blue}</span>
             </h2>
