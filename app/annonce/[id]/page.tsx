@@ -109,7 +109,7 @@ export default async function AnnoncePage({
         .card-heading h1, .card-heading h2, .card-heading h3 { font-size: 1.5rem; font-weight: 700; margin: 0; }
       `}</style>
 
-      <PublicNavbar active="opportunites" />
+      <PublicNavbar candidaterHref="#candidater" />
 
       <main className="flex-1 mx-auto w-full max-w-[1320px] px-6 pt-10 pb-8 space-y-16 sm:space-y-20" style={{ fontFamily: "var(--font-poppins)" }}>
 
