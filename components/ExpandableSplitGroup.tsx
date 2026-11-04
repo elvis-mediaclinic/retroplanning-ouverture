@@ -8,6 +8,7 @@ export type SplitPanel = {
   titre: string;
   bodyHtml: string;
   icone?: string;
+  image?: string;
 };
 
 // 2 ou 3 cartes côte à côte : la carte active occupe la plus grande part de la
@@ -37,7 +38,15 @@ export function ExpandableSplitGroup({ panels, contentCls }: { panels: SplitPane
                 )}
                 {p.titre}
               </h2>
-              <div className={contentCls} dangerouslySetInnerHTML={{ __html: p.bodyHtml }} />
+              <div className="flex flex-col sm:flex-row gap-6 items-start">
+                <div className={contentCls + " flex-1 min-w-0"} dangerouslySetInnerHTML={{ __html: p.bodyHtml }} />
+                {p.image && (
+                  <div className="w-full sm:w-48 shrink-0 aspect-[4/3] overflow-hidden rounded-2xl">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={p.image} alt="" className="h-full w-full object-cover" />
+                  </div>
+                )}
+              </div>
             </div>
           );
         }

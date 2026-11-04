@@ -17,7 +17,7 @@ export type OngletBouton = { id: string; label: string; href: string };
 export type Onglet = { id: string; label: string; contenu_json: string; image?: string; boutons?: OngletBouton[] };
 
 export type Section =
-  | { id: string; type?: "texte"; titre: string; contenu_json: string; disposition?: "pleine" | "moitie" | "tiers"; bleu?: boolean; icone?: string; dansAnnonces?: boolean; titreCentre?: boolean; carte?: boolean; separateurDroite?: boolean }
+  | { id: string; type?: "texte"; titre: string; contenu_json: string; image?: string; disposition?: "pleine" | "moitie" | "tiers"; bleu?: boolean; icone?: string; dansAnnonces?: boolean; titreCentre?: boolean; carte?: boolean; separateurDroite?: boolean }
   | { id: string; type: "stats"; titre: string; stats: Stat[]; colonnes: 2 | 3 | 4; alignement?: "gauche" | "centre"; bleu?: boolean; icone?: string; dansAnnonces?: boolean; separateurs?: boolean }
   | { id: string; type: "titre"; titre: string; icone?: string; dansAnnonces?: boolean }
   | { id: string; type: "separateur"; espacement?: "petit" | "moyen" | "grand"; dansAnnonces?: boolean }
@@ -456,6 +456,7 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
   );
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [photoPickerId, setPhotoPickerId] = useState<string | null>(null);
 
   function toggleIconEditor(id: string) {
     setIconOpenIds((prev) => {
@@ -812,10 +813,37 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
                 onUpdate={(patch) => update(section.id, patch as Partial<Section>)}
               />
             ) : (
-              <BlockEditor
-                defaultJson={(section as { contenu_json: string }).contenu_json || null}
-                onJsonChange={(json) => update(section.id, { contenu_json: json } as Partial<Section>)}
-              />
+              <>
+                <BlockEditor
+                  defaultJson={(section as { contenu_json: string }).contenu_json || null}
+                  onJsonChange={(json) => update(section.id, { contenu_json: json } as Partial<Section>)}
+                />
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setPhotoPickerId(section.id)}
+                    className="shrink-0 h-14 w-20 rounded-md overflow-hidden border border-zinc-300 bg-zinc-100 flex items-center justify-center text-zinc-400 hover:border-brand text-[10px]"
+                    title="Photo affichée à côté du texte (visible quand la section est active dans un accordéon ½ ou ⅓)"
+                  >
+                    {(section as { image?: string }).image ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={(section as { image?: string }).image} alt="" className="h-full w-full object-cover" />
+                    ) : "Photo"}
+                  </button>
+                  <div className="text-xs text-zinc-400">
+                    Photo optionnelle, affichée à côté du texte (utile pour les sections ½ ou ⅓, ex. « Le marché » / « Le local »).
+                    {(section as { image?: string }).image && (
+                      <button
+                        type="button"
+                        onClick={() => update(section.id, { image: undefined } as Partial<Section>)}
+                        className="ml-2 text-red-400 hover:text-red-600"
+                      >
+                        Retirer
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </>
             )}
           </>
         )}
@@ -873,6 +901,13 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
           + Séparateur
         </button>
       </div>
+
+      {photoPickerId && (
+        <MediaPicker
+          onSelect={(url) => { update(photoPickerId, { image: url } as Partial<Section>); setPhotoPickerId(null); }}
+          onClose={() => setPhotoPickerId(null)}
+        />
+      )}
     </div>
   );
 }

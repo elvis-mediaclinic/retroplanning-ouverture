@@ -196,7 +196,7 @@ export type OngletBouton = { id: string; label: string; href: string };
 export type OngletItem = { id: string; label: string; contenu_json: string; image?: string; boutons?: OngletBouton[] };
 
 export type StoredSection =
-  | { id: string; type?: "texte"; titre: string; contenu_json: string; disposition?: "pleine" | "moitie" | "tiers"; bleu?: boolean; icone?: string; dansAnnonces?: boolean; titreCentre?: boolean; carte?: boolean; separateurDroite?: boolean }
+  | { id: string; type?: "texte"; titre: string; contenu_json: string; image?: string; disposition?: "pleine" | "moitie" | "tiers"; bleu?: boolean; icone?: string; dansAnnonces?: boolean; titreCentre?: boolean; carte?: boolean; separateurDroite?: boolean }
   | { id: string; type: "stats"; titre: string; stats: StatItem[]; colonnes: 2 | 3 | 4; alignement?: "gauche" | "centre"; bleu?: boolean; icone?: string; dansAnnonces?: boolean; separateurs?: boolean }
   | { id: string; type: "titre"; titre: string; icone?: string; dansAnnonces?: boolean }
   | { id: string; type: "separateur"; espacement?: "petit" | "moyen" | "grand"; dansAnnonces?: boolean }
@@ -234,7 +234,7 @@ function renderTextSection(s: Extract<StoredSection, { type?: "texte" }>) {
     }
     return [sec.heading ? renderBlock(sec.heading) : "", renderBlocks(sec.blocks)].join("\n");
   }).join("\n");
-  return { titre: s.titre, bodyHtml };
+  return { titre: s.titre, bodyHtml, image: s.image };
 }
 
 // Rend un tableau de StoredSection en JSX (annonces, concept, page franchise…)
@@ -405,8 +405,8 @@ export function renderStoredSections(
       // rendu interactif, la carte active prend la plus grande part de la largeur,
       // les autres se replient et s'échangent au clic.
       const panels = row.pair.map((s) => {
-        const { titre, bodyHtml } = renderTextSection(s as Extract<StoredSection, { type?: "texte" }>);
-        return { id: s.id, titre: titre || "", bodyHtml, icone: (s as { icone?: string }).icone };
+        const { titre, bodyHtml, image } = renderTextSection(s as Extract<StoredSection, { type?: "texte" }>);
+        return { id: s.id, titre: titre || "", bodyHtml, image, icone: (s as { icone?: string }).icone };
       });
       return <ExpandableSplitGroup key={`${keyPrefix}-${ri}`} panels={panels} contentCls={contentCls} />;
     }
