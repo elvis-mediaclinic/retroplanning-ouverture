@@ -29,17 +29,19 @@ export function ExpandableSplitGroup({ panels, contentCls }: { panels: SplitPane
               key={p.id}
               className="rounded-[25px] bg-[#F6F6F6] shadow-[2px_2px_5px_rgba(0,0,0,0.05)] px-5 py-5 sm:px-8 sm:py-8 transition-all duration-300 sm:flex-[2]"
             >
-              <h2 className="flex items-center gap-2 text-3xl sm:text-4xl font-bold mb-4 text-brand">
-                {p.icone && (
-                  <span
-                    className="inline-flex shrink-0 w-6 h-6 [&_svg]:w-full [&_svg]:h-full"
-                    dangerouslySetInnerHTML={{ __html: svgUseCurrentColor(p.icone) }}
-                  />
-                )}
-                {p.titre}
-              </h2>
               <div className="flex flex-col sm:flex-row gap-6 items-stretch">
-                <div className={contentCls + " flex-1 min-w-0"} dangerouslySetInnerHTML={{ __html: p.bodyHtml }} />
+                <div className="flex-1 min-w-0">
+                  <h2 className="flex items-center gap-2 text-3xl sm:text-4xl font-bold mb-4 text-brand">
+                    {p.icone && (
+                      <span
+                        className="inline-flex shrink-0 w-6 h-6 [&_svg]:w-full [&_svg]:h-full"
+                        dangerouslySetInnerHTML={{ __html: svgUseCurrentColor(p.icone) }}
+                      />
+                    )}
+                    {p.titre}
+                  </h2>
+                  <div className={contentCls} dangerouslySetInnerHTML={{ __html: p.bodyHtml }} />
+                </div>
                 {p.image && (
                   <div className="w-full h-56 sm:h-auto sm:w-56 shrink-0 self-stretch overflow-hidden rounded-2xl">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
