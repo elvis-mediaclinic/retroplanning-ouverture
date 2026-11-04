@@ -15,18 +15,20 @@ export type Stat = { id: string; valeur: string; label: string };
 export type Membre = { id: string; photo?: string; nom: string; texte?: string };
 export type OngletBouton = { id: string; label: string; href: string };
 export type Onglet = { id: string; label: string; contenu_json: string; image?: string; boutons?: OngletBouton[] };
+export type EvenementTimeline = { id: string; date: string; titre: string; description?: string };
 
 export type Section =
-  | { id: string; type?: "texte"; titre: string; contenu_json: string; image?: string; disposition?: "pleine" | "moitie" | "tiers"; bleu?: boolean; icone?: string; dansAnnonces?: boolean; titreCentre?: boolean; carte?: boolean; separateurDroite?: boolean }
+  | { id: string; type?: "texte"; titre: string; contenu_json: string; image?: string; disposition?: "pleine" | "moitie" | "tiers"; bleu?: boolean; icone?: string; dansAnnonces?: boolean; titreCentre?: boolean; carte?: boolean; separateurDroite?: boolean; carteStatique?: boolean }
   | { id: string; type: "stats"; titre: string; stats: Stat[]; colonnes: 2 | 3 | 4; alignement?: "gauche" | "centre"; bleu?: boolean; icone?: string; dansAnnonces?: boolean; separateurs?: boolean }
   | { id: string; type: "titre"; titre: string; icone?: string; dansAnnonces?: boolean }
   | { id: string; type: "separateur"; espacement?: "petit" | "moyen" | "grand"; dansAnnonces?: boolean }
   | { id: string; type: "equipe"; titre: string; membres: Membre[]; colonnes?: 2 | 3 | 4; bleu?: boolean; icone?: string; dansAnnonces?: boolean; titreCentre?: boolean; carte?: boolean }
-  | { id: string; type: "onglets"; titre: string; onglets: Onglet[]; dansAnnonces?: boolean };
+  | { id: string; type: "onglets"; titre: string; onglets: Onglet[]; dansAnnonces?: boolean }
+  | { id: string; type: "timeline"; titre: string; evenements: EvenementTimeline[]; dansAnnonces?: boolean };
 
 function uid() { return Math.random().toString(36).slice(2); }
 
-function makeSection(type: "texte" | "stats" | "titre" | "separateur" | "equipe" | "onglets"): Section {
+function makeSection(type: "texte" | "stats" | "titre" | "separateur" | "equipe" | "onglets" | "timeline"): Section {
   if (type === "stats") {
     return { id: uid(), type: "stats", titre: "", stats: [{ id: uid(), valeur: "", label: "" }], colonnes: 3 };
   }
@@ -42,12 +44,15 @@ function makeSection(type: "texte" | "stats" | "titre" | "separateur" | "equipe"
   if (type === "onglets") {
     return { id: uid(), type: "onglets", titre: "", onglets: [{ id: uid(), label: "", contenu_json: "" }] };
   }
+  if (type === "timeline") {
+    return { id: uid(), type: "timeline", titre: "", evenements: [{ id: uid(), date: "", titre: "" }] };
+  }
   return { id: uid(), type: "texte", titre: "", contenu_json: "" };
 }
 
 type Row = { kind: "full"; index: number } | { kind: "group"; cols: 2 | 3; indices: number[] };
 
-const NO_DISPOSITION_TYPES = ["stats", "titre", "separateur", "equipe", "onglets"] as const;
+const NO_DISPOSITION_TYPES = ["stats", "titre", "separateur", "equipe", "onglets", "timeline"] as const;
 function hasDisposition(s: Section): s is Extract<Section, { disposition?: string }> {
   return !(NO_DISPOSITION_TYPES as readonly string[]).includes(s.type ?? "texte");
 }
@@ -82,7 +87,7 @@ const GROUP_GRID: Record<2 | 3, string> = {
   3: "grid grid-cols-1 sm:grid-cols-3 gap-3",
 };
 
-function InsertRow({ onInsert }: { onInsert: (type: "texte" | "stats" | "titre" | "separateur" | "equipe" | "onglets") => void }) {
+function InsertRow({ onInsert }: { onInsert: (type: "texte" | "stats" | "titre" | "separateur" | "equipe" | "onglets" | "timeline") => void }) {
   const [open, setOpen] = useState(false);
 
   if (!open) {
@@ -122,6 +127,10 @@ function InsertRow({ onInsert }: { onInsert: (type: "texte" | "stats" | "titre" 
       <button type="button" onClick={() => { onInsert("onglets"); setOpen(false); }}
         className="flex-1 rounded-lg border border-dashed border-sky-300 py-1.5 text-xs text-sky-600 hover:border-sky-400 hover:text-sky-700 transition-colors">
         + Onglets
+      </button>
+      <button type="button" onClick={() => { onInsert("timeline"); setOpen(false); }}
+        className="flex-1 rounded-lg border border-dashed border-rose-300 py-1.5 text-xs text-rose-600 hover:border-rose-400 hover:text-rose-700 transition-colors">
+        + Timeline
       </button>
       <button type="button" onClick={() => { onInsert("separateur"); setOpen(false); }}
         className="flex-1 rounded-lg border border-dashed border-zinc-400 py-1.5 text-xs text-zinc-600 hover:border-zinc-500 hover:text-zinc-800 transition-colors">
@@ -444,6 +453,68 @@ function OngletsEditor({ section, onUpdate }: { section: Extract<Section, { type
   );
 }
 
+function TimelineEditor({ section, onUpdate }: { section: Extract<Section, { type: "timeline" }>; onUpdate: (patch: Partial<Extract<Section, { type: "timeline" }>>) => void }) {
+  function updateEvt(id: string, patch: Partial<EvenementTimeline>) {
+    onUpdate({ evenements: section.evenements.map((e) => (e.id === id ? { ...e, ...patch } : e)) });
+  }
+  function moveEvt(i: number, dir: -1 | 1) {
+    const next = [...section.evenements];
+    const target = i + dir;
+    if (target < 0 || target >= next.length) return;
+    [next[i], next[target]] = [next[target], next[i]];
+    onUpdate({ evenements: next });
+  }
+
+  return (
+    <div className="space-y-3">
+      <p className="text-xs text-zinc-400">Les événements s&apos;affichent dans l&apos;ordre ci-dessous (utilisez ↑↓ pour réordonner).</p>
+      <div className="space-y-2">
+        {section.evenements.map((evt, i) => (
+          <div key={evt.id} className="rounded-md border border-zinc-200 bg-white p-3 space-y-2">
+            <div className="flex items-center gap-2">
+              <input
+                value={evt.date}
+                onChange={(e) => updateEvt(evt.id, { date: e.target.value })}
+                placeholder="2018"
+                className="w-28 rounded-md border border-zinc-300 px-2 py-1 text-sm font-bold text-brand"
+              />
+              <input
+                value={evt.titre}
+                onChange={(e) => updateEvt(evt.id, { titre: e.target.value })}
+                placeholder="Création de Mediaclinic"
+                className="flex-1 rounded-md border border-zinc-300 px-2 py-1 text-sm font-medium"
+              />
+              <button type="button" onClick={() => moveEvt(i, -1)} disabled={i === 0} title="Monter"
+                className="rounded border border-zinc-300 bg-white px-2 py-1 text-xs text-zinc-500 hover:bg-zinc-50 disabled:opacity-30">↑</button>
+              <button type="button" onClick={() => moveEvt(i, 1)} disabled={i === section.evenements.length - 1} title="Descendre"
+                className="rounded border border-zinc-300 bg-white px-2 py-1 text-xs text-zinc-500 hover:bg-zinc-50 disabled:opacity-30">↓</button>
+              <button
+                type="button"
+                onClick={() => onUpdate({ evenements: section.evenements.filter((e) => e.id !== evt.id) })}
+                className="text-xs text-red-400 hover:text-red-600 shrink-0"
+              >✕</button>
+            </div>
+            <textarea
+              value={evt.description ?? ""}
+              onChange={(e) => updateEvt(evt.id, { description: e.target.value })}
+              placeholder="Description (optionnelle)"
+              rows={2}
+              className="w-full rounded-md border border-zinc-300 px-2 py-1 text-sm"
+            />
+          </div>
+        ))}
+      </div>
+      <button
+        type="button"
+        onClick={() => onUpdate({ evenements: [...section.evenements, { id: uid(), date: "", titre: "" }] })}
+        className="text-xs text-brand hover:text-brand-dark"
+      >
+        + Ajouter un événement
+      </button>
+    </div>
+  );
+}
+
 export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSections?: Section[]; annonceToggle?: boolean }) {
   const inputId = useId();
   const [sections, setSections] = useState<Section[]>(
@@ -492,7 +563,7 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
     setSections((prev) => prev.filter((s) => s.id !== id));
   }
 
-  function insertAt(index: number, type: "texte" | "stats" | "titre" | "separateur" | "equipe" | "onglets") {
+  function insertAt(index: number, type: "texte" | "stats" | "titre" | "separateur" | "equipe" | "onglets" | "timeline") {
     setSections((prev) => {
       const next = [...prev];
       next.splice(index, 0, makeSection(type));
@@ -509,6 +580,7 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
         ...(original.type === "stats" ? { stats: original.stats.map((s) => ({ ...s, id: uid() })) } : {}),
         ...(original.type === "equipe" ? { membres: original.membres.map((m) => ({ ...m, id: uid() })) } : {}),
         ...(original.type === "onglets" ? { onglets: original.onglets.map((o) => ({ ...o, id: uid() })) } : {}),
+        ...(original.type === "timeline" ? { evenements: original.evenements.map((e) => ({ ...e, id: uid() })) } : {}),
       };
       const next = [...prev];
       next.splice(index + 1, 0, clone);
@@ -532,6 +604,7 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
     const isSeparateur = section.type === "separateur";
     const isEquipe = section.type === "equipe";
     const isOnglets = section.type === "onglets";
+    const isTimeline = section.type === "timeline";
     const disposition = hasDisposition(section) ? section.disposition : undefined;
     const collapsed = collapsedIds.has(section.id);
 
@@ -618,7 +691,7 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
           setDragIndex(null);
           setDragOverIndex(null);
         }}
-        className={`rounded-lg border p-4 space-y-3 transition-colors ${isStats ? "border-amber-200 bg-amber-50/40" : isTitre ? "border-violet-200 bg-violet-50/40" : isEquipe ? "border-emerald-200 bg-emerald-50/40" : isOnglets ? "border-sky-200 bg-sky-50/40" : "border-zinc-200 bg-zinc-50"} ${
+        className={`rounded-lg border p-4 space-y-3 transition-colors ${isStats ? "border-amber-200 bg-amber-50/40" : isTitre ? "border-violet-200 bg-violet-50/40" : isEquipe ? "border-emerald-200 bg-emerald-50/40" : isOnglets ? "border-sky-200 bg-sky-50/40" : isTimeline ? "border-rose-200 bg-rose-50/40" : "border-zinc-200 bg-zinc-50"} ${
           dragOverIndex === i && dragIndex !== null && dragIndex !== i ? "ring-2 ring-brand" : ""
         } ${dragIndex === i ? "opacity-40" : ""}`}
       >
@@ -643,8 +716,8 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
               {collapsed ? "▶" : "▼"}
             </button>
             <div className="flex items-center gap-1.5 shrink-0">
-              <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${isStats ? "bg-amber-100 text-amber-700" : isTitre ? "bg-violet-100 text-violet-700" : isEquipe ? "bg-emerald-100 text-emerald-700" : isOnglets ? "bg-sky-100 text-sky-700" : "bg-zinc-200 text-zinc-500"}`}>
-                {isStats ? "Stats" : isTitre ? "Titre" : isEquipe ? "Équipe" : isOnglets ? "Onglets" : "Texte"}
+              <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${isStats ? "bg-amber-100 text-amber-700" : isTitre ? "bg-violet-100 text-violet-700" : isEquipe ? "bg-emerald-100 text-emerald-700" : isOnglets ? "bg-sky-100 text-sky-700" : isTimeline ? "bg-rose-100 text-rose-700" : "bg-zinc-200 text-zinc-500"}`}>
+                {isStats ? "Stats" : isTitre ? "Titre" : isEquipe ? "Équipe" : isOnglets ? "Onglets" : isTimeline ? "Timeline" : "Texte"}
               </span>
             </div>
             <input
@@ -674,7 +747,7 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
               ) : null}
               Icône
             </button>
-            {!isTitre && !isOnglets && (
+            {!isTitre && !isOnglets && !isTimeline && (
               <label className="flex items-center gap-1 rounded border border-zinc-300 bg-white px-2 py-1 text-xs font-medium text-zinc-500 cursor-pointer">
                 <input
                   type="checkbox"
@@ -685,7 +758,7 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
                 Fond bleu
               </label>
             )}
-            {!isStats && !isTitre && !isOnglets && (
+            {!isStats && !isTitre && !isOnglets && !isTimeline && (
               <label className="flex items-center gap-1 rounded border border-zinc-300 bg-white px-2 py-1 text-xs font-medium text-zinc-500 cursor-pointer">
                 <input
                   type="checkbox"
@@ -696,7 +769,7 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
                 Titre centré
               </label>
             )}
-            {!isStats && !isTitre && !isOnglets && (
+            {!isStats && !isTitre && !isOnglets && !isTimeline && (
               <label className="flex items-center gap-1 rounded border border-zinc-300 bg-white px-2 py-1 text-xs font-medium text-zinc-500 cursor-pointer">
                 <input
                   type="checkbox"
@@ -707,7 +780,7 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
                 {isEquipe ? "Chaque élément dans une carte" : "Carte"}
               </label>
             )}
-            {!isStats && !isTitre && !isEquipe && !isOnglets && (disposition === "moitie" || disposition === "tiers") && (
+            {!isStats && !isTitre && !isEquipe && !isOnglets && !isTimeline && (disposition === "moitie" || disposition === "tiers") && (
               <label className="flex items-center gap-1 rounded border border-zinc-300 bg-white px-2 py-1 text-xs font-medium text-zinc-500 cursor-pointer">
                 <input
                   type="checkbox"
@@ -716,6 +789,17 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
                   className="h-3 w-3 accent-brand"
                 />
                 Séparateur à droite
+              </label>
+            )}
+            {!isStats && !isTitre && !isEquipe && !isOnglets && !isTimeline && (disposition === "moitie" || disposition === "tiers") && (
+              <label className="flex items-center gap-1 rounded border border-zinc-300 bg-white px-2 py-1 text-xs font-medium text-zinc-500 cursor-pointer" title="Désactive l'accordéon interactif : toutes les cartes du groupe s'affichent côte à côte, ouvertes en permanence">
+                <input
+                  type="checkbox"
+                  checked={(section as { carteStatique?: boolean }).carteStatique ?? false}
+                  onChange={(e) => update(section.id, { carteStatique: e.target.checked } as Partial<Section>)}
+                  className="h-3 w-3 accent-brand"
+                />
+                Cartes côte à côte (pas d&apos;accordéon)
               </label>
             )}
             {annonceToggle && (
@@ -729,7 +813,7 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
                 Dans les annonces
               </label>
             )}
-            {!isStats && !isEquipe && !isOnglets && (
+            {!isStats && !isEquipe && !isOnglets && !isTimeline && (
               <>
                 {(["pleine", "moitie", "tiers"] as const).map((d) => (
                   <button
@@ -810,6 +894,11 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
             ) : isOnglets ? (
               <OngletsEditor
                 section={section as Extract<Section, { type: "onglets" }>}
+                onUpdate={(patch) => update(section.id, patch as Partial<Section>)}
+              />
+            ) : isTimeline ? (
+              <TimelineEditor
+                section={section as Extract<Section, { type: "timeline" }>}
                 onUpdate={(patch) => update(section.id, patch as Partial<Section>)}
               />
             ) : (
@@ -895,6 +984,10 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
         <button type="button" onClick={() => insertAt(sections.length, "onglets")}
           className="flex-1 rounded-lg border border-dashed border-sky-300 py-2.5 text-sm text-sky-600 hover:border-sky-400 hover:text-sky-700 transition-colors">
           + Onglets
+        </button>
+        <button type="button" onClick={() => insertAt(sections.length, "timeline")}
+          className="flex-1 rounded-lg border border-dashed border-rose-300 py-2.5 text-sm text-rose-600 hover:border-rose-400 hover:text-rose-700 transition-colors">
+          + Timeline
         </button>
         <button type="button" onClick={() => insertAt(sections.length, "separateur")}
           className="flex-1 rounded-lg border border-dashed border-zinc-400 py-2.5 text-sm text-zinc-600 hover:border-zinc-500 hover:text-zinc-800 transition-colors">

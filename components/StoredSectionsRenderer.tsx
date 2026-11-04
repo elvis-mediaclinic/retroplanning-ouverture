@@ -1,6 +1,7 @@
 import { svgUseCurrentColor } from "@/lib/utils";
 import { ExpandableSplitGroup } from "./ExpandableSplitGroup";
 import { TabsSection } from "./TabsSection";
+import { TimelineSection } from "./TimelineSection";
 
 // ── BlockNote JSON renderer ──────────────────────────────────────────────────
 
@@ -194,14 +195,16 @@ export type StatItem = { id: string; valeur: string; label: string };
 export type MembreItem = { id: string; photo?: string; nom: string; texte?: string };
 export type OngletBouton = { id: string; label: string; href: string };
 export type OngletItem = { id: string; label: string; contenu_json: string; image?: string; boutons?: OngletBouton[] };
+export type EvenementTimelineItem = { id: string; date: string; titre: string; description?: string };
 
 export type StoredSection =
-  | { id: string; type?: "texte"; titre: string; contenu_json: string; image?: string; disposition?: "pleine" | "moitie" | "tiers"; bleu?: boolean; icone?: string; dansAnnonces?: boolean; titreCentre?: boolean; carte?: boolean; separateurDroite?: boolean }
+  | { id: string; type?: "texte"; titre: string; contenu_json: string; image?: string; disposition?: "pleine" | "moitie" | "tiers"; bleu?: boolean; icone?: string; dansAnnonces?: boolean; titreCentre?: boolean; carte?: boolean; separateurDroite?: boolean; carteStatique?: boolean }
   | { id: string; type: "stats"; titre: string; stats: StatItem[]; colonnes: 2 | 3 | 4; alignement?: "gauche" | "centre"; bleu?: boolean; icone?: string; dansAnnonces?: boolean; separateurs?: boolean }
   | { id: string; type: "titre"; titre: string; icone?: string; dansAnnonces?: boolean }
   | { id: string; type: "separateur"; espacement?: "petit" | "moyen" | "grand"; dansAnnonces?: boolean }
   | { id: string; type: "equipe"; titre: string; membres: MembreItem[]; colonnes?: 2 | 3 | 4; bleu?: boolean; icone?: string; dansAnnonces?: boolean; titreCentre?: boolean; carte?: boolean }
-  | { id: string; type: "onglets"; titre: string; onglets: OngletItem[]; dansAnnonces?: boolean };
+  | { id: string; type: "onglets"; titre: string; onglets: OngletItem[]; dansAnnonces?: boolean }
+  | { id: string; type: "timeline"; titre: string; evenements: EvenementTimelineItem[]; dansAnnonces?: boolean };
 
 function SectionIcon({ svg, className }: { svg?: string; className?: string }) {
   if (!svg) return null;
@@ -249,14 +252,14 @@ export function renderStoredSections(
   let i = 0;
   while (i < list.length) {
     const s = list[i];
-    const disp = (s.type !== "stats" && s.type !== "titre" && s.type !== "separateur" && s.type !== "equipe" && s.type !== "onglets") ? s.disposition : undefined;
+    const disp = (s.type !== "stats" && s.type !== "titre" && s.type !== "separateur" && s.type !== "equipe" && s.type !== "onglets" && s.type !== "timeline") ? s.disposition : undefined;
     if (disp === "moitie" || disp === "tiers") {
       const targetDisp = disp;
       const maxCols = disp === "moitie" ? 2 : 3;
       const group: StoredSection[] = [s];
       while (group.length < maxCols) {
         const next = list[i + 1];
-        if (next && next.type !== "stats" && next.type !== "titre" && next.type !== "separateur" && next.type !== "equipe" && next.type !== "onglets" && next.disposition === targetDisp) {
+        if (next && next.type !== "stats" && next.type !== "titre" && next.type !== "separateur" && next.type !== "equipe" && next.type !== "onglets" && next.type !== "timeline" && next.disposition === targetDisp) {
           group.push(next); i++;
         } else break;
       }
@@ -400,7 +403,21 @@ export function renderStoredSections(
       );
     }
 
-    if (row.kind === "group" && (row.cols === 2 || row.cols === 3)) {
+    if (row.kind === "full" && row.s.type === "timeline") {
+      const s = row.s as Extract<StoredSection, { type: "timeline" }>;
+      return (
+        <div key={`${keyPrefix}-${ri}`} className="space-y-10">
+          {s.titre && (
+            <h2 className="text-3xl sm:text-4xl font-bold text-center text-[#1D1D1D]">{s.titre}</h2>
+          )}
+          <TimelineSection evenements={s.evenements} />
+        </div>
+      );
+    }
+
+    const groupCarteStatique = row.kind === "group" && ((row.pair[0] as { carteStatique?: boolean }).carteStatique ?? false);
+
+    if (row.kind === "group" && (row.cols === 2 || row.cols === 3) && !groupCarteStatique) {
       // Groupe de 2 ou 3 sections (ex. "Le marché" / "Le local" [/ un 3e critère]) :
       // rendu interactif, la carte active prend la plus grande part de la largeur,
       // les autres se replient et s'échangent au clic.
@@ -420,12 +437,18 @@ export function renderStoredSections(
             const carte = (s as { carte?: boolean }).carte ?? true;
             const separateurDroite = (s as { separateurDroite?: boolean }).separateurDroite ?? false;
             const prevSeparateurDroite = idx > 0 && ((row.pair[idx - 1] as { separateurDroite?: boolean }).separateurDroite ?? false);
-            const { titre, bodyHtml } = renderTextSection(s as Extract<StoredSection, { type?: "texte" }>);
+            const { titre, bodyHtml, image } = renderTextSection(s as Extract<StoredSection, { type?: "texte" }>);
             const cls = !carte
               ? `py-4 ${separateurDroite ? "pr-4 sm:pr-6 border-r border-zinc-200" : ""} ${prevSeparateurDroite ? "pl-4 sm:pl-6" : ""}`
               : `${bleu ? bleuCardCls : colCardCls} ${separateurDroite ? "border-r-2 border-r-zinc-200" : ""}`;
             return (
               <div key={s.id} className={cls}>
+                {image && (
+                  <div className="mb-4 -mt-1 aspect-[16/10] overflow-hidden rounded-2xl">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={image} alt="" className="h-full w-full object-cover" />
+                  </div>
+                )}
                 {titre && (
                   <h2 className={`flex items-center gap-2 text-3xl font-bold mb-4 ${bleu && carte ? "text-white" : "text-brand"} ${titreCentre ? "justify-center text-center" : ""}`}>
                     <SectionIcon svg={(s as { icone?: string }).icone} />
