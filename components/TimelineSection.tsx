@@ -14,12 +14,13 @@ function EventContent({ e, align }: { e: TimelineEvent; align?: "left" | "right"
   );
 }
 
-// Frise chronologique : liste simple à gauche sur mobile, en quinconce de
-// part et d'autre d'une ligne centrale à partir de sm (gain de place).
+// Frise chronologique : liste simple à gauche sur mobile. À partir de sm,
+// ligne centrale avec événements en quinconce qui se chevauchent légèrement
+// (le suivant démarre à mi-hauteur du précédent, pas en dessous).
 export function TimelineSection({ evenements }: { evenements: TimelineEvent[] }) {
   return (
     <>
-      {/* Mobile : ligne à gauche */}
+      {/* Mobile : ligne à gauche, événements empilés */}
       <div className="sm:hidden">
         {evenements.map((e, i) => (
           <div key={e.id} className="flex gap-6">
@@ -34,19 +35,22 @@ export function TimelineSection({ evenements }: { evenements: TimelineEvent[] })
         ))}
       </div>
 
-      {/* Desktop : ligne centrale, événements en quinconce */}
-      <div className="hidden sm:block">
+      {/* Desktop : ligne centrale, événements en quinconce qui se chevauchent */}
+      <div className="hidden sm:block relative">
+        <div className="absolute left-1/2 top-0 bottom-0 w-0.5 -translate-x-1/2 bg-brand/20" />
         {evenements.map((e, i) => {
-          const onLeft = i % 2 === 0;
-          const isLast = i === evenements.length - 1;
+          const onRight = i % 2 === 0;
           return (
-            <div key={e.id} className="grid grid-cols-[1fr_32px_1fr] items-stretch gap-6">
-              <div className="pt-1">{onLeft && <EventContent e={e} align="right" />}</div>
-              <div className="flex flex-col items-center">
-                <span className="mt-1.5 h-4 w-4 shrink-0 rounded-full bg-brand ring-4 ring-white" />
-                {!isLast && <span className="w-0.5 flex-1 bg-brand/20" />}
+            <div
+              key={e.id}
+              className={`relative flex ${onRight ? "justify-end" : "justify-start"} ${i > 0 ? "-mt-10" : ""}`}
+            >
+              <span className="absolute left-1/2 top-2 h-4 w-4 -translate-x-1/2 rounded-full bg-brand ring-4 ring-white z-10" />
+              <div
+                className={`w-1/2 ${onRight ? "pl-10" : "pr-10"}`}
+              >
+                <EventContent e={e} align={onRight ? "left" : "right"} />
               </div>
-              <div className={`pt-1 ${isLast ? "" : "pb-10"}`}>{!onLeft && <EventContent e={e} />}</div>
             </div>
           );
         })}
