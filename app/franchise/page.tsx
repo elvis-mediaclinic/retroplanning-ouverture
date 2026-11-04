@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import { PublicNavbar } from "@/components/PublicNavbar";
 import { PublicFooter } from "@/components/PublicFooter";
@@ -18,31 +17,16 @@ export default async function FranchisePage() {
   const conceptSections = parseStoredSections(conceptPage?.sections) ?? [];
 
   return (
-    <div className="min-h-dvh flex flex-col bg-zinc-100">
-      <style>{`
-        body { background: #0089bd; }
-      `}</style>
-
+    <div className="min-h-dvh flex flex-col bg-white">
       <PublicNavbar active="franchise" />
 
-      <main className="flex-1 mx-auto w-full max-w-[1600px] px-6 pt-3 pb-8 space-y-6">
-        {/* Header automatique — logo + "La franchise" */}
-        <div className="text-center mt-10">
-          <div className="flex justify-center mb-6">
-            <Image
-              src="/Logo-MediaClinic-Noir.png"
-              alt="Mediaclinic"
-              width={400}
-              height={100}
-              className="h-[100px] w-auto object-contain"
-            />
-          </div>
-          <p className="text-xl sm:text-2xl font-semibold uppercase tracking-widest text-[#0089bd]">
-            La franchise
-          </p>
-        </div>
-
-        <hr className="border-t border-zinc-200 my-12" />
+      <main
+        className="flex-1 mx-auto w-full max-w-[1320px] px-6 pt-16 pb-8 space-y-16 sm:space-y-20"
+        style={{ fontFamily: "var(--font-poppins)" }}
+      >
+        <h1 className="text-4xl sm:text-6xl font-bold leading-[1.1] tracking-tight text-center text-[#1D1D1D] max-w-4xl mx-auto">
+          La franchise Mediaclinic
+        </h1>
 
         {conceptSections.length > 0 ? (
           renderStoredSections(conceptSections, "franchise")
