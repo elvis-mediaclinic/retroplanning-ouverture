@@ -38,10 +38,10 @@ export function ExpandableSplitGroup({ panels, contentCls }: { panels: SplitPane
                 )}
                 {p.titre}
               </h2>
-              <div className="flex flex-col sm:flex-row gap-6 items-start">
+              <div className="flex flex-col sm:flex-row gap-6 items-stretch">
                 <div className={contentCls + " flex-1 min-w-0"} dangerouslySetInnerHTML={{ __html: p.bodyHtml }} />
                 {p.image && (
-                  <div className="w-full sm:w-48 shrink-0 aspect-[4/3] overflow-hidden rounded-2xl">
+                  <div className="w-full h-56 sm:h-auto sm:w-56 shrink-0 self-stretch overflow-hidden rounded-2xl">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={p.image} alt="" className="h-full w-full object-cover" />
                   </div>
