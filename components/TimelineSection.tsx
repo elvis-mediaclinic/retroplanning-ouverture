@@ -5,8 +5,9 @@ import { useLayoutEffect, useRef, useState } from "react";
 export type TimelineEvent = { id: string; date: string; titre: string; description?: string };
 
 function EventContent({ e, align }: { e: TimelineEvent; align?: "left" | "right" }) {
+  const borderCls = align === "right" ? "border-r-2 border-brand/30 pr-6" : "border-l-2 border-brand/30 pl-6";
   return (
-    <div className={align === "right" ? "text-right" : ""}>
+    <div className={`${align === "right" ? "text-right" : ""} ${borderCls}`}>
       {e.date && (
         <p className="text-sm font-bold uppercase tracking-wide text-brand">{e.date}</p>
       )}
@@ -39,7 +40,7 @@ export function TimelineSection({ evenements }: { evenements: TimelineEvent[] })
       let leftNext = 0;
       let rightNext = 0;
       evenements.forEach((_, i) => {
-        const onRight = i % 2 === 0;
+        const onRight = i % 2 === 1;
         const top = onRight ? rightNext : leftNext;
         nextTops[i] = top;
         const half = heights[i] / 2;
@@ -82,7 +83,7 @@ export function TimelineSection({ evenements }: { evenements: TimelineEvent[] })
       <div className="hidden sm:block relative" style={{ height: containerHeight || undefined }}>
         <div className="absolute left-1/2 top-0 bottom-0 w-0.5 -translate-x-1/2 bg-brand/20" />
         {evenements.map((e, i) => {
-          const onRight = i % 2 === 0;
+          const onRight = i % 2 === 1;
           return (
             <div
               key={e.id}
