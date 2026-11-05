@@ -15,7 +15,7 @@ export type Stat = { id: string; valeur: string; label: string };
 export type Membre = { id: string; photo?: string; nom: string; texte?: string };
 export type OngletBouton = { id: string; label: string; href: string };
 export type Onglet = { id: string; label: string; contenu_json: string; image?: string; boutons?: OngletBouton[] };
-export type EvenementTimeline = { id: string; date: string; titre: string; description?: string };
+export type EvenementTimeline = { id: string; date: string; mois?: string; titre: string; description?: string };
 
 export type Section =
   | { id: string; type?: "texte"; titre: string; contenu_json: string; image?: string; disposition?: "pleine" | "moitie" | "tiers"; bleu?: boolean; icone?: string; dansAnnonces?: boolean; titreCentre?: boolean; carte?: boolean; separateurDroite?: boolean; carteStatique?: boolean }
@@ -473,10 +473,16 @@ function TimelineEditor({ section, onUpdate }: { section: Extract<Section, { typ
           <div key={evt.id} className="rounded-md border border-zinc-200 bg-white p-3 space-y-2">
             <div className="flex items-center gap-2">
               <input
+                value={evt.mois ?? ""}
+                onChange={(e) => updateEvt(evt.id, { mois: e.target.value })}
+                placeholder="Septembre"
+                className="w-28 rounded-md border border-zinc-300 px-2 py-1 text-sm font-bold text-[#1D1D1D]"
+              />
+              <input
                 value={evt.date}
                 onChange={(e) => updateEvt(evt.id, { date: e.target.value })}
                 placeholder="2018"
-                className="w-28 rounded-md border border-zinc-300 px-2 py-1 text-sm font-bold text-brand"
+                className="w-20 rounded-md border border-zinc-300 px-2 py-1 text-sm font-bold text-brand"
               />
               <input
                 value={evt.titre}

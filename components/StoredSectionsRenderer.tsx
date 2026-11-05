@@ -195,7 +195,7 @@ export type StatItem = { id: string; valeur: string; label: string };
 export type MembreItem = { id: string; photo?: string; nom: string; texte?: string };
 export type OngletBouton = { id: string; label: string; href: string };
 export type OngletItem = { id: string; label: string; contenu_json: string; image?: string; boutons?: OngletBouton[] };
-export type EvenementTimelineItem = { id: string; date: string; titre: string; description?: string };
+export type EvenementTimelineItem = { id: string; date: string; mois?: string; titre: string; description?: string };
 
 export type StoredSection =
   | { id: string; type?: "texte"; titre: string; contenu_json: string; image?: string; disposition?: "pleine" | "moitie" | "tiers"; bleu?: boolean; icone?: string; dansAnnonces?: boolean; titreCentre?: boolean; carte?: boolean; separateurDroite?: boolean; carteStatique?: boolean }

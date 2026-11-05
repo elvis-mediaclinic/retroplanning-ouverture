@@ -2,14 +2,17 @@
 
 import { useLayoutEffect, useRef, useState } from "react";
 
-export type TimelineEvent = { id: string; date: string; titre: string; description?: string };
+export type TimelineEvent = { id: string; date: string; mois?: string; titre: string; description?: string };
 
 function EventContent({ e, align }: { e: TimelineEvent; align?: "left" | "right" }) {
   const borderCls = align === "right" ? "border-r-2 border-brand/30 pr-6" : "border-l-2 border-brand/30 pl-6";
   return (
     <div className={`${align === "right" ? "text-right" : ""} ${borderCls}`}>
-      {e.date && (
-        <p className="text-sm font-bold uppercase tracking-wide text-brand">{e.date}</p>
+      {(e.mois || e.date) && (
+        <p className="text-sm font-bold uppercase tracking-wide">
+          {e.mois && <span className="text-[#1D1D1D]">{e.mois} </span>}
+          {e.date && <span className="text-brand">{e.date}</span>}
+        </p>
       )}
       <h3 className="text-xl sm:text-2xl font-bold text-[#1D1D1D] mt-1">{e.titre}</h3>
       {e.description && (
