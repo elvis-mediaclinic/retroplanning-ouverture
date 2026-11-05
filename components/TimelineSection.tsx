@@ -95,6 +95,10 @@ export function TimelineSection({ evenements }: { evenements: TimelineEvent[] })
                 className="absolute top-2 h-4 w-4 rounded-full bg-brand ring-4 ring-white z-10"
                 style={onRight ? { left: 0, transform: "translateX(-50%)" } : { right: 0, transform: "translateX(50%)" }}
               />
+              <span
+                className="absolute top-[15px] h-0.5 w-8 bg-brand/30"
+                style={onRight ? { left: 0 } : { right: 0 }}
+              />
               <EventContent e={e} align={onRight ? "left" : "right"} />
             </div>
           );
