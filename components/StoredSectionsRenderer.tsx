@@ -198,14 +198,16 @@ export type OngletBouton = { id: string; label: string; href: string };
 export type OngletItem = { id: string; label: string; contenu_json: string; image?: string; boutons?: OngletBouton[] };
 export type EvenementTimelineItem = { id: string; date: string; mois?: string; titre: string; description?: string };
 
+export type EspacementHaut = "defaut" | "aucun" | "petit" | "moyen" | "grand" | "tres-grand";
+
 export type StoredSection =
-  | { id: string; type?: "texte"; titre: string; contenu_json: string; image?: string; disposition?: "pleine" | "moitie" | "tiers"; bleu?: boolean; icone?: string; dansAnnonces?: boolean; titreCentre?: boolean; carte?: boolean; separateurDroite?: boolean; carteStatique?: boolean }
-  | { id: string; type: "stats"; titre: string; stats: StatItem[]; colonnes: 2 | 3 | 4; alignement?: "gauche" | "centre"; bleu?: boolean; icone?: string; dansAnnonces?: boolean; separateurs?: boolean }
-  | { id: string; type: "titre"; titre: string; icone?: string; dansAnnonces?: boolean }
+  | { id: string; type?: "texte"; titre: string; contenu_json: string; image?: string; disposition?: "pleine" | "moitie" | "tiers"; bleu?: boolean; icone?: string; dansAnnonces?: boolean; titreCentre?: boolean; carte?: boolean; separateurDroite?: boolean; carteStatique?: boolean; espacementHaut?: EspacementHaut }
+  | { id: string; type: "stats"; titre: string; stats: StatItem[]; colonnes: 2 | 3 | 4; alignement?: "gauche" | "centre"; bleu?: boolean; icone?: string; dansAnnonces?: boolean; separateurs?: boolean; espacementHaut?: EspacementHaut }
+  | { id: string; type: "titre"; titre: string; icone?: string; dansAnnonces?: boolean; espacementHaut?: EspacementHaut }
   | { id: string; type: "separateur"; espacement?: "petit" | "moyen" | "grand"; dansAnnonces?: boolean }
-  | { id: string; type: "equipe"; titre: string; membres: MembreItem[]; colonnes?: 2 | 3 | 4; bleu?: boolean; icone?: string; dansAnnonces?: boolean; titreCentre?: boolean; carte?: boolean }
-  | { id: string; type: "onglets"; titre: string; onglets: OngletItem[]; dansAnnonces?: boolean }
-  | { id: string; type: "timeline"; titre: string; evenements: EvenementTimelineItem[]; dansAnnonces?: boolean };
+  | { id: string; type: "equipe"; titre: string; membres: MembreItem[]; colonnes?: 2 | 3 | 4; bleu?: boolean; icone?: string; dansAnnonces?: boolean; titreCentre?: boolean; carte?: boolean; espacementHaut?: EspacementHaut }
+  | { id: string; type: "onglets"; titre: string; onglets: OngletItem[]; dansAnnonces?: boolean; espacementHaut?: EspacementHaut }
+  | { id: string; type: "timeline"; titre: string; evenements: EvenementTimelineItem[]; dansAnnonces?: boolean; espacementHaut?: EspacementHaut };
 
 function SectionIcon({ svg, className }: { svg?: string; className?: string }) {
   if (!svg) return null;
@@ -276,7 +278,7 @@ export function renderStoredSections(
     3: "grid grid-cols-1 sm:grid-cols-3 gap-4",
   };
 
-  return rows.map((row, ri) => {
+  function renderRow(row: (typeof rows)[number], ri: number) {
     if (row.kind === "full" && row.s.type === "separateur") {
       const ESPACEMENT: Record<string, string> = { petit: "my-1", moyen: "my-4", grand: "my-8" };
       return <hr key={`${keyPrefix}-${ri}`} className={`border-t border-zinc-200 ${ESPACEMENT[row.s.espacement ?? "moyen"]}`} />;
@@ -480,6 +482,26 @@ export function renderStoredSections(
         </div>
       );
     }
+  }
+
+  const ESPACEMENT_HAUT: Record<string, string> = {
+    aucun: "0px",
+    petit: "1rem",
+    moyen: "2.5rem",
+    grand: "5rem",
+    "tres-grand": "7rem",
+  };
+
+  return rows.map((row, ri) => {
+    const el = renderRow(row, ri);
+    const espSource = row.kind === "full" ? row.s : row.pair[0];
+    const esp = (espSource as { espacementHaut?: string }).espacementHaut;
+    if (!esp || esp === "defaut" || !(esp in ESPACEMENT_HAUT)) return el;
+    return (
+      <div key={`${keyPrefix}-esp-${ri}`} style={{ marginTop: ESPACEMENT_HAUT[esp] }}>
+        {el}
+      </div>
+    );
   });
 }
 

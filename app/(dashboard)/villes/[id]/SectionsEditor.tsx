@@ -76,14 +76,16 @@ export type OngletBouton = { id: string; label: string; href: string };
 export type Onglet = { id: string; label: string; contenu_json: string; image?: string; boutons?: OngletBouton[] };
 export type EvenementTimeline = { id: string; date: string; mois?: string; titre: string; description?: string };
 
+export type EspacementHaut = "defaut" | "aucun" | "petit" | "moyen" | "grand" | "tres-grand";
+
 export type Section =
-  | { id: string; type?: "texte"; titre: string; contenu_json: string; image?: string; disposition?: "pleine" | "moitie" | "tiers"; bleu?: boolean; icone?: string; dansAnnonces?: boolean; titreCentre?: boolean; carte?: boolean; separateurDroite?: boolean; carteStatique?: boolean }
-  | { id: string; type: "stats"; titre: string; stats: Stat[]; colonnes: 2 | 3 | 4; alignement?: "gauche" | "centre"; bleu?: boolean; icone?: string; dansAnnonces?: boolean; separateurs?: boolean }
-  | { id: string; type: "titre"; titre: string; icone?: string; dansAnnonces?: boolean }
+  | { id: string; type?: "texte"; titre: string; contenu_json: string; image?: string; disposition?: "pleine" | "moitie" | "tiers"; bleu?: boolean; icone?: string; dansAnnonces?: boolean; titreCentre?: boolean; carte?: boolean; separateurDroite?: boolean; carteStatique?: boolean; espacementHaut?: EspacementHaut }
+  | { id: string; type: "stats"; titre: string; stats: Stat[]; colonnes: 2 | 3 | 4; alignement?: "gauche" | "centre"; bleu?: boolean; icone?: string; dansAnnonces?: boolean; separateurs?: boolean; espacementHaut?: EspacementHaut }
+  | { id: string; type: "titre"; titre: string; icone?: string; dansAnnonces?: boolean; espacementHaut?: EspacementHaut }
   | { id: string; type: "separateur"; espacement?: "petit" | "moyen" | "grand"; dansAnnonces?: boolean }
-  | { id: string; type: "equipe"; titre: string; membres: Membre[]; colonnes?: 2 | 3 | 4; bleu?: boolean; icone?: string; dansAnnonces?: boolean; titreCentre?: boolean; carte?: boolean }
-  | { id: string; type: "onglets"; titre: string; onglets: Onglet[]; dansAnnonces?: boolean }
-  | { id: string; type: "timeline"; titre: string; evenements: EvenementTimeline[]; dansAnnonces?: boolean };
+  | { id: string; type: "equipe"; titre: string; membres: Membre[]; colonnes?: 2 | 3 | 4; bleu?: boolean; icone?: string; dansAnnonces?: boolean; titreCentre?: boolean; carte?: boolean; espacementHaut?: EspacementHaut }
+  | { id: string; type: "onglets"; titre: string; onglets: Onglet[]; dansAnnonces?: boolean; espacementHaut?: EspacementHaut }
+  | { id: string; type: "timeline"; titre: string; evenements: EvenementTimeline[]; dansAnnonces?: boolean; espacementHaut?: EspacementHaut };
 
 function uid() { return Math.random().toString(36).slice(2); }
 
@@ -844,6 +846,22 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
                 {isEquipe ? "Chaque élément dans une carte" : "Carte"}
               </label>
             )}
+            <div className="flex items-center gap-1 shrink-0" title="Espace au-dessus de cette section, remplace l'espacement par défaut">
+              <label className="text-xs text-zinc-500 shrink-0">Espace avant :</label>
+              {(["defaut", "aucun", "petit", "moyen", "grand", "tres-grand"] as const).map((e) => (
+                <button
+                  key={e}
+                  type="button"
+                  title={{ defaut: "Par défaut", aucun: "Aucun espace", petit: "Petit", moyen: "Moyen", grand: "Grand", "tres-grand": "Très grand" }[e]}
+                  onClick={() => update(section.id, { espacementHaut: e } as Partial<Section>)}
+                  className={`rounded border px-2 py-1 text-xs font-medium transition-colors ${
+                    ((section as { espacementHaut?: string }).espacementHaut ?? "defaut") === e ? "border-brand bg-brand/10 text-brand" : "border-zinc-300 bg-white text-zinc-400 hover:text-zinc-600"
+                  }`}
+                >
+                  {{ defaut: "Déf.", aucun: "0", petit: "S", moyen: "M", grand: "L", "tres-grand": "XL" }[e]}
+                </button>
+              ))}
+            </div>
             {!isStats && !isTitre && !isEquipe && !isOnglets && !isTimeline && (disposition === "moitie" || disposition === "tiers") && (
               <label className="flex items-center gap-1 rounded border border-zinc-300 bg-white px-2 py-1 text-xs font-medium text-zinc-500 cursor-pointer">
                 <input
