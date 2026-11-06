@@ -31,7 +31,7 @@ export function ExpandableSplitGroup({ panels, contentCls }: { panels: SplitPane
             >
               <div className="flex flex-col sm:flex-row gap-6 items-stretch">
                 <div className="flex-1 min-w-0">
-                  <h2 className="flex items-center gap-2 text-3xl sm:text-4xl font-bold mb-4 text-[#1D1D1D]">
+                  <h2 className="flex items-center gap-2 text-3xl sm:text-5xl font-bold mb-4 text-[#1D1D1D]">
                     {p.icone && (
                       <span
                         className="inline-flex shrink-0 w-6 h-6 [&_svg]:w-full [&_svg]:h-full"
