@@ -96,16 +96,6 @@ export default async function AnnoncePage({
     <div className="min-h-dvh flex flex-col bg-white">
       <style>{`
         body { background: #FFFFFF; }
-        [data-text-color="gray"]   { color: #9b9a97 !important; }
-        [data-text-color="brown"]  { color: #64473a !important; }
-        [data-text-color="red"]    { color: #e03e3e !important; }
-        [data-text-color="orange"] { color: #d9730d !important; }
-        [data-text-color="yellow"] { color: #dfab01 !important; }
-        [data-text-color="green"]  { color: #4d6461 !important; }
-        [data-text-color="blue"]   { color: #0b6e99 !important; }
-        [data-text-color="purple"] { color: #6940a5 !important; }
-        [data-text-color="pink"]   { color: #ad1a72 !important; }
-        [data-text-color] [data-style-type="textColor"][data-value="rgb(0, 0, 0)"] { color: inherit !important; }
         .card-heading h1, .card-heading h2, .card-heading h3 { font-size: 1.5rem; font-weight: 700; margin: 0; }
       `}</style>
 
