@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { svgUseCurrentColor } from "@/lib/utils";
 import { MediaPicker } from "./MediaPicker";
@@ -10,6 +10,62 @@ const BlockEditor = dynamic(() => import("./BlockEditor").then((m) => m.BlockEdi
   ssr: false,
   loading: () => <div className="rounded-lg border border-zinc-200 bg-zinc-50 h-32 animate-pulse" />,
 });
+
+// Input de titre avec un bouton "Bleu" : sélectionner des mots puis cliquer
+// les entoure de **...**, rendu en bleu de marque côté public (renderTitreRiche).
+function TitreInput({
+  value,
+  onChange,
+  placeholder,
+  className,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  className?: string;
+}) {
+  const ref = useRef<HTMLInputElement>(null);
+
+  function toggleBleu() {
+    const el = ref.current;
+    if (!el) return;
+    const start = el.selectionStart ?? 0;
+    const end = el.selectionEnd ?? 0;
+    if (start === end) return;
+    const before = value.slice(0, start);
+    const selected = value.slice(start, end);
+    const after = value.slice(end);
+    const isWrapped = selected.startsWith("**") && selected.endsWith("**") && selected.length > 4;
+    const newSelected = isWrapped ? selected.slice(2, -2) : `**${selected}**`;
+    onChange(before + newSelected + after);
+    requestAnimationFrame(() => {
+      el.focus();
+      el.setSelectionRange(before.length, before.length + newSelected.length);
+    });
+  }
+
+  return (
+    <div className="flex items-center gap-1 flex-1 min-w-0">
+      <input
+        ref={ref}
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className={className}
+      />
+      <button
+        type="button"
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={toggleBleu}
+        title="Sélectionner des mots dans le titre puis cliquer ici pour les mettre en bleu"
+        className="shrink-0 rounded border border-zinc-300 bg-white px-2 py-1.5 text-xs font-bold text-brand hover:bg-brand/10"
+      >
+        Bleu
+      </button>
+    </div>
+  );
+}
 
 export type Stat = { id: string; valeur: string; label: string };
 export type Membre = { id: string; photo?: string; nom: string; texte?: string };
@@ -726,10 +782,9 @@ export function SectionsEditor({ defaultSections, annonceToggle }: { defaultSect
                 {isStats ? "Stats" : isTitre ? "Titre" : isEquipe ? "Équipe" : isOnglets ? "Onglets" : isTimeline ? "Timeline" : "Texte"}
               </span>
             </div>
-            <input
-              type="text"
+            <TitreInput
               value={section.titre}
-              onChange={(e) => update(section.id, { titre: e.target.value })}
+              onChange={(v) => update(section.id, { titre: v })}
               placeholder="Titre de la section (optionnel)"
               className="flex-1 min-w-0 rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm font-medium"
             />

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { svgUseCurrentColor } from "@/lib/utils";
+import { renderTitreRiche } from "./renderTitreRiche";
 
 export type SplitPanel = {
   id: string;
@@ -38,7 +39,7 @@ export function ExpandableSplitGroup({ panels, contentCls }: { panels: SplitPane
                         dangerouslySetInnerHTML={{ __html: svgUseCurrentColor(p.icone) }}
                       />
                     )}
-                    {p.titre}
+                    {renderTitreRiche(p.titre)}
                   </h2>
                   <div className={contentCls} dangerouslySetInnerHTML={{ __html: p.bodyHtml }} />
                 </div>
@@ -73,7 +74,7 @@ export function ExpandableSplitGroup({ panels, contentCls }: { panels: SplitPane
                   dangerouslySetInnerHTML={{ __html: svgUseCurrentColor(p.icone) }}
                 />
               )}
-              {p.titre}
+              {renderTitreRiche(p.titre)}
             </h2>
 
             <span className="relative inline-flex w-fit items-center gap-2 rounded-xl bg-brand px-4 py-2.5 text-sm font-medium text-white">

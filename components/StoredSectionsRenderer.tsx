@@ -2,6 +2,7 @@ import { svgUseCurrentColor } from "@/lib/utils";
 import { ExpandableSplitGroup } from "./ExpandableSplitGroup";
 import { TabsSection } from "./TabsSection";
 import { TimelineSection } from "./TimelineSection";
+import { renderTitreRiche } from "./renderTitreRiche";
 
 // ── BlockNote JSON renderer ──────────────────────────────────────────────────
 
@@ -286,7 +287,7 @@ export function renderStoredSections(
         <div key={`${keyPrefix}-${ri}`} className="text-center py-2">
           <h2 className="flex items-center justify-center gap-2 text-3xl sm:text-5xl font-bold text-[#1D1D1D] max-w-3xl mx-auto">
             <SectionIcon svg={row.s.icone} />
-            {row.s.titre}
+            {renderTitreRiche(row.s.titre)}
           </h2>
         </div>
       );
@@ -302,7 +303,7 @@ export function renderStoredSections(
           {s.titre ? (
             <h2 className="flex items-center justify-center gap-2 text-3xl sm:text-5xl font-bold mb-8 text-[#1D1D1D] text-center max-w-3xl mx-auto">
               <SectionIcon svg={s.icone} />
-              {s.titre}
+              {renderTitreRiche(s.titre)}
             </h2>
           ) : defaultStatsTitle ? (
             <h2 className="flex flex-col items-center gap-0 text-3xl sm:text-5xl font-bold mb-8 text-center leading-[1.05] max-w-3xl mx-auto">
@@ -349,7 +350,7 @@ export function renderStoredSections(
           {s.titre && (
             <h2 className={`flex items-center gap-2 text-3xl sm:text-5xl font-bold mb-6 text-[#1D1D1D] max-w-2xl ${titreCentre ? "justify-center text-center mx-auto" : ""}`}>
               <SectionIcon svg={s.icone} />
-              {s.titre}
+              {renderTitreRiche(s.titre)}
             </h2>
           )}
           <div className="flex flex-wrap justify-center gap-x-4 gap-y-8">
@@ -396,7 +397,7 @@ export function renderStoredSections(
       return (
         <div key={`${keyPrefix}-${ri}`} className="space-y-6">
           {s.titre && (
-            <h2 className="text-3xl sm:text-5xl font-bold text-center text-[#1D1D1D] max-w-2xl mx-auto">{s.titre}</h2>
+            <h2 className="text-3xl sm:text-5xl font-bold text-center text-[#1D1D1D] max-w-2xl mx-auto">{renderTitreRiche(s.titre)}</h2>
           )}
           <TabsSection tabs={tabs} contentCls={contentCls} />
         </div>
@@ -408,7 +409,7 @@ export function renderStoredSections(
       return (
         <div key={`${keyPrefix}-${ri}`} className="space-y-10">
           {s.titre && (
-            <h2 className="text-3xl sm:text-5xl font-bold text-center text-[#1D1D1D] max-w-2xl mx-auto">{s.titre}</h2>
+            <h2 className="text-3xl sm:text-5xl font-bold text-center text-[#1D1D1D] max-w-2xl mx-auto">{renderTitreRiche(s.titre)}</h2>
           )}
           <TimelineSection evenements={s.evenements} />
         </div>
@@ -452,7 +453,7 @@ export function renderStoredSections(
                 {titre && (
                   <h2 className={`flex items-center gap-2 text-3xl sm:text-5xl font-bold mb-4 ${bleu && carte ? "text-white" : "text-[#1D1D1D]"} max-w-md ${titreCentre ? "justify-center text-center mx-auto" : ""}`}>
                     <SectionIcon svg={(s as { icone?: string }).icone} />
-                    {titre}
+                    {renderTitreRiche(titre)}
                   </h2>
                 )}
                 {bodyHtml.trim() && <div className={bleu && carte ? contentClsDark : contentCls} dangerouslySetInnerHTML={{ __html: bodyHtml }} />}
@@ -472,7 +473,7 @@ export function renderStoredSections(
           {titre && (
             <h2 className={`flex items-center gap-2 text-3xl sm:text-5xl font-bold mb-4 ${bleu && carte ? "text-white" : "text-[#1D1D1D]"} max-w-2xl ${titreCentre ? "justify-center text-center mx-auto" : ""}`}>
               <SectionIcon svg={(row.s as { icone?: string }).icone} />
-              {titre}
+              {renderTitreRiche(titre)}
             </h2>
           )}
           {bodyHtml.trim() && <div className={bleu && carte ? contentClsDark : contentCls} dangerouslySetInnerHTML={{ __html: bodyHtml }} />}
