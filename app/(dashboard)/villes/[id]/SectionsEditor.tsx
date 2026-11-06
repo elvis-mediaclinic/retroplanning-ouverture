@@ -13,16 +13,18 @@ const BlockEditor = dynamic(() => import("./BlockEditor").then((m) => m.BlockEdi
 
 // Input de titre avec un bouton "Bleu" : sélectionner des mots puis cliquer
 // les entoure de **...**, rendu en bleu de marque côté public (renderTitreRiche).
-function TitreInput({
+export function TitreInput({
   value,
   onChange,
   placeholder,
   className,
+  name,
 }: {
   value: string;
   onChange: (v: string) => void;
   placeholder?: string;
   className?: string;
+  name?: string;
 }) {
   const ref = useRef<HTMLInputElement>(null);
 
@@ -49,6 +51,7 @@ function TitreInput({
       <input
         ref={ref}
         type="text"
+        name={name}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}

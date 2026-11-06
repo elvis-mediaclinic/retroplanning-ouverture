@@ -101,7 +101,7 @@ export default async function AnnoncePage({
 
       <PublicNavbar candidaterHref="#candidater" />
 
-      <main className="flex-1 mx-auto w-full max-w-[1320px] px-6 pt-10 pb-8 space-y-16 sm:space-y-20" style={{ fontFamily: "var(--font-poppins)" }}>
+      <main className="flex-1 mx-auto w-full max-w-[1320px] px-6 pt-10 pb-8 space-y-12 sm:space-y-16" style={{ fontFamily: "var(--font-poppins)" }}>
 
         {!annonce.actif && (
           <div className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">

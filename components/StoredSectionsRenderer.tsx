@@ -471,7 +471,7 @@ export function renderStoredSections(
       return (
         <div key={`${keyPrefix}-${ri}`} className={!carte ? "" : bleu ? bleuCardCls : cardCls}>
           {titre && (
-            <h2 className={`flex items-center gap-2 text-3xl sm:text-5xl font-bold mb-4 ${bleu && carte ? "text-white" : "text-[#1D1D1D]"} max-w-2xl ${titreCentre ? "justify-center text-center mx-auto" : ""}`}>
+            <h2 className={`flex items-center gap-2 text-3xl sm:text-5xl font-bold mb-6 ${bleu && carte ? "text-white" : "text-[#1D1D1D]"} max-w-2xl ${titreCentre ? "justify-center text-center mx-auto" : ""}`}>
               <SectionIcon svg={(row.s as { icone?: string }).icone} />
               <span>{renderTitreRiche(titre)}</span>
             </h2>

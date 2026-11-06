@@ -15,15 +15,18 @@ export async function saveConcept(
 
   const sectionsRaw = formData.get("sections") as string | null;
   if (!sectionsRaw) return { error: "Aucun contenu." };
+  const titre = (formData.get("titre") as string | null)?.trim() || null;
 
   const { error } = await supabase.from("pages").upsert({
     key: "concept",
     sections: JSON.parse(sectionsRaw),
+    titre,
     updated_at: new Date().toISOString(),
   }, { onConflict: "key" });
 
   if (error) return { error: error.message };
 
   revalidatePath("/concept");
+  revalidatePath("/franchise");
   return { ok: true };
 }

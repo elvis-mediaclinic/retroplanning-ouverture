@@ -7,7 +7,7 @@ export default async function ConceptPage() {
   await requireMC();
   const supabase = await createClient();
 
-  const { data } = await supabase.from("pages").select("sections").eq("key", "concept").maybeSingle();
+  const { data } = await supabase.from("pages").select("sections, titre").eq("key", "concept").maybeSingle();
 
   const defaultSections: Section[] | undefined = (() => {
     if (!data?.sections) return undefined;
@@ -31,7 +31,7 @@ export default async function ConceptPage() {
       </div>
 
       <section className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
-        <ConceptEditor defaultSections={defaultSections} />
+        <ConceptEditor defaultSections={defaultSections} defaultTitre={data?.titre ?? ""} />
       </section>
     </div>
   );
