@@ -39,7 +39,7 @@ export function ExpandableSplitGroup({ panels, contentCls }: { panels: SplitPane
                         dangerouslySetInnerHTML={{ __html: svgUseCurrentColor(p.icone) }}
                       />
                     )}
-                    {renderTitreRiche(p.titre)}
+                    <span>{renderTitreRiche(p.titre)}</span>
                   </h2>
                   <div className={contentCls} dangerouslySetInnerHTML={{ __html: p.bodyHtml }} />
                 </div>
@@ -74,7 +74,7 @@ export function ExpandableSplitGroup({ panels, contentCls }: { panels: SplitPane
                   dangerouslySetInnerHTML={{ __html: svgUseCurrentColor(p.icone) }}
                 />
               )}
-              {renderTitreRiche(p.titre)}
+              <span>{renderTitreRiche(p.titre)}</span>
             </h2>
 
             <span className="relative inline-flex w-fit items-center gap-2 rounded-xl bg-brand px-4 py-2.5 text-sm font-medium text-white">
