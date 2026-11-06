@@ -5,7 +5,7 @@ import { useLayoutEffect, useRef, useState } from "react";
 export type TimelineEvent = { id: string; date: string; mois?: string; titre: string; description?: string };
 
 function EventContent({ e, align }: { e: TimelineEvent; align?: "left" | "right" }) {
-  const borderCls = align === "right" ? "border-r-2 border-brand/30 pr-6" : "border-l-2 border-brand/30 pl-6";
+  const borderCls = align === "right" ? "border-r-2 border-brand/30 pr-3" : "border-l-2 border-brand/30 pl-3";
   return (
     <div className={`${align === "right" ? "text-right" : ""} ${borderCls}`}>
       {(e.mois || e.date) && (
@@ -99,7 +99,7 @@ export function TimelineSection({ evenements }: { evenements: TimelineEvent[] })
                 style={onRight ? { left: 0, transform: "translateX(-50%)" } : { right: 0, transform: "translateX(50%)" }}
               />
               <span
-                className="absolute top-[15px] h-0.5 w-8 bg-brand/30"
+                className="absolute top-[15px] h-0.5 w-6 bg-brand/30"
                 style={onRight ? { left: 0 } : { right: 0 }}
               />
               <EventContent e={e} align={onRight ? "left" : "right"} />
