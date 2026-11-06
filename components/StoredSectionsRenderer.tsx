@@ -450,7 +450,7 @@ export function renderStoredSections(
                   </div>
                 )}
                 {titre && (
-                  <h2 className={`flex items-center gap-2 text-3xl font-bold mb-4 ${bleu && carte ? "text-white" : "text-brand"} ${titreCentre ? "justify-center text-center" : ""}`}>
+                  <h2 className={`flex items-center gap-2 text-3xl sm:text-4xl font-bold mb-4 ${bleu && carte ? "text-white" : "text-brand"} ${titreCentre ? "justify-center text-center" : ""}`}>
                     <SectionIcon svg={(s as { icone?: string }).icone} />
                     {titre}
                   </h2>
@@ -470,7 +470,7 @@ export function renderStoredSections(
       return (
         <div key={`${keyPrefix}-${ri}`} className={!carte ? "" : bleu ? bleuCardCls : cardCls}>
           {titre && (
-            <h2 className={`flex items-center gap-2 text-3xl font-bold mb-4 ${bleu && carte ? "text-white" : "text-brand"} ${titreCentre ? "justify-center text-center" : ""}`}>
+            <h2 className={`flex items-center gap-2 text-3xl sm:text-4xl font-bold mb-4 ${bleu && carte ? "text-white" : "text-brand"} ${titreCentre ? "justify-center text-center" : ""}`}>
               <SectionIcon svg={(row.s as { icone?: string }).icone} />
               {titre}
             </h2>
