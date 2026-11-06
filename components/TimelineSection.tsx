@@ -92,14 +92,14 @@ export function TimelineSection({ evenements }: { evenements: TimelineEvent[] })
               key={e.id}
               ref={(el) => { refs.current[i] = el; }}
               style={{ position: "absolute", top: tops[i], [onRight ? "left" : "right"]: "50%" }}
-              className={`w-1/2 ${onRight ? "pl-8" : "pr-8"}`}
+              className={`w-1/2 ${onRight ? "pl-14" : "pr-14"}`}
             >
               <span
                 className="absolute top-2 h-4 w-4 rounded-full bg-brand ring-4 ring-white z-10"
                 style={onRight ? { left: 0, transform: "translateX(-50%)" } : { right: 0, transform: "translateX(50%)" }}
               />
               <span
-                className="absolute top-[15px] h-0.5 w-6 bg-brand/30"
+                className="absolute top-[15px] h-0.5 w-14 bg-brand/30"
                 style={onRight ? { left: 0 } : { right: 0 }}
               />
               <EventContent e={e} align={onRight ? "left" : "right"} />
